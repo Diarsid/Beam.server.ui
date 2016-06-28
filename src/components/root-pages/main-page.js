@@ -1,3 +1,11 @@
-/**
- * Created by Diarsid on 24.06.2016.
- */
+var React = require("react");
+
+var MainPage = React.createClass({
+    render: function () {
+        return(
+            <div className="main-page">Main page</div>
+        );
+    }
+});
+
+module.exports = MainPage;

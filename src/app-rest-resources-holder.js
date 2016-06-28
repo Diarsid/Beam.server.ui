@@ -1,20 +1,27 @@
-var serverRootUrl = "http://localhost:XXXX/beam.server";
+var serverRootUrl = "http://localhost:XXXX/beam.server/services";
 
 var appRestResourcesHolder = {
 
     jwtValidation: {
-        url: serverRootUrl + "/services/auth/tokens/validation",
-        method: "GET"
+        url: serverRootUrl + "/auth/tokens/validation",
+        method: "GET",
+        jwtValid: 200,
+        jwtValidButExpired: 302,
+        jwtInvalid: 401
     },
 
     registration: {
-        url: serverRootUrl + "/services/auth/users/registration",
-        method: "GET"
+        url: serverRootUrl + "/auth/users/registration",
+        method: "GET",
+        success: 200,
+        failed: 401
     },
 
     login: {
-        url: serverRootUrl + "/services/auth/users/login",
-        method: "GET"
+        url: serverRootUrl + "/auth/users/login",
+        method: "GET",
+        success: 200,
+        failed: 401
     }
 
 };
