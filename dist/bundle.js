@@ -29609,6 +29609,30 @@ module.exports = validateDOMNesting;
 module.exports = require('./lib/React');
 
 },{"./lib/React":55}],168:[function(require,module,exports){
+var serverRootUrl = "http://localhost:XXXX/beam.server";
+
+var appRestResourcesHolder = {
+
+    jwtValidation: {
+        url: serverRootUrl + "/services/auth/tokens/validation",
+        method: "GET"
+    },
+
+    registration: {
+        url: serverRootUrl + "/services/auth/users/registration",
+        method: "GET"
+    },
+
+    login: {
+        url: serverRootUrl + "/services/auth/users/login",
+        method: "GET"
+    }
+
+};
+
+module.exports = appRestResourcesHolder;
+
+},{}],169:[function(require,module,exports){
 var appStorageKeys = {
 
     JWTKey: "beam.server.ui.jwt",
@@ -29619,25 +29643,90 @@ var appStorageKeys = {
 
 module.exports = appStorageKeys;
 
-},{}],169:[function(require,module,exports){
-var appUrlsHolder = {
-
-    jwtValidationUrl: "/services/registration/tokens"
-
-};
-
-module.exports = appUrlsHolder;
-
 },{}],170:[function(require,module,exports){
+var $ = require('jquery');
+
 var reactRootPageRenderer = require('./react-root-page-renderer.js');
 var appStorageKeys = require('./app-storage-keys.js');
-var jwtVerifier = require('./jwt-verifier.js');
+var appRestResourcesHolder = require('./app-rest-resources-holder.js');
 
 var app = {
 
-    loginAndRenderInitialPage: function (jwt) {
-        // parse JWT
-        reactRootPageRenderer.renderMainPage();
+    registrationAndRenderInitialPage: function (name, surname, password, nickName, email) {
+        localStorage.removeItem(appStorageKeys.JWTKey);
+        localStorage.removeItem(appStorageKeys.userRoleKey);
+        localStorage.removeItem(appStorageKeys.userNameKey);
+        localStorage.removeItem(appStorageKeys.userNickNameKey);
+        var user = {
+            "name": name,
+            "surname": surname,
+            "password": password,
+            "nickName": nickName,
+            "email": email
+        };
+        var userJsonPayload = JSON.stringify(user);
+        $.ajax({
+            url: appRestResourcesHolder.registration.url,
+            method: appRestResourcesHolder.registration.method
+        }).always(function (data, statusText, xhr) {
+            var statusCode = xhr.status;
+            if (statusCode == 200) {
+                var userName = xhr.getResponseHeader(appStorageKeys.userNameKey);
+                var userNickName = xhr.getResponseHeader(appStorageKeys.userNickNameKey);
+                var userRole = xhr.getResponseHeader(appStorageKeys.userRoleKey);
+                var jwt = xhr.getResponseHeader("jwt");
+                localStorage.setItem(appStorageKeys.userNameKey, userName);
+                localStorage.setItem(appStorageKeys.userNickNameKey, userNickName);
+                localStorage.setItem(appStorageKeys.userRoleKey, userRole);
+                localStorage.setItem(appStorageKeys.JWTKey, jwt);
+                reactRootPageRenderer.renderMainPage();
+            } else {
+                console.log("[APP] error during registration request.");
+                var error = {
+                    title: "Registration error",
+                    description: "Error occurred during registration attempt. Ajax response status code is not 200.",
+                    source: xhr
+                };
+                reactRootPageRenderer.renderErrorPage(error);
+            }
+        });
+    },
+
+    loginAndRenderInitialPage: function (nickName, password) {
+        localStorage.removeItem(appStorageKeys.JWTKey);
+        localStorage.removeItem(appStorageKeys.userRoleKey);
+        localStorage.removeItem(appStorageKeys.userNameKey);
+        localStorage.removeItem(appStorageKeys.userNickNameKey);
+        var loginData = {
+            "password": password,
+            "nickName": nickName
+        };
+        var loginPayload = JSON.stringify(loginData);
+        $.ajax({
+            url: appRestResourcesHolder.login.url,
+            method: appRestResourcesHolder.login.method
+        }).always(function (data, statusText, xhr) {
+            var statusCode = xhr.status;
+            if (statusCode == 200) {
+                var userName = xhr.getResponseHeader(appStorageKeys.userNameKey);
+                var userNickName = xhr.getResponseHeader(appStorageKeys.userNickNameKey);
+                var userRole = xhr.getResponseHeader(appStorageKeys.userRoleKey);
+                var jwt = xhr.getResponseHeader("jwt");
+                localStorage.setItem(appStorageKeys.userNameKey, userName);
+                localStorage.setItem(appStorageKeys.userNickNameKey, userNickName);
+                localStorage.setItem(appStorageKeys.userRoleKey, userRole);
+                localStorage.setItem(appStorageKeys.JWTKey, jwt);
+                reactRootPageRenderer.renderMainPage();
+            } else {
+                console.log("[APP] error during login request.");
+                var error = {
+                    title: "Login error",
+                    description: "Error occurred during login attempt. Ajax response status code is not 200.",
+                    source: xhr
+                };
+                reactRootPageRenderer.renderErrorPage(error);
+            }
+        });
     },
 
     logoutAndRenderLoginPage: function () {
@@ -29652,18 +29741,45 @@ var app = {
         if (localStorage.getItem(appStorageKeys.JWTKey) == null) {
             reactRootPageRenderer.renderLoginPage();
         } else {
-            var jwtVerificationStatus = jwtVerifier.currentJwtValidationStatusCode();
-            // ASYNC IT IS!!!11
-            reactRootPageRenderer.renderMainPage();
+            var app = this;
+            $.ajax({
+                method: appRestResourcesHolder.jwtValidation.method,
+                url: appRestResourcesHolder.jwtValidation.url,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem(appStorageKeys.JWTKey));
+                }
+            }).always(function (data, statusText, xhr) {
+                var responseStatusCode = xhr.status;
+                console.log('[APP] verify JWT, response status code: ' + responseStatusCode);
+                if (responseStatusCode == 200) {
+                    reactRootPageRenderer.renderMainPage();
+                } else if (responseStatusCode == 302) {
+                    app.logoutAndRenderLoginPage();
+                } else if (responseStatusCode == 401) {
+                    app.registrationAndRenderInitialPage();
+                } else {
+                    console.error('[APP] JWT verification failed.');
+                    var error = {
+                        title: "Json Web Token verification failure.",
+                        description: "Error during Json Web Token verification attempt. Response status code" + " is neither 200 (JWT is valid), nor 302 (JWT is valid, but has expired), nor 401 " + "(JWT is invalid).",
+                        source: xhr
+                    };
+                    app.renderErrorPage(error);
+                }
+            });
         }
+    },
+
+    renderErrorPage: function (error) {
+        reactRootPageRenderer.renderErrorPage(error);
     }
 };
 
 module.exports = app;
 
-},{"./app-storage-keys.js":168,"./jwt-verifier.js":174,"./react-root-page-renderer.js":176}],171:[function(require,module,exports){
+},{"./app-rest-resources-holder.js":168,"./app-storage-keys.js":169,"./react-root-page-renderer.js":176,"jquery":27}],171:[function(require,module,exports){
 /**
- * Created by Diarsid on 24.06.2016.
+ * Created by Diarsid on 28.06.2016.
  */
 
 },{}],172:[function(require,module,exports){
@@ -29677,31 +29793,8 @@ module.exports = app;
  */
 
 },{}],174:[function(require,module,exports){
-var $ = require('jquery');
 
-var appStorageKeys = require('./app-storage-keys.js');
-var appUrlsHolder = require('./app-urls-holder.js');
-
-var jwtVerifier = {
-
-    currentJwtValidationStatusCode: function () {
-        $.ajax({
-            method: 'GET',
-            url: appUrlsHolder.jwtValidationUrl,
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem(appStorageKeys.JWTKey));
-            }
-        }).always(function (data, statusText, xhr) {
-            var responseStatusCode = xhr.status;
-            console.log('[JWT VERIFIER] verify token, status code: ' + responseStatusCode);
-            return responseStatusCode;
-        });
-    }
-};
-
-module.exports = jwtVerifier;
-
-},{"./app-storage-keys.js":168,"./app-urls-holder.js":169,"jquery":27}],175:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 var app = require('./app.js');
 
 app.renderInitialPage();
@@ -29712,28 +29805,37 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 // React components
-var LoginPage = require('./components/root/login-page.js');
-var MainPage = require('./components/root/main-page.js');
-var RegistrationPage = require('./components/root/registration-page.js');
+var LoginPage = require('./components/root-pages/login-page.js');
+var MainPage = require('./components/root-pages/main-page.js');
+var RegistrationPage = require('./components/root-pages/registration-page.js');
+var ErrorPage = require('./components/root-pages/error-page.js');
+
+function renderPage(PageReactComponent) {
+    ReactDOM.render(PageReactComponent, document.getElementById('content'));
+}
 
 var reactRootPageRenderer = {
 
     renderLoginPage: function () {
-        ReactDOM.render(React.createElement(LoginPage, null), document.getElementById('content'));
+        renderPage(React.createElement(LoginPage, null));
     },
 
     renderMainPage: function () {
-        ReactDOM.render(React.createElement(MainPage, null), document.getElementById('content'));
+        renderPage(React.createElement(MainPage, null));
     },
 
     renderRegistrationPage: function () {
-        ReactDOM.render(React.createElement(RegistrationPage, null), document.getElementById('content'));
+        renderPage(React.createElement(RegistrationPage, null));
+    },
+
+    renderErrorPage: function (error) {
+        renderPage(React.createElement(ErrorPage, { error: error }));
     }
 };
 
 module.exports = reactRootPageRenderer;
 
-},{"./components/root/login-page.js":171,"./components/root/main-page.js":172,"./components/root/registration-page.js":173,"react":167,"react-dom":29}],177:[function(require,module,exports){
+},{"./components/root-pages/error-page.js":171,"./components/root-pages/login-page.js":172,"./components/root-pages/main-page.js":173,"./components/root-pages/registration-page.js":174,"react":167,"react-dom":29}],177:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
