@@ -7,3 +7,5 @@
 /dev_private/*
 
 /*directory_key*
+/copy*
+/deploy*

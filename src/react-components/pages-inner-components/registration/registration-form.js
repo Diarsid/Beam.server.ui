@@ -70,7 +70,7 @@ var RegistrationForm = React.createClass({
     },
 
     getRegistrationButtonStyle: function () {
-        return inlineStyles.getRegistrationButtonStyle(this.isRegistrationAllowed);
+        return inlineStyles.getRegistrationButtonStyle(this.isRegistrationAllowed());
     },
 
     nickNameChanged: function ( event ) {
