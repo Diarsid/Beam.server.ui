@@ -1,5 +1,8 @@
 var React = require('react');
 
+var inlineStyles =      require('../../../inline-styles.js');
+var inputValidator =    require('../../../input-validator.js');
+
 var LoginForm = React.createClass({
 
     getInitialState: function () {
@@ -9,17 +12,16 @@ var LoginForm = React.createClass({
         }
     },
 
-    nickNameAndPasswordEntered: function () {
-        return ( this.state.nickName.length > 0 && this.state.password.length > 0 );
+    nickNameAndPasswordBothValid: function () {
+        return (
+            inputValidator.validateNickName(this.state.nickName) &&
+            inputValidator.validatePassword(this.state.password)
+        );
     },
 
     login: function () {
-        if ( this.nickNameAndPasswordEntered() ) {
+        if ( this.nickNameAndPasswordBothValid() ) {
             this.props.loginAction(this.state.nickName, this.state.password);
-            this.setState({
-                nickName: "",
-                password: ""
-            });
         }
     },
 
@@ -36,12 +38,33 @@ var LoginForm = React.createClass({
     },
 
     getLoginButtonStyle: function () {
-        if ( this.nickNameAndPasswordEntered() ) {
+        if ( this.nickNameAndPasswordBothValid() ) {
+            return inlineStyles.loginButtonActiveStyle;
+        } else {
+            return inlineStyles.loginButtonInactiveStyle;
+        }
+    },
 
+    getNickNameInputStyle: function () {
+        if ( inputValidator.validateNickName(this.state.nickName) ) {
+            return inlineStyles.inputValidStyle;
+        } else {
+            return inlineStyles.inputInvalidStyle;
+        }
+    },
+
+    getPasswordInputStyle: function () {
+        if ( inputValidator.validatePassword(this.state.password) ) {
+            return inlineStyles.inputValidStyle;
+        } else {
+            return inlineStyles.inputInvalidStyle;
         }
     },
 
     render: function () {
+        var loginButtonStyle = this.getLoginButtonStyle();
+        var nickNameInputStyle = this.getNickNameInputStyle();
+        var passwordInputStyle = this.getPasswordInputStyle();
         return(
             <div className="login-form">
                 <form>
@@ -50,13 +73,16 @@ var LoginForm = React.createClass({
                         <br/>
                         <input type="text"
                                className="login-form-input"
+                               placeholder="nick_name"
+                               style = {nickNameInputStyle}
                                value = {this.state.nickName}
                                onChange={this.nickNameChanged} />
                         <br/>
                         <label className="login-form-label">Password:</label>
                         <br/>
-                        <input type="text"
+                        <input type="password"
                                className="login-form-input"
+                               style={passwordInputStyle}
                                value={this.state.password}
                                onChange={this.passwordChanged}/>
                         <br/>
@@ -64,7 +90,7 @@ var LoginForm = React.createClass({
                 </form>
                 <button type="button"
                         className="login-button"
-                        style={this.getLoginButtonStyle}
+                        style={loginButtonStyle}
                         onClick={this.login} >
                     Login
                 </button>

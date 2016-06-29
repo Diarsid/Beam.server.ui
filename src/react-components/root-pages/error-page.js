@@ -6,7 +6,7 @@ var ErrorPage = React.createClass({
             <div className="error-page">Error page
                 <div>{this.props.error.title}</div>
                 <div>{this.props.error.description}</div>
-                <div>{this.props.error.source}</div>
+                <div>{this.props.error.source.toString()}</div>
             </div>
         );
     }

@@ -1,6 +1,16 @@
-var serverRootUrl = "http://localhost:XXXX/beam.server/services";
+function obtainServerRootUrl() {
+    var rootUrl = window.location.href;
+    if ( rootUrl.endsWith("/") ) {
+        rootUrl = rootUrl.substring(0, rootUrl.length-1);
+    }
+    return rootUrl;
+}
+
+var serverRootUrl = obtainServerRootUrl();
 
 var appRestResourcesHolder = {
+
+    appRootUrl: serverRootUrl,
 
     jwtValidation: {
         url: serverRootUrl + "/auth/tokens/validation",

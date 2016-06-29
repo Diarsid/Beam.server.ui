@@ -1,7 +1,13 @@
 var React = require("react");
 
-var app =           require('../.././app.js');
-var appStorageKeys= require('../.././app-storage-keys.js');
+var appStorageKeys = require('../../app-storage-keys.js');
+
+var RegistrationForm            = require('../pages-inner-components/registration/registration-form.js');
+var RegistrationWarningMessage  = require('../pages-inner-components/registration/registration-warning-message.js');
+var RegistrationFailureMessage  = require('../pages-inner-components/registration/registration-failure-message.js');
+
+var renderMainPage =    require('../../render-main-page.js');
+var renderErrorPage =   require('../../render-error-page.js');
 
 var RegistrationPage = React.createClass({
 
@@ -33,7 +39,7 @@ var RegistrationPage = React.createClass({
                 localStorage.setItem(appStorageKeys.userNickNameKey, userNickName);
                 localStorage.setItem(appStorageKeys.userRoleKey, userRole);
                 localStorage.setItem(appStorageKeys.JWTKey, jwt);
-                app.renderMainPage();
+                renderMainPage();
             } else {
                 console.log("[APP] error during registration request.");
                 var error = {
@@ -41,14 +47,15 @@ var RegistrationPage = React.createClass({
                     description: "Error occurred during registration attempt. Ajax response status code is not 200.",
                     source: xhr
                 };
-                app.renderErrorPage(error);
+                renderErrorPage(error);
             }
         });
     },
 
     render: function () {
         return (
-            <div className="registration-page">Registration page</div>
+            <div className="registration-page">Registration page
+            </div>
         );
     }
 });
