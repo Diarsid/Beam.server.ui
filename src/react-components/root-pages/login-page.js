@@ -4,8 +4,9 @@ var $ = require('jquery');
 var appStorageKeys =        require('../../app-storage-keys.js');
 var appRestResourcesHolder= require('../../app-rest-resources-holder.js');
 
-var renderErrorPage =   require('../../render-error-page.js');
-var renderMainPage =    require('../../render-main-page.js');
+var renderErrorPage =           require('../../render-error-page.js');
+var renderMainPage =            require('../../render-main-page.js');
+var renderRegistrationPage =    require('../../render-registration-page.js');
 
 // React login page react-components
 var LoginForm =             require('../pages-inner-components/login/login-form.js');
@@ -70,6 +71,11 @@ var LoginPage = React.createClass({
     render: function () {
         return (
             <div className="login-page">Login page
+                <button type="button"
+                        className="go-to-registration-button"
+                        onClick={renderRegistrationPage}>
+                    Registration
+                </button>
                 <LoginForm loginAction={this.tryToLogin} />
                 <LoginFailureMessage showMessage={this.state.showLoginFailedMessage} />
             </div>

@@ -46,19 +46,11 @@ var LoginForm = React.createClass({
     },
 
     getNickNameInputStyle: function () {
-        if ( inputValidator.validateNickName(this.state.nickName) ) {
-            return inlineStyles.inputValidStyle;
-        } else {
-            return inlineStyles.inputInvalidStyle;
-        }
+        return inlineStyles.getInputStyle( inputValidator.validateNickName(this.state.nickName) );
     },
 
     getPasswordInputStyle: function () {
-        if ( inputValidator.validatePassword(this.state.password) ) {
-            return inlineStyles.inputValidStyle;
-        } else {
-            return inlineStyles.inputInvalidStyle;
-        }
+        return inlineStyles.getInputStyle( inputValidator.validatePassword(this.state.password) );
     },
 
     render: function () {

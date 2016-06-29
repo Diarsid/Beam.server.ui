@@ -3,10 +3,11 @@ function obtainServerRootUrl() {
     if ( rootUrl.endsWith("/") ) {
         rootUrl = rootUrl.substring(0, rootUrl.length-1);
     }
+    console.log('[RESOURCES HOLDER] root url: ' + rootUrl);
     return rootUrl;
 }
 
-var serverRootUrl = obtainServerRootUrl();
+var serverRootUrl = obtainServerRootUrl() + "/services";
 
 var appRestResourcesHolder = {
 
@@ -14,7 +15,7 @@ var appRestResourcesHolder = {
 
     jwtValidation: {
         url: serverRootUrl + "/auth/tokens/validation",
-        method: "GET",
+        method: "POST",
         jwtValid: 200,
         jwtValidButExpired: 302,
         jwtInvalid: 401
@@ -22,14 +23,14 @@ var appRestResourcesHolder = {
 
     registration: {
         url: serverRootUrl + "/auth/users/registration",
-        method: "GET",
+        method: "POST",
         success: 200,
         failed: 401
     },
 
     login: {
         url: serverRootUrl + "/auth/users/login",
-        method: "GET",
+        method: "POST",
         success: 200,
         failed: 401
     }
