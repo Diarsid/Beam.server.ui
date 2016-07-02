@@ -25,14 +25,24 @@ var appRestResourcesHolder = {
         url: serverRootUrl + "/auth/users/registration",
         method: "POST",
         success: 200,
-        failed: 401
+        unauthorized: 401
+    },
+
+    nickNames: {
+        url: function ( nickName ) {
+            return serverRootUrl + "/auth/users/nicknames/" + nickName
+        },
+        method: "GET",
+        found: 302,
+        notFound: 404
     },
 
     login: {
         url: serverRootUrl + "/auth/users/login",
         method: "POST",
         success: 200,
-        failed: 401
+        unauthorized: 401,
+        badRequest: 400
     }
 
 };

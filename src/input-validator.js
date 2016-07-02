@@ -1,14 +1,32 @@
 var $ = require('jquery');
 
+var appRestResourcesHolder= require('./app-rest-resources-holder.js');
+
 var minimumNameLength = 2;
-var minimumPasswordLength = 6;
+var minimumPasswordLength = 7;
 var minimumEmailLength = 3;
 
 var inputValidator = {
 
-    checkIfNickNameIsFree: function ( nickName ) {
-        // ask server is given nickName is free
-        return true;
+    checkIfNickNameIsFree: function ( nickName, isFreeCallback, isNotFreeCallback ) {
+        $.ajax({
+            method: appRestResourcesHolder.nickNames.method,
+            url: appRestResourcesHolder.nickNames.url(nickName),
+            statusCode: {
+                302: function () {
+                    // nickName found among nicknames that are already registered
+                    // it is not free
+                    console.log('[INPUT VALIDATOR] nick is not free');
+                    isNotFreeCallback();
+                },
+                404: function () {
+                    // nickName not found among nicknames that are already registered
+                    // it is free
+                    console.log('[INPUT VALIDATOR] nick is free');
+                    isFreeCallback();
+                }
+            }
+        });
     },
 
     validateNickName: function ( nickName ) {

@@ -2,16 +2,13 @@ var React = require("react");
 var $ =     require('jquery');
 
 // Application scripts
-var appStorageKeys =        require('../../app-storage-keys.js');
 var appRestResourcesHolder= require('../../app-rest-resources-holder.js');
+var appStorage =            require('../../app-storage.js');
+var jwtUtil =               require('../../jwt-util.js');
 
 // Registration react components
 var RegistrationForm            = require('../pages-inner-components/registration/registration-form.js');
 var RegistrationFailureMessage  = require('../pages-inner-components/registration/registration-failure-message.js');
-
-// Top level pages rendering functions
-var renderMainPage =    require('../../render-main-page.js');
-var renderErrorPage =   require('../../render-error-page.js');
 
 var RegistrationPage = React.createClass({
 
@@ -23,10 +20,11 @@ var RegistrationPage = React.createClass({
     },
 
     tryToRegister: function ( nickName, name, surname, email, password ) {
-        localStorage.removeItem(appStorageKeys.JWTKey);
-        localStorage.removeItem(appStorageKeys.userRoleKey);
-        localStorage.removeItem(appStorageKeys.userNameKey);
-        localStorage.removeItem(appStorageKeys.userNickNameKey);
+        var self = this;
+        localStorage.removeItem(appStorage.JWTKey);
+        localStorage.removeItem(appStorage.userRoleKey);
+        localStorage.removeItem(appStorage.userIdKey);
+        localStorage.removeItem(appStorage.userNickNameKey);
         var user = {
             "name": name,
             "surname" : surname,
@@ -38,27 +36,27 @@ var RegistrationPage = React.createClass({
             url: appRestResourcesHolder.registration.url,
             method: appRestResourcesHolder.registration.method,
             data: JSON.stringify(user),
-            cache: false
-        }).always(function ( data, statusText, xhr ) {
-            var statusCode = xhr.status;
-            if ( statusCode == 200 ) {
-                var userName = xhr.getResponseHeader(appStorageKeys.userNameKey);
-                var userNickName = xhr.getResponseHeader(appStorageKeys.userNickNameKey);
-                var userRole = xhr.getResponseHeader(appStorageKeys.userRoleKey);
-                var jwt = xhr.getResponseHeader("jwt");
-                localStorage.setItem(appStorageKeys.userNameKey, userName);
-                localStorage.setItem(appStorageKeys.userNickNameKey, userNickName);
-                localStorage.setItem(appStorageKeys.userRoleKey, userRole);
-                localStorage.setItem(appStorageKeys.JWTKey, jwt);
-                renderMainPage();
-            } else {
-                console.log("[APP] error during registration request.");
-                var error = {
-                    title : "Registration error",
-                    description: "Error occurred during registration attempt. Ajax response status code is not 200.",
-                    source: xhr
-                };
-                renderErrorPage(error);
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            cache: false,
+            statusCode: {
+                200: function ( xhr ) {
+                    console.log('[REG PAGE] fucken xhr obj: ');
+                    console.log(xhr);
+                    var jwtString = xhr.getResponseHeader("jwt");
+                    var claims = jwtUtil.decodeJwtClaims(jwtString);
+                    localStorage.setItem(appStorage.userIdKey, claims.id);
+                    localStorage.setItem(appStorage.userNickNameKey, claims.nickName);
+                    localStorage.setItem(appStorage.userRoleKey, claims.role);
+                    localStorage.setItem(appStorage.JWTKey, jwtString);
+                    self.props.renderMainPage();
+                },
+                401: function ( xhr, statusText, errorThrown ) {
+                    self.setState({
+                        showFailure: true,
+                        failureText: "Registration failed due to malformed data."
+                    });
+                }
             }
         });
     },
@@ -66,6 +64,11 @@ var RegistrationPage = React.createClass({
     render: function () {
         return (
             <div className="registration-page">Registration page
+                <button type="button"
+                        className="login-button-on-registration-page"
+                        onClick={this.props.renderLoginPage}>
+                    Login
+                </button>
                 <RegistrationForm registerAction={this.tryToRegister} />
                 <RegistrationFailureMessage
                     showMessage={this.state.showFailure}

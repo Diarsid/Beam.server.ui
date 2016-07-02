@@ -1,61 +1,30 @@
 var React = require('react');
 var $ = require('jquery');
 
-var appStorageKeys =        require('../../app-storage-keys.js');
+var appStorage =            require('../../app-storage.js');
 var appRestResourcesHolder= require('../../app-rest-resources-holder.js');
-
-var renderErrorPage =           require('../../render-error-page.js');
-var renderMainPage =            require('../../render-main-page.js');
-var renderRegistrationPage =    require('../../render-registration-page.js');
+var jwtUtil =               require('../../jwt-util.js');
 
 // React login page react-components
 var LoginForm =             require('../pages-inner-components/login/login-form.js');
 var LoginFailureMessage =   require('../pages-inner-components/login/login-failure-message.js');
 
-function processAjaxLoginRequest ( data, statusText, xhr ) {
-    var statusCode = xhr.status;
-    if ( statusCode == appRestResourcesHolder.login.success ) {
-        console.log("[LOGIN PAGE] login successful.");
-        var userName = xhr.getResponseHeader(appStorageKeys.userNameKey);
-        var userNickName = xhr.getResponseHeader(appStorageKeys.userNickNameKey);
-        var userRole = xhr.getResponseHeader(appStorageKeys.userRoleKey);
-        var jwt = xhr.getResponseHeader("jwt");
-        localStorage.setItem(appStorageKeys.userNameKey, userName);
-        localStorage.setItem(appStorageKeys.userNickNameKey, userNickName);
-        localStorage.setItem(appStorageKeys.userRoleKey, userRole);
-        localStorage.setItem(appStorageKeys.JWTKey, jwt);
-        renderMainPage();
-    } else if ( statusCode == appRestResourcesHolder.login.failed ) {
-        console.log("[LOGIN PAGE] login failed, access denied.");
-        this.setState({
-            showLoginFailedMessage: true
-        });
-    } else {
-        console.log("[LOGIN PAGE] error during login request.");
-        var error = {
-            title : "Login error",
-            description: "Error occurred during a login attempt. " +
-            "The Ajax response status code is neither 200 nor 401. ",
-            source: xhr
-        };
-        renderErrorPage(error);
-    }
-}
-
 var LoginPage = React.createClass({
 
     getInitialState: function () {
         return {
-            showLoginFailedMessage: false
+            showLoginFailedMessage: false,
+            failureText: ""
         };
     },
 
     tryToLogin: function ( nickName, password) {
+        var self = this;
         console.log('[LOGIN PAGE] try to login with: ' + nickName + ":" + password);
-        localStorage.removeItem(appStorageKeys.JWTKey);
-        localStorage.removeItem(appStorageKeys.userRoleKey);
-        localStorage.removeItem(appStorageKeys.userNameKey);
-        localStorage.removeItem(appStorageKeys.userNickNameKey);
+        localStorage.removeItem(appStorage.JWTKey);
+        localStorage.removeItem(appStorage.userRoleKey);
+        localStorage.removeItem(appStorage.userIdKey);
+        localStorage.removeItem(appStorage.userNickNameKey);
         var loginData = {
             "password" : password,
             "nickName" : nickName
@@ -64,8 +33,37 @@ var LoginPage = React.createClass({
             url: appRestResourcesHolder.login.url,
             method: appRestResourcesHolder.login.method,
             data: JSON.stringify(loginData),
-            cache: false
-        }).always(processAjaxLoginRequest);
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            cache: false,
+            statusCode: {
+                200: function ( xhr ) {
+                    console.log("[LOGIN PAGE] login successful.");
+                    console.log(xhr);
+                    var jwtString = xhr.getResponseHeader("jwt");
+                    var claims = jwtUtil.decodeJwtClaims(jwtString);
+                    localStorage.setItem(appStorage.userIdKey, claims.id);
+                    localStorage.setItem(appStorage.userNickNameKey, claims.nickName);
+                    localStorage.setItem(appStorage.userRoleKey, claims.role);
+                    localStorage.setItem(appStorage.JWTKey, jwtString);
+                    self.props.renderMainPage();
+                },
+                401: function ( xhr, statusText, errorThrown ) {
+                    console.log("[LOGIN PAGE] login failed, UNAUTHORIZED.");
+                    self.setState({
+                        showLoginFailedMessage: true,
+                        failureText: "Login data not accepted by server. It seems, nickname or password is invaild."
+                    });
+                },
+                400: function ( xhr, statusText, errorThrown ) {
+                    console.log("[LOGIN PAGE] login failed, BAD_REQUEST.");
+                    self.setState({
+                        showLoginFailedMessage: true,
+                        failureText: "Login data is malformed."
+                    });
+                }
+            }
+        });
     },
 
     render: function () {
@@ -73,11 +71,12 @@ var LoginPage = React.createClass({
             <div className="login-page">Login page
                 <button type="button"
                         className="go-to-registration-button"
-                        onClick={renderRegistrationPage}>
+                        onClick={this.props.renderRegPage}>
                     Registration
                 </button>
                 <LoginForm loginAction={this.tryToLogin} />
-                <LoginFailureMessage showMessage={this.state.showLoginFailedMessage} />
+                <LoginFailureMessage showMessage={this.state.showLoginFailedMessage}
+                                     messageText={this.state.failureText}/>
             </div>
         );
     }

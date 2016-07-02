@@ -1,45 +1,56 @@
+var React =     require("react");
+var ReactDOM =  require('react-dom');
+var $ =         require('jquery');
+
+var SpaRootPage = require('./spa-root-page.js');
+
 var appRestResourcesHolder= require('./app-rest-resources-holder.js');
-var appStorageKeys =        require('./app-storage-keys.js');
+var appStorage =            require('./app-storage.js');
+var appRootPages =          require('./app-root-pages.js');
 
-// Top-level React render function
-var renderLoginPage =           require('./render-login-page.js');
-var renderMainPage =            require('./render-main-page.js');
-var renderRegistrationPage =    require('./render-registration-page.js');
-var renderErrorPage =           require('./render-error-page.js');
-var logoutAndRenderLoginPage =  require('./logout-and-render-login-page.js');
+function renderApplication( initialPage ) {
+    console.log('[MAIN] render app...');
+    ReactDOM.render(
+        <SpaRootPage initial={initialPage} />,
+        document.getElementById('content')
+    );
+}
 
-function renderInitialPage () {
-    if ( localStorage.getItem(appStorageKeys.JWTKey) == null ) {
-        renderLoginPage();
+function startApplication () {
+    console.log('[MAIN] start app...');
+    if ( localStorage.getItem(appStorage.JWTKey) == null ) {
+        renderApplication(appRootPages.loginPage);
     } else {
         $.ajax({
             method: appRestResourcesHolder.jwtValidation.method,
             url: appRestResourcesHolder.jwtValidation.url,
             beforeSend: function ( xhr ) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem(appStorageKeys.JWTKey));
-            }
-        }).always(function ( data, statusText, xhr ) {
-            var responseStatusCode = xhr.status;
-            console.log('[MAIN] verify JWT, response status code: ' + responseStatusCode);
-            if ( responseStatusCode == appRestResourcesHolder.jwtValidation.jwtValid ) {
-                renderMainPage();
-            } else if ( responseStatusCode == appRestResourcesHolder.jwtValidation.jwtValidButExpired ) {
-                logoutAndRenderLoginPage();
-            } else if ( responseStatusCode == appRestResourcesHolder.jwtValidation.jwtInvalid ) {
-                renderRegistrationPage();
-            } else {
-                console.error('[MAIN] JWT verification failed.');
-                var error = {
-                    title: "Json Web Token verification failure.",
-                    description: "Error during Json Web Token verification attempt. Response status code" +
-                    " is neither 200 (JWT is valid), nor 302 (JWT is valid, but has expired), nor 401 " +
-                    "(JWT is invalid).",
-                    source: xhr
-                };
-                renderErrorPage(error);
+                xhr.setRequestHeader('Authentication', 'Bearer ' + localStorage.getItem(appStorage.JWTKey));
+            },
+            statusCode: {
+                200: function () {
+                    console.log('[MAIN] define initial page: ' + appRootPages.mainPage);
+                    renderApplication(appRootPages.mainPage);
+                },
+                302: function () {
+                    localStorage.removeItem(appStorage.JWTKey);
+                    localStorage.removeItem(appStorage.userRoleKey);
+                    localStorage.removeItem(appStorage.userIdKey);
+                    localStorage.removeItem(appStorage.userNickNameKey);
+                    console.log('[MAIN] define initial page: ' + appRootPages.loginPage);
+                    renderApplication(appRootPages.loginPage);
+                },
+                401: function () {
+                    localStorage.removeItem(appStorage.JWTKey);
+                    localStorage.removeItem(appStorage.userRoleKey);
+                    localStorage.removeItem(appStorage.userIdKey);
+                    localStorage.removeItem(appStorage.userNickNameKey);
+                    console.log('[MAIN] define initial page: ' + appRootPages.registrationPage);
+                    renderApplication(appRootPages.registrationPage);
+                }
             }
         });
     }
 }
 
-renderInitialPage();
+startApplication();

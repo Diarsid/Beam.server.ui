@@ -1,5 +1,7 @@
 var React = require("react");
 
+var RegistrationInputHint = require('./registration-input-hint.js');
+
 var inlineStyles =      require('../../../inline-styles.js');
 var inputValidator =    require('../../../input-validator.js');
 
@@ -20,7 +22,14 @@ var RegistrationForm = React.createClass({
             surnameValid: false,
             emailValid: false,
             passwordValid: false,
-            confirmedPasswordValid: false
+            confirmedPasswordValid: false,
+
+            nickNameInvalidMessage: " < enter nick name",
+            nameInvalidMessage: " < enter name",
+            surnameInvalidMessage: " < enter surname",
+            emailInvalidMessage: " < enter email",
+            passwordInvalidMessage: " < enter password",
+            confirmedPasswordInvalidMessage: " < confirm password"
         }
     },
 
@@ -73,53 +82,150 @@ var RegistrationForm = React.createClass({
         return inlineStyles.getRegistrationButtonStyle(this.isRegistrationAllowed());
     },
 
+    nickNameFreeCallback: function () {
+        console.log('[REG FORM] nick free');
+        this.setState({
+            nickNameIsFree: true,
+            nickNameValid: true,
+            nickNameInvalidMessage: ""
+        });
+    },
+
+    nickNameNotFreeCallback: function () {
+        console.log('[REG FORM] nick not free');
+        this.setState({
+            nickNameIsFree: false,
+            nickNameValid: true,
+            nickNameInvalidMessage: " < this nick name is not free"
+        });
+    },
+
     nickNameChanged: function ( event ) {
         var newNickName = event.target.value;
-        this.setState({
-            nickName : newNickName,
-            nickNameIsFree: inputValidator.checkIfNickNameIsFree(newNickName),
-            nickNameValid: inputValidator.validateNickName(newNickName)
-        });
+
+        if ( inputValidator.validateNickName(newNickName) ) {
+            inputValidator.checkIfNickNameIsFree(
+                newNickName, this.nickNameFreeCallback, this.nickNameNotFreeCallback);
+            this.setState({
+                nickName : newNickName
+            });
+        } else {
+            this.setState({
+                nickName : newNickName,
+                nickNameIsFree: true,
+                nickNameValid: false,
+                nickNameInvalidMessage: " < this nick name is invalid"
+            });
+        }
     },
 
     nameChanged: function ( event ) {
         var newName = event.target.value;
-        this.setState({
-            name: newName,
-            nameValid: inputValidator.validateName(newName)
-        });
+        if ( inputValidator.validateName(newName) ) {
+            this.setState({
+                name: newName,
+                nameValid: true,
+                nameInvalidMessage: ""
+            });
+        } else {
+            this.setState({
+                name: newName,
+                nameValid: false,
+                nameInvalidMessage: " < name must be longer than 1 character"
+            });
+        }
     },
 
     surnameChanged: function ( event ) {
         var newSurname = event.target.value;
-        this.setState({
-            surname: newSurname,
-            surnameValid: inputValidator.validateName(newSurname)
-        });
+        if ( inputValidator.validateName(newSurname) ) {
+            this.setState({
+                surname: newSurname,
+                surnameValid: true,
+                surnameInvalidMessage: ""
+            });
+        } else {
+            this.setState({
+                surname: newSurname,
+                surnameValid: false,
+                surnameInvalidMessage: " < surname must be longer than 1 character"
+            });
+        }
     },
 
     emailChanged: function ( event ) {
         var newEmail = event.target.value;
-        this.setState({
-            email: newEmail,
-            emailValid: inputValidator.validateEmail(newEmail)
-        });
+        if ( inputValidator.validateEmail(newEmail) ) {
+            this.setState({
+                email: newEmail,
+                emailValid: true,
+                emailInvalidMessage: ""
+            });
+        } else {
+            this.setState({
+                email: newEmail,
+                emailValid: false,
+                emailInvalidMessage: " < email must be of the right format"
+            });
+        }
     },
 
     passwordChanged: function ( event ) {
         var newPassword = event.target.value;
-        this.setState({
-            password: newPassword,
-            passwordValid: inputValidator.validatePassword(newPassword)
-        });
+        if ( inputValidator.validatePassword(newPassword) ) {
+            if ( inputValidator.validatePasswords(newPassword, this.state.confirmedPassword) ) {
+                this.setState({
+                    password: newPassword,
+                    passwordValid: true,
+                    confirmedPasswordValid: true,
+                    passwordInvalidMessage: "",
+                    confirmedPasswordInvalidMessage: ""
+                });
+            } else {
+                this.setState({
+                    password: newPassword,
+                    passwordValid: true,
+                    confirmedPasswordValid: false,
+                    passwordInvalidMessage: "",
+                    confirmedPasswordInvalidMessage: " < passwords do not match"
+                });
+            }
+        } else {
+            if ( inputValidator.validatePasswords(newPassword, this.state.confirmedPassword) ) {
+                this.setState({
+                    password: newPassword,
+                    passwordValid: false,
+                    confirmedPasswordValid: true,
+                    passwordInvalidMessage: " < password must be longer than 6 chars",
+                    confirmedPasswordInvalidMessage: ""
+                });
+            } else {
+                this.setState({
+                    password: newPassword,
+                    passwordValid: false,
+                    confirmedPasswordValid: false,
+                    passwordInvalidMessage: " < password must be longer than 6 chars",
+                    confirmedPasswordInvalidMessage: " < passwords do not match"
+                });
+            }
+        }
     },
 
     confirmedPasswordChanged: function ( event ) {
         var newConfirmedPassword = event.target.value;
-        this.setState({
-            confirmedPassword : newConfirmedPassword,
-            confirmedPasswordValid: inputValidator.validatePasswords(this.state.password, newConfirmedPassword)
-        });
+        if ( inputValidator.validatePasswords(this.state.password, newConfirmedPassword) ) {
+            this.setState({
+                confirmedPassword : newConfirmedPassword,
+                confirmedPasswordValid: true,
+                confirmedPasswordInvalidMessage: ""
+            });
+        } else {
+            this.setState({
+                confirmedPassword : newConfirmedPassword,
+                confirmedPasswordValid: false,
+                confirmedPasswordInvalidMessage: " < passwords do not match"
+            });
+        }
     },
 
     render: function () {
@@ -143,6 +249,9 @@ var RegistrationForm = React.createClass({
                                style = {nickNameInputStyle}
                                value = {this.state.nickName}
                                onChange={this.nickNameChanged} />
+                        <RegistrationInputHint
+                            showHint={!this.state.nickNameValid | !this.state.nickNameIsFree}
+                            message={this.state.nickNameInvalidMessage} />
                         <br/>
 
                         <label class="registration-form-label">Name:</label>
@@ -153,6 +262,9 @@ var RegistrationForm = React.createClass({
                                style = {nameInputStyle}
                                value = {this.state.name}
                                onChange={this.nameChanged} />
+                        <RegistrationInputHint
+                            showHint={!this.state.nameValid}
+                            message={this.state.nameInvalidMessage} />
                         <br/>
 
                         <label class="registration-form-label">Surname:</label>
@@ -163,6 +275,9 @@ var RegistrationForm = React.createClass({
                                style = {surnameInputStyle}
                                value = {this.state.surname}
                                onChange={this.surnameChanged} />
+                        <RegistrationInputHint
+                            showHint={!this.state.surnameValid}
+                            message={this.state.surnameInvalidMessage} />
                         <br/>
 
                         <label class="registration-form-label">Email:</label>
@@ -173,6 +288,9 @@ var RegistrationForm = React.createClass({
                                style = {emailInputStyle}
                                value = {this.state.email}
                                onChange={this.emailChanged} />
+                        <RegistrationInputHint
+                            showHint={!this.state.emailValid }
+                            message={this.state.emailInvalidMessage} />
                         <br/>
 
                         <label className="registration-form-label">Enter password:</label>
@@ -182,6 +300,9 @@ var RegistrationForm = React.createClass({
                                style={passwordInputStyle}
                                value={this.state.password}
                                onChange={this.passwordChanged}/>
+                        <RegistrationInputHint
+                            showHint={!this.state.passwordValid}
+                            message={this.state.passwordInvalidMessage} />
                         <br/>
 
                         <label className="registration-form-label">Confirm password:</label>
@@ -191,6 +312,9 @@ var RegistrationForm = React.createClass({
                                style={confirmedPasswordInputStyle}
                                value={this.state.confirmedPassword}
                                onChange={this.confirmedPasswordChanged}/>
+                        <RegistrationInputHint
+                            showHint={!this.state.confirmedPasswordValid}
+                            message={this.state.confirmedPasswordInvalidMessage} />
                         <br/>
 
                     </fieldset>
