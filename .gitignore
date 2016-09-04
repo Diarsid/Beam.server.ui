@@ -8,4 +8,7 @@
 
 /*directory_key*
 /copy*
-/deploy*
+*deploy*
+*build*
+*bat*
+*exe*

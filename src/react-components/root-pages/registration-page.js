@@ -21,7 +21,7 @@ var RegistrationPage = React.createClass({
 
     tryToRegister: function ( nickName, name, surname, email, password ) {
         var self = this;
-        localStorage.removeItem(appStorage.JWTKey);
+        localStorage.removeItem(appStorage.JwtHeader);
         localStorage.removeItem(appStorage.userRoleKey);
         localStorage.removeItem(appStorage.userIdKey);
         localStorage.removeItem(appStorage.userNickNameKey);
@@ -48,7 +48,7 @@ var RegistrationPage = React.createClass({
                     localStorage.setItem(appStorage.userIdKey, claims.id);
                     localStorage.setItem(appStorage.userNickNameKey, claims.nickName);
                     localStorage.setItem(appStorage.userRoleKey, claims.role);
-                    localStorage.setItem(appStorage.JWTKey, jwtString);
+                    localStorage.setItem(appStorage.JwtHeader, jwtString);
                     self.props.renderMainPage();
                 },
                 401: function ( xhr, statusText, errorThrown ) {

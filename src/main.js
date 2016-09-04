@@ -1,56 +1,58 @@
 var React =     require("react");
 var ReactDOM =  require('react-dom');
-var $ =         require('jquery');
+var Provider =  require('react-redux').Provider;
 
-var SpaRootPage = require('./spa-root-page.js');
+var appStore =
+    require("./state/store/app-store.js");
+var actionDispatchers =
+    require("./state/actions/action-dispatchers.js");
+var ajaxJwtValidation =
+    require("./network/prepared-ajax-calls/validate-jwt-call.js");
+var storage =
+    require("./state/local/storage.js");
+var RootPageContainer =
+    require('./view/containers/top-level/root-page-container.js');
 
-var appRestResourcesHolder= require('./app-rest-resources-holder.js');
-var appStorage =            require('./app-storage.js');
-var appRootPages =          require('./app-root-pages.js');
+// --------------------------------------------
 
-function renderApplication( initialPage ) {
-    console.log('[MAIN] render app...');
+var jwtValidationHttpResponseCallbacks = {
+    onStart : function () {
+        actionDispatchers.initialAuthCheck.dispatchStoredUserInfoValidationBeginsAction();
+    },
+    onJwtValid : function () {
+        actionDispatchers.initialAuthCheck.dispatchStoredUserInfoValidAction(storage.parseUserFromJwt());
+    },
+    onJwtInvalid : function () {
+        storage.deleteJwt();
+        actionDispatchers.app.dispatchGoToRegisterAction();
+    },
+    onJwtExpired : function () {
+        storage.deleteJwt();
+        actionDispatchers.app.dispatchGoToLoginAction();
+    }
+};
+
+function initialAppUserInfoProcessing() {
+    if ( storage.hasJwt() ) {
+        ajaxJwtValidation(storage.getJwt(), jwtValidationHttpResponseCallbacks);
+    } else {
+        actionDispatchers.app.dispatchGoToLandingPageAction();
+    }
+
+}
+function renderView() {
     ReactDOM.render(
-        <SpaRootPage initial={initialPage} />,
+        <Provider store={appStore} >
+            <RootPageContainer />
+        </Provider>,
         document.getElementById('content')
     );
 }
 
-function startApplication () {
-    console.log('[MAIN] start app...');
-    if ( localStorage.getItem(appStorage.JWTKey) == null ) {
-        renderApplication(appRootPages.loginPage);
-    } else {
-        $.ajax({
-            method: appRestResourcesHolder.jwtValidation.method,
-            url: appRestResourcesHolder.jwtValidation.url,
-            beforeSend: function ( xhr ) {
-                xhr.setRequestHeader('Authentication', 'Bearer ' + localStorage.getItem(appStorage.JWTKey));
-            },
-            statusCode: {
-                200: function () {
-                    console.log('[MAIN] define initial page: ' + appRootPages.mainPage);
-                    renderApplication(appRootPages.mainPage);
-                },
-                302: function () {
-                    localStorage.removeItem(appStorage.JWTKey);
-                    localStorage.removeItem(appStorage.userRoleKey);
-                    localStorage.removeItem(appStorage.userIdKey);
-                    localStorage.removeItem(appStorage.userNickNameKey);
-                    console.log('[MAIN] define initial page: ' + appRootPages.loginPage);
-                    renderApplication(appRootPages.loginPage);
-                },
-                401: function () {
-                    localStorage.removeItem(appStorage.JWTKey);
-                    localStorage.removeItem(appStorage.userRoleKey);
-                    localStorage.removeItem(appStorage.userIdKey);
-                    localStorage.removeItem(appStorage.userNickNameKey);
-                    console.log('[MAIN] define initial page: ' + appRootPages.registrationPage);
-                    renderApplication(appRootPages.registrationPage);
-                }
-            }
-        });
-    }
+function startApp() {
+    console.log('[APP] [MAIN] start app...');
+    initialAppUserInfoProcessing();
+    renderView();
 }
 
-startApplication();
+startApp();
