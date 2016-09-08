@@ -9,7 +9,7 @@ var actionDispatchers =
 var ajaxJwtValidation =
     require("./network/prepared-ajax-calls/validate-jwt-call.js");
 var storage =
-    require("./state/local/storage.js");
+    require("./state/store/app-local-storage.js");
 var RootPageContainer =
     require('./view/containers/top-level/root-page-container.js');
 

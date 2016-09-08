@@ -1,7 +1,7 @@
 var connect = require('react-redux').connect;
 
 var storage =
-    require("./../../../state/local/storage.js");
+    require("./../../../state/store/app-local-storage.js");
 var RegistrationPage =
     require("./../../components/top-level/registration-page.js");
 var actionDispatchers =
