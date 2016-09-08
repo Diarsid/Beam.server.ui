@@ -20,9 +20,50 @@ var actionTypes = {
     loginPasswordValid : "LOGIN_PASSWORD_VALID",
     loginPasswordInvalid : "LOGIN_PASSWORD_INVALID",
 
+    regNickNameChanged : "REGISTR_NICK_NAME_CHANGED",
+    regNickNameValidationBegins: "REGISTR_NICK_NAME_VALIDATION_BEGINS",
+    regNickNameValid : "REGISTR_NICK_NAME_VALID",
+    regNickNameInvalid : "REGISTR_NICK_NAME_INVALID",
+
+    regNameChanged : "REGISTR_NAME_CHANGED",
+    regNameValidationBegins: "REGISTR_NAME_VALIDATION_BEGINS",
+    regNameValid : "REGISTR_NAME_VALID",
+    regNameInvalid : "REGISTR_NAME_INVALID",
+
+    regSurnameChanged : "REGISTR_SURNAME_CHANGED",
+    regSurnameValidationBegins: "REGISTR_SURNAME_VALIDATION_BEGINS",
+    regSurnameValid : "REGISTR_SURNAME_VALID",
+    regSurnameInvalid : "REGISTR_SURNAME_INVALID",
+
+    regEmailChanged : "REGISTR_EMAIL_CHANGED",
+    regEmailValidationBegins: "REGISTR_EMAIL_VALIDATION_BEGINS",
+    regEmailValid : "REGISTR_EMAIL_VALID",
+    regEmailInvalid : "REGISTR_EMAIL_INVALID",
+
+    regPasswordChanged : "REGISTR_PASSWORD_CHANGED",
+    regPasswordValidationBegins : "REGISTR_PASSWORD_VALIDATION_BEGINS",
+    regPasswordValid : "REGISTR_PASSWORD_VALID",
+    regPasswordInvalid : "REGISTR_PASSWORD_INVALID",
+
+    regConfirmPasswordChanged : "REGISTR_CONFIRM_PASSWORD_CHANGED",
+    regConfirmPasswordValidationBegins : "REGISTR_CONFIRM_PASSWORD_VALIDATION_BEGINS",
+    regConfirmPasswordValid : "REGISTR_CONFIRM_PASSWORD_VALID",
+    regConfirmPasswordInvalid : "REGISTR_CONFIRM_PASSWORD_INVALID",
+
+    regPasswordsDiffer : "REGISTR_PASSWORDS_DIFFER",
+    regPasswordsEqual : "REGISTR_PASSWORDS_EQUAL",
+
+    loginAssessIfAllowed : "ASSESS_IF_LOGIN_ALLOWED",
     loginAttemptBegins : "LOGIN_ATTMEPT_BEGINS",
     loginFailed : "LOGIN_FAILED",
-    loginSuccess : "LOGIN_SUCCESS"
+    loginSuccess : "LOGIN_SUCCESS",
+
+    regAssessIfAllowed : "ASSESS_IF_REGISTR_ALLOWED",
+    regAttemptBegins : "REGISTR_ATTEMPT_BEGINS",
+    regFailed : "REGISTR_FAILED",
+    regSuccess : "REGISTR_SUCCESS",
+
+    logout : "LOGOUT"
 };
 
 module.exports = actionTypes;

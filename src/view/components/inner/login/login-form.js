@@ -4,6 +4,8 @@ var inlineStyles =
     require('./../../../inline-styles/inline-styles.js');
 var AcceptedSign =
     require("./../common/accepted-sign.js");
+var FormFieldInvalidMessage =
+    require("./../common/form-field-invalid-message.js");
 var Spinner =
     require("./../common/spinner.js");
 
@@ -17,16 +19,8 @@ var LoginForm = React.createClass({
         this.props.passwordChanged(event.target.value);
     },
 
-    nickNameAreValidAndNotEmpty : function () {
-        return (
-            this.props.nickNameValid &&
-            this.props.passwordValid &&
-            this.props.nickName != "" &&
-            this.props.password != "");
-    },
-
     getLoginButtonStyle: function () {
-        if (this.nickNameAreValidAndNotEmpty() ) {
+        if ( this.props.loginAllowed ) {
             return inlineStyles.loginButtonActiveStyle;
         } else {
             return inlineStyles.loginButtonInactiveStyle;
@@ -74,7 +68,7 @@ var LoginForm = React.createClass({
                                value = {this.props.nickName}
                                onChange={this.nickNameInputChanged} />
                         <AcceptedSign accepted={this.isNickNameAccepted()}/>
-                        <Spinner show={this.props.nickNameValidationInProgress}/>
+                        <FormFieldInvalidMessage message={this.props.nickNameInvalidMessage} />
                         <br/>
 
                         <label className="login-form-label">Password:</label>
@@ -85,7 +79,7 @@ var LoginForm = React.createClass({
                                value={this.props.password}
                                onChange={this.passwordInputChanged}/>
                         <AcceptedSign accepted={this.isPasswordAccepted()}/>
-                        <Spinner show={this.props.passwordValidationInProgress}/>
+                        <FormFieldInvalidMessage message={this.props.passwordInvalidMessage} />
                         <br/>
                     </fieldset>
                 </form>

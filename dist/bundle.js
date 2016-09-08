@@ -22139,6 +22139,11 @@
 
 	        case actionTypes.loginSuccess:
 	            return action.userInfo;
+	        case actionTypes.regSuccess:
+	            return action.userInfo;
+
+	        case actionTypes.logout:
+	            return userInitialState;
 
 	        default:
 	            return userState;
@@ -22175,9 +22180,50 @@
 	    loginPasswordValid: "LOGIN_PASSWORD_VALID",
 	    loginPasswordInvalid: "LOGIN_PASSWORD_INVALID",
 
+	    regNickNameChanged: "REGISTR_NICK_NAME_CHANGED",
+	    regNickNameValidationBegins: "REGISTR_NICK_NAME_VALIDATION_BEGINS",
+	    regNickNameValid: "REGISTR_NICK_NAME_VALID",
+	    regNickNameInvalid: "REGISTR_NICK_NAME_INVALID",
+
+	    regNameChanged: "REGISTR_NAME_CHANGED",
+	    regNameValidationBegins: "REGISTR_NAME_VALIDATION_BEGINS",
+	    regNameValid: "REGISTR_NAME_VALID",
+	    regNameInvalid: "REGISTR_NAME_INVALID",
+
+	    regSurnameChanged: "REGISTR_SURNAME_CHANGED",
+	    regSurnameValidationBegins: "REGISTR_SURNAME_VALIDATION_BEGINS",
+	    regSurnameValid: "REGISTR_SURNAME_VALID",
+	    regSurnameInvalid: "REGISTR_SURNAME_INVALID",
+
+	    regEmailChanged: "REGISTR_EMAIL_CHANGED",
+	    regEmailValidationBegins: "REGISTR_EMAIL_VALIDATION_BEGINS",
+	    regEmailValid: "REGISTR_EMAIL_VALID",
+	    regEmailInvalid: "REGISTR_EMAIL_INVALID",
+
+	    regPasswordChanged: "REGISTR_PASSWORD_CHANGED",
+	    regPasswordValidationBegins: "REGISTR_PASSWORD_VALIDATION_BEGINS",
+	    regPasswordValid: "REGISTR_PASSWORD_VALID",
+	    regPasswordInvalid: "REGISTR_PASSWORD_INVALID",
+
+	    regConfirmPasswordChanged: "REGISTR_CONFIRM_PASSWORD_CHANGED",
+	    regConfirmPasswordValidationBegins: "REGISTR_CONFIRM_PASSWORD_VALIDATION_BEGINS",
+	    regConfirmPasswordValid: "REGISTR_CONFIRM_PASSWORD_VALID",
+	    regConfirmPasswordInvalid: "REGISTR_CONFIRM_PASSWORD_INVALID",
+
+	    regPasswordsDiffer: "REGISTR_PASSWORDS_DIFFER",
+	    regPasswordsEqual: "REGISTR_PASSWORDS_EQUAL",
+
+	    loginAssessIfAllowed: "ASSESS_IF_LOGIN_ALLOWED",
 	    loginAttemptBegins: "LOGIN_ATTMEPT_BEGINS",
 	    loginFailed: "LOGIN_FAILED",
-	    loginSuccess: "LOGIN_SUCCESS"
+	    loginSuccess: "LOGIN_SUCCESS",
+
+	    regAssessIfAllowed: "ASSESS_IF_REGISTR_ALLOWED",
+	    regAttemptBegins: "REGISTR_ATTEMPT_BEGINS",
+	    regFailed: "REGISTR_FAILED",
+	    regSuccess: "REGISTR_SUCCESS",
+
+	    logout: "LOGOUT"
 	};
 
 	module.exports = actionTypes;
@@ -22191,6 +22237,10 @@
 	var actionTypes = __webpack_require__(190);
 	var appPages = __webpack_require__(188);
 
+	function currentPageLog(message) {
+	    console.log("[APP] [CURRENT PAGE REDUCER] " + message);
+	}
+
 	function defineCurrentPageState() {
 	    var currentPageState = arguments.length <= 0 || arguments[0] === undefined ? appPages.landing : arguments[0];
 	    var action = arguments[1];
@@ -22198,19 +22248,29 @@
 	    switch (action.type) {
 
 	        case actionTypes.goToLanding:
+	            currentPageLog("goToLanding");
 	            return appPages.landing;
 	        case actionTypes.goToLogin:
+	            currentPageLog("goToLogin");
 	            return appPages.login;
 	        case actionTypes.goToRegister:
+	            currentPageLog("goToRegister");
 	            return appPages.registration;
 	        case actionTypes.storedUserInfoValid:
+	            currentPageLog("stored user info valid");
 	            return appPages.main;
-	        case actionTypes.loginFailed:
-	            return appPages.login;
 	        case actionTypes.loginSuccess:
+	            currentPageLog("login success");
 	            return appPages.main;
+	        case actionTypes.regSuccess:
+	            currentPageLog("reg success");
+	            return appPages.main;
+	        case actionTypes.logout:
+	            currentPageLog("logout");
+	            return appPages.landing;
 
 	        default:
+	            currentPageLog("default: " + currentPageState);
 	            return currentPageState;
 	    }
 	}
@@ -22237,6 +22297,8 @@
 	    passwordInvalidMessage: "",
 	    passwordValidationInProgress: false,
 
+	    loginAllowed: false,
+
 	    loginFailureMessage: ""
 
 	};
@@ -22254,7 +22316,8 @@
 	            return Object.assign({}, loginPageState, {
 	                nickNameValidationInProgress: false,
 	                nickNameValid: false,
-	                nickNameInvalidMessage: action.message
+	                nickNameInvalidMessage: action.message,
+	                loginAllowed: false
 	            });
 	        case actionTypes.loginNickNameValid:
 	            return Object.assign({}, loginPageState, {
@@ -22263,7 +22326,10 @@
 	                nickNameInvalidMessage: ""
 	            });
 	        case actionTypes.loginNickNameValidationBegins:
-	            return Object.assign({}, loginPageState, { nickNameValidationInProgress: true });
+	            return Object.assign({}, loginPageState, {
+	                nickNameValidationInProgress: true,
+	                loginAllowed: false
+	            });
 
 	        // actions to process password input field
 	        case actionTypes.loginPasswordChanged:
@@ -22272,7 +22338,8 @@
 	            return Object.assign({}, loginPageState, {
 	                passwordValid: false,
 	                passwordValidationInProgress: false,
-	                passwordInvalidMessage: action.message
+	                passwordInvalidMessage: action.message,
+	                loginAllowed: false
 	            });
 	        case actionTypes.loginPasswordValid:
 	            return Object.assign({}, loginPageState, {
@@ -22281,11 +22348,22 @@
 	                passwordInvalidMessage: ""
 	            });
 	        case actionTypes.loginPasswordValidationBegins:
-	            return Object.assign({}, loginPageState, { passwordValidationInProgress: true });
+	            return Object.assign({}, loginPageState, {
+	                passwordValidationInProgress: true,
+	                loginAllowed: false
+	            });
+
+	        case actionTypes.loginAssessIfAllowed:
+	            return Object.assign({}, loginPageState, {
+	                loginAllowed: loginPageState.nickName != "" && loginPageState.password != "" && loginPageState.nickNameValid && loginPageState.passwordValid && !loginPageState.nickNameValidationInProgress && !loginPageState.passwordValidationInProgress
+	            });
 
 	        // login attempt
 	        case actionTypes.loginFailed:
-	            return Object.assign({}, loginPageState, { loginFailureMessage: action.message });
+	            return Object.assign({}, loginPageState, {
+	                loginFailureMessage: action.message,
+	                loginAllowed: false
+	            });
 	        case actionTypes.loginSuccess:
 	            return initialLoginPageState;
 
@@ -22296,6 +22374,8 @@
 	        case actionTypes.goToMain:
 	            return initialLoginPageState;
 	        case actionTypes.goToError:
+	            return initialLoginPageState;
+	        case actionTypes.logout:
 	            return initialLoginPageState;
 
 	        // default
@@ -22314,16 +22394,224 @@
 
 	var actionTypes = __webpack_require__(190);
 
-	var regPageInitialState = {};
+	var initialRegPageState = {
+
+	    nickName: "",
+	    nickNameValid: true,
+	    nickNameInvalidMessage: "",
+	    nickNameValidationInProgress: false,
+
+	    name: "",
+	    nameValid: true,
+	    nameInvalidMessage: "",
+	    nameValidationInProgress: false,
+
+	    surname: "",
+	    surnameValid: true,
+	    surnameInvalidMessage: "",
+	    surnameValidationInProgress: false,
+
+	    email: "",
+	    emailValid: true,
+	    emailInvalidMessage: "",
+	    emailValidationInProgress: false,
+
+	    password: "",
+	    passwordValid: true,
+	    passwordInvalidMessage: "",
+	    passwordValidationInProgress: false,
+
+	    confirmPassword: "",
+	    confirmPasswordValid: true,
+	    confirmPasswordInvalidMessage: "",
+	    confirmPasswordValidationInProgress: false,
+
+	    registrationFailureMessage: "",
+	    passwordsDifferFailureMessage: "",
+
+	    registrationAllowed: false
+	};
 
 	function defineRegistrationPageState() {
-	    var regPageState = arguments.length <= 0 || arguments[0] === undefined ? regPageInitialState : arguments[0];
+	    var regPageState = arguments.length <= 0 || arguments[0] === undefined ? initialRegPageState : arguments[0];
 	    var action = arguments[1];
+
 
 	    switch (action.type) {
 
+	        // actions to process nick name input field
+	        case actionTypes.regNickNameChanged:
+	            return Object.assign({}, regPageState, { nickName: action.newNickName });
+	        case actionTypes.regNickNameInvalid:
+	            return Object.assign({}, regPageState, {
+	                nickNameValidationInProgress: false,
+	                nickNameValid: false,
+	                nickNameInvalidMessage: action.message,
+	                registrationAllowed: false
+	            });
+	        case actionTypes.regNickNameValid:
+	            return Object.assign({}, regPageState, {
+	                nickNameValidationInProgress: false,
+	                nickNameValid: true,
+	                nickNameInvalidMessage: ""
+	            });
+	        case actionTypes.regNickNameValidationBegins:
+	            return Object.assign({}, regPageState, {
+	                nickNameValidationInProgress: true,
+	                registrationAllowed: false
+	            });
+
+	        // actions to process name input field
+	        case actionTypes.regNameChanged:
+	            return Object.assign({}, regPageState, { name: action.newName });
+	        case actionTypes.regNameInvalid:
+	            return Object.assign({}, regPageState, {
+	                nameValidationInProgress: false,
+	                nameValid: false,
+	                nameInvalidMessage: action.message,
+	                registrationAllowed: false
+	            });
+	        case actionTypes.regNameValid:
+	            return Object.assign({}, regPageState, {
+	                nameValidationInProgress: false,
+	                nameValid: true,
+	                nameInvalidMessage: ""
+	            });
+	        case actionTypes.regNameValidationBegins:
+	            return Object.assign({}, regPageState, {
+	                nameValidationInProgress: true,
+	                registrationAllowed: false
+	            });
+
+	        // actions to process surname input field
+	        case actionTypes.regSurnameChanged:
+	            return Object.assign({}, regPageState, { surname: action.newSurname });
+	        case actionTypes.regSurnameInvalid:
+	            return Object.assign({}, regPageState, {
+	                surnameValidationInProgress: false,
+	                surnameValid: false,
+	                surnameInvalidMessage: action.message,
+	                registrationAllowed: false
+	            });
+	        case actionTypes.regSurnameValid:
+	            return Object.assign({}, regPageState, {
+	                surnameValidationInProgress: false,
+	                surnameValid: true,
+	                surnameInvalidMessage: ""
+	            });
+	        case actionTypes.regSurnameValidationBegins:
+	            return Object.assign({}, regPageState, {
+	                surnameValidationInProgress: true,
+	                registrationAllowed: false
+	            });
+
+	        // actions to process surname input field
+	        case actionTypes.regEmailChanged:
+	            return Object.assign({}, regPageState, { email: action.newEmail });
+	        case actionTypes.regEmailInvalid:
+	            return Object.assign({}, regPageState, {
+	                emailValidationInProgress: false,
+	                emailValid: false,
+	                emailInvalidMessage: action.message,
+	                registrationAllowed: false
+	            });
+	        case actionTypes.regEmailValid:
+	            return Object.assign({}, regPageState, {
+	                emailValidationInProgress: false,
+	                emailValid: true,
+	                emailInvalidMessage: ""
+	            });
+	        case actionTypes.regEmailValidationBegins:
+	            return Object.assign({}, regPageState, {
+	                emailValidationInProgress: true,
+	                registrationAllowed: false
+	            });
+
+	        // actions to process password input field
+	        case actionTypes.regPasswordChanged:
+	            return Object.assign({}, regPageState, { password: action.newPassword });
+	        case actionTypes.regPasswordInvalid:
+	            return Object.assign({}, regPageState, {
+	                passwordValid: false,
+	                passwordValidationInProgress: false,
+	                passwordInvalidMessage: action.message,
+	                registrationAllowed: false
+	            });
+	        case actionTypes.regPasswordValid:
+	            return Object.assign({}, regPageState, {
+	                passwordValid: true,
+	                passwordValidationInProgress: false,
+	                passwordInvalidMessage: ""
+	            });
+	        case actionTypes.regPasswordValidationBegins:
+	            return Object.assign({}, regPageState, {
+	                passwordValidationInProgress: true,
+	                registrationAllowed: false
+	            });
+
+	        // actions to process confirmation password input field
+	        case actionTypes.regConfirmPasswordChanged:
+	            return Object.assign({}, regPageState, { confirmPassword: action.newConfirmPassword });
+	        case actionTypes.regConfirmPasswordInvalid:
+	            return Object.assign({}, regPageState, {
+	                confirmPasswordValid: false,
+	                confirmPasswordValidationInProgress: false,
+	                confirmPasswordInvalidMessage: action.message,
+	                registrationAllowed: false
+	            });
+	        case actionTypes.regConfirmPasswordValid:
+	            return Object.assign({}, regPageState, {
+	                confirmPasswordValid: true,
+	                confirmPasswordValidationInProgress: false,
+	                confirmPasswordInvalidMessage: "" });
+	        case actionTypes.regConfirmPasswordValidationBegins:
+	            return Object.assign({}, regPageState, {
+	                confirmPasswordValidationInProgress: true,
+	                registrationAllowed: false
+	            });
+
+	        case actionTypes.regAssessIfAllowed:
+	            return Object.assign({}, regPageState, {
+	                registrationAllowed: regPageState.nickName != "" && regPageState.name != "" && regPageState.surname != "" && regPageState.email != "" && regPageState.password != "" && regPageState.confirmPassword != "" && regPageState.password === regPageState.confirmPassword && regPageState.nickNameValid && regPageState.nameValid && regPageState.surnameValid && regPageState.emailValid && regPageState.passwordValid && regPageState.confirmPasswordValid && !regPageState.nickNameValidationInProgress && !regPageState.nameValidationInProgress && !regPageState.surnameValidationInProgress && !regPageState.emailValidationInProgress && !regPageState.passwordValidationInProgress && !regPageState.confirmPasswordValidationInProgress
+	            });
+
+	        // reg attempt
+	        case actionTypes.regFailed:
+	            console.log("Registration debug, before state: ");
+	            console.log(regPageState);
+	            console.log("Registration debug, assign: ");
+	            console.log(Object.assign({}, regPageState, {
+	                registrationAllowed: false,
+	                registrationFailureMessage: action.message
+	            }));
+	            return Object.assign({}, regPageState, {
+	                registrationAllowed: false,
+	                registrationFailureMessage: action.message
+	            });
+	        case actionTypes.regPasswordsDiffer:
+	            return Object.assign({}, regPageState, {
+	                passwordsDifferFailureMessage: "Passwords are not equal"
+	            });
+	        case actionTypes.regPasswordsEqual:
+	            return Object.assign({}, regPageState, {
+	                passwordsDifferFailureMessage: ""
+	            });
+	        case actionTypes.regSuccess:
+	            return initialRegPageState;
+
+	        case actionTypes.goToLanding:
+	            return initialRegPageState;
+	        case actionTypes.goToRegister:
+	            return initialRegPageState;
+	        case actionTypes.goToMain:
+	            return initialRegPageState;
+	        case actionTypes.goToError:
+	            return initialRegPageState;
+	        case actionTypes.logout:
+	            return initialRegPageState;
+
 	        default:
-	            return regPageInitialState;
+	            return regPageState;
 	    }
 	}
 
@@ -22407,6 +22695,11 @@
 	        dispatchGoToRegisterAction: function dispatchGoToRegisterAction() {
 	            dispatchLog("go to register.");
 	            dispatch(actionCreators.initialAuthCheck.goToRegisterAction());
+	        },
+
+	        dispatchLogoutAction: function dispatchLogoutAction() {
+	            dispatchLog("logout.");
+	            dispatch(actionCreators.app.logoutAction());
 	        }
 	    },
 
@@ -22466,6 +22759,11 @@
 	            dispatch(actionCreators.login.passwordValidationBeginsAction());
 	        },
 
+	        dispatchAssessIfLoginAllowedAction: function dispatchAssessIfLoginAllowedAction() {
+	            dispatchLog("is login allowed?");
+	            dispatch(actionCreators.login.assessIfAllowedAction());
+	        },
+
 	        dispatchLoginAttemptBegins: function dispatchLoginAttemptBegins() {
 	            dispatchLog("login call begins...");
 	            dispatch(actionCreators.login.attemptBegins());
@@ -22479,6 +22777,159 @@
 	        dispatchLoginSuccessAction: function dispatchLoginSuccessAction(userInfo) {
 	            dispatchLog("login success - " + userInfo);
 	            dispatch(actionCreators.login.attemptSuccessAction(userInfo));
+	        }
+	    },
+
+	    reg: {
+
+	        dispatchNickNameChangedAction: function dispatchNickNameChangedAction(newNickName) {
+	            dispatchLog("nickName changed : " + newNickName);
+	            dispatch(actionCreators.reg.nickNameChangedAction(newNickName));
+	        },
+
+	        dispatchNickNameValidAction: function dispatchNickNameValidAction() {
+	            dispatchLog("nickNameValid");
+	            dispatch(actionCreators.reg.nickNameValidAction());
+	        },
+
+	        dispatchNickNameInvalidAction: function dispatchNickNameInvalidAction(message) {
+	            dispatchLog("nickName invalid : " + message);
+	            dispatch(actionCreators.reg.nickNameInvalidAction(message));
+	        },
+
+	        dispatchNickNameValidationBeginsAction: function dispatchNickNameValidationBeginsAction() {
+	            dispatchLog("nickName validation begins... ");
+	            dispatch(actionCreators.reg.nickNameValidationBeginsAction());
+	        },
+
+	        dispatchNameChangedAction: function dispatchNameChangedAction(newName) {
+	            dispatchLog("name changed : " + newName);
+	            dispatch(actionCreators.reg.nameChangedAction(newName));
+	        },
+
+	        dispatchNameValidAction: function dispatchNameValidAction() {
+	            dispatchLog("nameValid");
+	            dispatch(actionCreators.reg.nameValidAction());
+	        },
+
+	        dispatchNameInvalidAction: function dispatchNameInvalidAction(message) {
+	            dispatchLog("name invalid : " + message);
+	            dispatch(actionCreators.reg.nameInvalidAction(message));
+	        },
+
+	        dispatchNameValidationBeginsAction: function dispatchNameValidationBeginsAction() {
+	            dispatchLog("name validation begins... ");
+	            dispatch(actionCreators.reg.nameValidationBeginsAction());
+	        },
+
+	        dispatchSurnameChangedAction: function dispatchSurnameChangedAction(newSurname) {
+	            dispatchLog("surname changed : " + newSurname);
+	            dispatch(actionCreators.reg.surnameChangedAction(newSurname));
+	        },
+
+	        dispatchSurnameValidAction: function dispatchSurnameValidAction() {
+	            dispatchLog("surname valid");
+	            dispatch(actionCreators.reg.surnameValidAction());
+	        },
+
+	        dispatchSurnameInvalidAction: function dispatchSurnameInvalidAction(message) {
+	            dispatchLog("surname invalid : " + message);
+	            dispatch(actionCreators.reg.surnameInvalidAction(message));
+	        },
+
+	        dispatchSurnameValidationBeginsAction: function dispatchSurnameValidationBeginsAction() {
+	            dispatchLog("surname validation begins... ");
+	            dispatch(actionCreators.reg.surnameValidationBeginsAction());
+	        },
+
+	        dispatchEmailChangedAction: function dispatchEmailChangedAction(newEmail) {
+	            dispatchLog("email changed : " + newEmail);
+	            dispatch(actionCreators.reg.emailChangedAction(newEmail));
+	        },
+
+	        dispatchEmailValidAction: function dispatchEmailValidAction() {
+	            dispatchLog("email valid");
+	            dispatch(actionCreators.reg.emailValidAction());
+	        },
+
+	        dispatchEmailInvalidAction: function dispatchEmailInvalidAction(message) {
+	            dispatchLog("email invalid : " + message);
+	            dispatch(actionCreators.reg.emailInvalidAction(message));
+	        },
+
+	        dispatchEmailValidationBeginsAction: function dispatchEmailValidationBeginsAction() {
+	            dispatchLog("email validation begins... ");
+	            dispatch(actionCreators.reg.emailValidationBeginsAction());
+	        },
+
+	        dispatchPasswordChangedAction: function dispatchPasswordChangedAction(newPassword) {
+	            dispatchLog("password changed : " + newPassword);
+	            dispatch(actionCreators.reg.passwordChangedAction(newPassword));
+	        },
+
+	        dispatchPasswordValidAction: function dispatchPasswordValidAction() {
+	            dispatchLog("password valid.");
+	            dispatch(actionCreators.reg.passwordValidAction());
+	        },
+
+	        dispatchPasswordInvalidAction: function dispatchPasswordInvalidAction(message) {
+	            dispatchLog("password invalid : " + message);
+	            dispatch(actionCreators.reg.passwordInvalidAction(message));
+	        },
+
+	        dispatchPasswordValidationBeginsAction: function dispatchPasswordValidationBeginsAction() {
+	            dispatchLog("password validation begins...");
+	            dispatch(actionCreators.reg.passwordValidationBeginsAction());
+	        },
+
+	        dispatchConfirmPasswordChangedAction: function dispatchConfirmPasswordChangedAction(newConfirmPassword) {
+	            dispatchLog("confirm password changed : " + newConfirmPassword);
+	            dispatch(actionCreators.reg.confirmPasswordChangedAction(newConfirmPassword));
+	        },
+
+	        dispatchConfirmPasswordValidAction: function dispatchConfirmPasswordValidAction() {
+	            dispatchLog("confirm password valid.");
+	            dispatch(actionCreators.reg.confirmPasswordValidAction());
+	        },
+
+	        dispatchConfirmPasswordInvalidAction: function dispatchConfirmPasswordInvalidAction(message) {
+	            dispatchLog("confirm password invalid : " + message);
+	            dispatch(actionCreators.reg.confirmPasswordInvalidAction(message));
+	        },
+
+	        dispatchConfirmPasswordValidationBeginsAction: function dispatchConfirmPasswordValidationBeginsAction() {
+	            dispatchLog("confirm password validation begins...");
+	            dispatch(actionCreators.reg.confirmPasswordValidationBeginsAction());
+	        },
+
+	        dispatchAssessIfRegistrationAllowedAction: function dispatchAssessIfRegistrationAllowedAction() {
+	            dispatchLog("is registr allowed?");
+	            dispatch(actionCreators.reg.assessIfAlowedAction());
+	        },
+
+	        dispatchRegistrationAttemptBegins: function dispatchRegistrationAttemptBegins() {
+	            dispatchLog("registr call begins...");
+	            dispatch(actionCreators.reg.attemptBegins());
+	        },
+
+	        dispatchRegistrationFailedAction: function dispatchRegistrationFailedAction(message) {
+	            dispatchLog("registr failed : " + message);
+	            dispatch(actionCreators.reg.attemptFailedAction(message));
+	        },
+
+	        dispatchRegistrationSuccessAction: function dispatchRegistrationSuccessAction(userInfo) {
+	            dispatchLog("registr success - " + userInfo);
+	            dispatch(actionCreators.reg.attemptSuccessAction(userInfo));
+	        },
+
+	        dispatchPasswordsDifferAction: function dispatchPasswordsDifferAction() {
+	            dispatchLog("passwords differ.");
+	            dispatch(actionCreators.reg.passwordsDifferAction());
+	        },
+
+	        dispatchPasswordsEqualAction: function dispatchPasswordsEqualAction() {
+	            dispatchLog("passwords equal.");
+	            dispatch(actionCreators.reg.passwordsEqualAction());
 	        }
 	    }
 	};
@@ -22504,6 +22955,12 @@
 	        goToLandingPageAction: function goToLandingPageAction() {
 	            return {
 	                type: actionTypes.goToLanding
+	            };
+	        },
+
+	        logoutAction: function logoutAction() {
+	            return {
+	                type: actionTypes.logout
 	            };
 	        }
 	    },
@@ -22599,6 +23056,12 @@
 	            };
 	        },
 
+	        assessIfAllowedAction: function assessIfAllowedAction() {
+	            return {
+	                type: actionTypes.loginAssessIfAllowed
+	            };
+	        },
+
 	        attemptBegins: function attemptBegins() {
 	            return {
 	                type: actionTypes.loginAttemptBegins
@@ -22620,7 +23083,220 @@
 	        }
 	    },
 
-	    pages: {}
+	    reg: {
+
+	        nickNameChangedAction: function nickNameChangedAction(newNickName) {
+	            creatorLog("registr nickName changed to : " + newNickName);
+	            return {
+	                type: actionTypes.regNickNameChanged,
+	                newNickName: newNickName
+	            };
+	        },
+
+	        nickNameValidationBeginsAction: function nickNameValidationBeginsAction() {
+	            creatorLog("registr nickName validation begins...");
+	            return {
+	                type: actionTypes.regNickNameValidationBegins
+	            };
+	        },
+
+	        nickNameValidAction: function nickNameValidAction() {
+	            creatorLog("registr nickName valid.");
+	            return {
+	                type: actionTypes.regNickNameValid
+	            };
+	        },
+
+	        nickNameInvalidAction: function nickNameInvalidAction(message) {
+	            creatorLog("registr nickName invalid : " + message);
+	            return {
+	                type: actionTypes.regNickNameInvalid,
+	                message: message
+	            };
+	        },
+
+	        nameChangedAction: function nameChangedAction(newName) {
+	            creatorLog("registr name changed to : " + newName);
+	            return {
+	                type: actionTypes.regNameChanged,
+	                newName: newName
+	            };
+	        },
+
+	        nameValidationBeginsAction: function nameValidationBeginsAction() {
+	            creatorLog("registr name validation begins...");
+	            return {
+	                type: actionTypes.regNameValidationBegins
+	            };
+	        },
+
+	        nameValidAction: function nameValidAction() {
+	            creatorLog("registr name valid.");
+	            return {
+	                type: actionTypes.regNameValid
+	            };
+	        },
+
+	        nameInvalidAction: function nameInvalidAction(message) {
+	            creatorLog("registr name invalid : " + message);
+	            return {
+	                type: actionTypes.regNameInvalid,
+	                message: message
+	            };
+	        },
+
+	        surnameChangedAction: function surnameChangedAction(newSurname) {
+	            creatorLog("registr surname changed to : " + newSurname);
+	            return {
+	                type: actionTypes.regSurnameChanged,
+	                newSurname: newSurname
+	            };
+	        },
+
+	        surnameValidationBeginsAction: function surnameValidationBeginsAction() {
+	            creatorLog("registr surname validation begins...");
+	            return {
+	                type: actionTypes.regSurnameValidationBegins
+	            };
+	        },
+
+	        surnameValidAction: function surnameValidAction() {
+	            creatorLog("registr surname valid.");
+	            return {
+	                type: actionTypes.regSurnameValid
+	            };
+	        },
+
+	        surnameInvalidAction: function surnameInvalidAction(message) {
+	            creatorLog("registr surname invalid : " + message);
+	            return {
+	                type: actionTypes.regSurnameInvalid,
+	                message: message
+	            };
+	        },
+
+	        emailChangedAction: function emailChangedAction(newEmail) {
+	            creatorLog("registr email changed to : " + newEmail);
+	            return {
+	                type: actionTypes.regEmailChanged,
+	                newEmail: newEmail
+	            };
+	        },
+
+	        emailValidationBeginsAction: function emailValidationBeginsAction() {
+	            creatorLog("registr email validation begins...");
+	            return {
+	                type: actionTypes.regEmailValidationBegins
+	            };
+	        },
+
+	        emailValidAction: function emailValidAction() {
+	            creatorLog("registr email valid.");
+	            return {
+	                type: actionTypes.regEmailValid
+	            };
+	        },
+
+	        emailInvalidAction: function emailInvalidAction(message) {
+	            creatorLog("registr email invalid : " + message);
+	            return {
+	                type: actionTypes.regEmailInvalid,
+	                message: message
+	            };
+	        },
+
+	        passwordChangedAction: function passwordChangedAction(newPassword) {
+	            creatorLog("registr password changed : " + newPassword);
+	            return {
+	                type: actionTypes.regPasswordChanged,
+	                newPassword: newPassword
+	            };
+	        },
+
+	        passwordValidationBeginsAction: function passwordValidationBeginsAction() {
+	            return {
+	                type: actionTypes.regPasswordValidationBegins
+	            };
+	        },
+
+	        passwordValidAction: function passwordValidAction() {
+	            return {
+	                type: actionTypes.regPasswordValid
+	            };
+	        },
+
+	        passwordInvalidAction: function passwordInvalidAction(message) {
+	            return {
+	                type: actionTypes.regPasswordInvalid,
+	                message: message
+	            };
+	        },
+
+	        confirmPasswordChangedAction: function confirmPasswordChangedAction(newConfirmPassword) {
+	            creatorLog("registr confirmPassword changed : " + newConfirmPassword);
+	            return {
+	                type: actionTypes.regConfirmPasswordChanged,
+	                newConfirmPassword: newConfirmPassword
+	            };
+	        },
+
+	        confirmPasswordValidationBeginsAction: function confirmPasswordValidationBeginsAction() {
+	            return {
+	                type: actionTypes.regConfirmPasswordValidationBegins
+	            };
+	        },
+
+	        confirmPasswordValidAction: function confirmPasswordValidAction() {
+	            return {
+	                type: actionTypes.regConfirmPasswordValid
+	            };
+	        },
+
+	        confirmPasswordInvalidAction: function confirmPasswordInvalidAction(message) {
+	            return {
+	                type: actionTypes.regConfirmPasswordInvalid,
+	                message: message
+	            };
+	        },
+
+	        assessIfAlowedAction: function assessIfAlowedAction() {
+	            return {
+	                type: actionTypes.regAssessIfAllowed
+	            };
+	        },
+
+	        attemptBegins: function attemptBegins() {
+	            return {
+	                type: actionTypes.regAttemptBegins
+	            };
+	        },
+
+	        attemptFailedAction: function attemptFailedAction(message) {
+	            return {
+	                type: actionTypes.regFailed,
+	                message: message
+	            };
+	        },
+
+	        attemptSuccessAction: function attemptSuccessAction(userInfo) {
+	            return {
+	                type: actionTypes.regSuccess,
+	                userInfo: userInfo
+	            };
+	        },
+
+	        passwordsDifferAction: function passwordsDifferAction() {
+	            return {
+	                type: actionTypes.regPasswordsDiffer
+	            };
+	        },
+
+	        passwordsEqualAction: function passwordsEqualAction() {
+	            return {
+	                type: actionTypes.regPasswordsEqual
+	            };
+	        }
+	    }
 
 	};
 
@@ -32946,8 +33622,8 @@
 	var MainPageContainer = __webpack_require__(204);
 	var LandingPageContainer = __webpack_require__(206);
 	var LoginPageContainer = __webpack_require__(208);
-	var ErrorPageContainer = __webpack_require__(218);
-	var RegistrationPageContainer = __webpack_require__(220);
+	var ErrorPageContainer = __webpack_require__(219);
+	var RegistrationPageContainer = __webpack_require__(221);
 
 	// ----------------------
 
@@ -33027,10 +33703,20 @@
 	var connect = __webpack_require__(163).connect;
 
 	var MainPage = __webpack_require__(205);
+	var storage = __webpack_require__(201);
+	var actionDispatchers = __webpack_require__(196);
+
+	// ----------------------
+
+	function performLogout() {
+	    actionDispatchers.app.dispatchLogoutAction();
+	    storage.deleteJwt();
+	}
 
 	function mapStateToProps(state) {
 	    return {
-	        nickName: state.user.nickName
+	        nickName: state.user.nickName,
+	        logout: performLogout
 	    };
 	}
 
@@ -33054,6 +33740,13 @@
 	        return React.createElement(
 	            "div",
 	            { className: "main-page" },
+	            React.createElement(
+	                "button",
+	                { type: "button",
+	                    className: "logout-button-on-landing-page",
+	                    onClick: this.props.logout },
+	                "Logout"
+	            ),
 	            React.createElement(
 	                "span",
 	                null,
@@ -33080,7 +33773,8 @@
 
 	function mapStateToProps(state) {
 	    return {
-	        goToLogin: actionDispatchers.app.dispatchGoToLoginAction
+	        goToLogin: actionDispatchers.app.dispatchGoToLoginAction,
+	        goToRegistration: actionDispatchers.app.dispatchGoToRegisterAction
 	    };
 	}
 
@@ -33103,14 +33797,22 @@
 	    render: function render() {
 	        return React.createElement(
 	            "div",
-	            null,
+	            { className: "landing-page" },
 	            React.createElement(
 	                "button",
 	                { type: "button",
-	                    className: "login-button-on-landing-page",
+	                    className: "go-tologin-button-on-landing-page",
 	                    onClick: this.props.goToLogin },
 	                "Login"
 	            ),
+	            React.createElement(
+	                "button",
+	                { type: "button",
+	                    className: "go-to-registration-button-on-landing-page",
+	                    onClick: this.props.goToRegistration },
+	                "Registration"
+	            ),
+	            React.createElement("br", null),
 	            "Landing page."
 	        );
 	    }
@@ -33129,9 +33831,9 @@
 	var storage = __webpack_require__(201);
 	var LoginPage = __webpack_require__(209);
 	var actionDispatchers = __webpack_require__(196);
-	var loginAjaxCall = __webpack_require__(215);
-	var validateNickNameAjaxCall = __webpack_require__(216);
-	var validatePasswordAjaxCall = __webpack_require__(217);
+	var loginAjaxCall = __webpack_require__(216);
+	var validateNickNameAjaxCall = __webpack_require__(217);
+	var validatePasswordAjaxCall = __webpack_require__(218);
 
 	// ----------------------
 
@@ -33141,7 +33843,10 @@
 	function beginDelayedPasswordValidation(newPassword) {
 	    var passwordAjaxValidationCallbacks = {
 	        onStart: actionDispatchers.login.dispatchPasswordValidationBeginsAction,
-	        onValid: actionDispatchers.login.dispatchPasswordValidAction,
+	        onValid: function onValid() {
+	            actionDispatchers.login.dispatchPasswordValidAction();
+	            actionDispatchers.login.dispatchAssessIfLoginAllowedAction();
+	        },
 	        onInvalid: actionDispatchers.login.dispatchPasswordInvalidAction
 	    };
 	    validatePasswordAjaxCall(newPassword, passwordAjaxValidationCallbacks);
@@ -33150,7 +33855,10 @@
 	function beginDelayedNickNameValidation(newNickName) {
 	    var nickNameAjaxValidationCallbacks = {
 	        onStart: actionDispatchers.login.dispatchNickNameValidationBeginsAction,
-	        onValid: actionDispatchers.login.dispatchNickNameValidAction,
+	        onValid: function onValid() {
+	            actionDispatchers.login.dispatchNickNameValidAction();
+	            actionDispatchers.login.dispatchAssessIfLoginAllowedAction();
+	        },
 	        onInvalid: actionDispatchers.login.dispatchNickNameInvalidAction
 	    };
 	    validateNickNameAjaxCall(newNickName, nickNameAjaxValidationCallbacks);
@@ -33159,13 +33867,13 @@
 	function passwordChanged(newPassword) {
 	    window.clearTimeout(passwordValidationDelay);
 	    actionDispatchers.login.dispatchPasswordChangedAction(newPassword);
-	    passwordValidationDelay = window.setTimeout(beginDelayedPasswordValidation, 1000, newPassword);
+	    passwordValidationDelay = window.setTimeout(beginDelayedPasswordValidation, 700, newPassword);
 	}
 
 	function nickNameChanged(newNickName) {
 	    window.clearTimeout(nickNameValidationDelay);
 	    actionDispatchers.login.dispatchNickNameChangedAction(newNickName);
-	    nickNameValidationDelay = window.setTimeout(beginDelayedNickNameValidation, 1000, newNickName);
+	    nickNameValidationDelay = window.setTimeout(beginDelayedNickNameValidation, 700, newNickName);
 	}
 
 	function goToRegistration() {
@@ -33198,13 +33906,18 @@
 
 	        loginFailureMessage: state.loginPage.loginFailureMessage,
 
+	        loginAllowed: state.loginPage.loginAllowed,
+
+	        goToLanding: actionDispatchers.app.dispatchGoToLandingPageAction,
 	        goToRegistration: goToRegistration,
 	        tryToLogin: function tryToLogin() {
-	            var loginData = {
-	                "nickName": state.loginPage.nickName,
-	                "password": state.loginPage.password
-	            };
-	            _tryToLogin(loginData);
+	            if (state.loginPage.loginAllowed) {
+	                var loginData = {
+	                    "nickName": state.loginPage.nickName,
+	                    "password": state.loginPage.password
+	                };
+	                _tryToLogin(loginData);
+	            }
 	        },
 	        nickNameChanged: nickNameChanged,
 	        passwordChanged: passwordChanged
@@ -33224,7 +33937,7 @@
 	var React = __webpack_require__(1);
 
 	var LoginForm = __webpack_require__(210);
-	var LoginFailureMessage = __webpack_require__(214);
+	var FormFailureMessage = __webpack_require__(215);
 
 	var LoginPage = React.createClass({
 	    displayName: "LoginPage",
@@ -33239,10 +33952,19 @@
 	                "button",
 	                {
 	                    type: "button",
-	                    className: "go-to-registration-button",
+	                    className: "go-to-registration-button-on-login",
 	                    onClick: this.props.goToRegistration },
 	                "Registration"
 	            ),
+	            React.createElement(
+	                "button",
+	                {
+	                    type: "button",
+	                    className: "go-to-landing-button-on-login",
+	                    onClick: this.props.goToLanding },
+	                "Back"
+	            ),
+	            React.createElement("br", null),
 	            React.createElement(LoginForm, {
 	                nickName: this.props.nickName,
 	                nickNameValid: this.props.nickNameValid,
@@ -33254,10 +33976,11 @@
 	                passwordInvalidMessage: this.props.passwordInvalidMessage,
 	                passwordValidationInProgress: this.props.passwordValidationInProgress,
 
+	                loginAllowed: this.props.loginAllowed,
 	                loginAction: this.props.tryToLogin,
 	                nickNameChanged: this.props.nickNameChanged,
 	                passwordChanged: this.props.passwordChanged }),
-	            React.createElement(LoginFailureMessage, {
+	            React.createElement(FormFailureMessage, {
 	                message: this.props.loginFailureMessage })
 	        );
 	    }
@@ -33275,7 +33998,8 @@
 
 	var inlineStyles = __webpack_require__(211);
 	var AcceptedSign = __webpack_require__(212);
-	var Spinner = __webpack_require__(213);
+	var FormFieldInvalidMessage = __webpack_require__(213);
+	var Spinner = __webpack_require__(214);
 
 	var LoginForm = React.createClass({
 	    displayName: 'LoginForm',
@@ -33289,12 +34013,8 @@
 	        this.props.passwordChanged(event.target.value);
 	    },
 
-	    nickNameAreValidAndNotEmpty: function nickNameAreValidAndNotEmpty() {
-	        return this.props.nickNameValid && this.props.passwordValid && this.props.nickName != "" && this.props.password != "";
-	    },
-
 	    getLoginButtonStyle: function getLoginButtonStyle() {
-	        if (this.nickNameAreValidAndNotEmpty()) {
+	        if (this.props.loginAllowed) {
 	            return inlineStyles.loginButtonActiveStyle;
 	        } else {
 	            return inlineStyles.loginButtonInactiveStyle;
@@ -33343,7 +34063,7 @@
 	                        value: this.props.nickName,
 	                        onChange: this.nickNameInputChanged }),
 	                    React.createElement(AcceptedSign, { accepted: this.isNickNameAccepted() }),
-	                    React.createElement(Spinner, { show: this.props.nickNameValidationInProgress }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.nickNameInvalidMessage }),
 	                    React.createElement('br', null),
 	                    React.createElement(
 	                        'label',
@@ -33357,7 +34077,7 @@
 	                        value: this.props.password,
 	                        onChange: this.passwordInputChanged }),
 	                    React.createElement(AcceptedSign, { accepted: this.isPasswordAccepted() }),
-	                    React.createElement(Spinner, { show: this.props.passwordValidationInProgress }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.passwordInvalidMessage }),
 	                    React.createElement('br', null)
 	                )
 	            ),
@@ -33524,22 +34244,52 @@
 /* 213 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var FormFieldInvalidMessage = React.createClass({
+	    displayName: "FormFieldInvalidMessage",
+
+	    render: function render() {
+	        if (this.props.message != "") {
+	            return React.createElement(
+	                "span",
+	                { className: "form-field-invalid-message" },
+	                React.createElement(
+	                    "b",
+	                    null,
+	                    this.props.message
+	                )
+	            );
+	        } else {
+	            return null;
+	        }
+	    }
+	});
+
+	module.exports = FormFieldInvalidMessage;
+
+/***/ },
+/* 214 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
 
 	var React = __webpack_require__(1);
 
 	var Spinner = React.createClass({
-	    displayName: 'Spinner',
+	    displayName: "Spinner",
 
 	    render: function render() {
 	        if (this.props.show) {
 	            return React.createElement(
-	                'span',
-	                null,
+	                "span",
+	                { className: "spinner" },
 	                React.createElement(
-	                    'b',
+	                    "b",
 	                    null,
-	                    ' ... '
+	                    " ... "
 	                )
 	            );
 	        } else {
@@ -33551,23 +34301,21 @@
 	module.exports = Spinner;
 
 /***/ },
-/* 214 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var React = __webpack_require__(1);
 
-	var LoginFailureMessage = React.createClass({
-	    displayName: "LoginFailureMessage",
+	var FormFailureMessage = React.createClass({
+	    displayName: "FormFailureMessage",
 
 	    render: function render() {
 	        if (this.props.message != "") {
 	            return React.createElement(
 	                "div",
-	                { className: "login-failure-message" },
-	                "Login failure:",
-	                React.createElement("br", null),
+	                { className: "form-failure-message" },
 	                this.props.message
 	            );
 	        } else {
@@ -33576,10 +34324,10 @@
 	    }
 	});
 
-	module.exports = LoginFailureMessage;
+	module.exports = FormFailureMessage;
 
 /***/ },
-/* 215 */
+/* 216 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -33624,7 +34372,7 @@
 	module.exports = tryToLogin;
 
 /***/ },
-/* 216 */
+/* 217 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -33667,7 +34415,7 @@
 	module.exports = validateNickName;
 
 /***/ },
-/* 217 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -33710,14 +34458,14 @@
 	module.exports = validatePassword;
 
 /***/ },
-/* 218 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var connect = __webpack_require__(163).connect;
 
-	var ErrorPage = __webpack_require__(219);
+	var ErrorPage = __webpack_require__(220);
 
 	function mapStateToProps(state) {
 	    return {};
@@ -33728,7 +34476,7 @@
 	module.exports = ErrorPageContainer;
 
 /***/ },
-/* 219 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -33751,17 +34499,225 @@
 	module.exports = ErrorPage;
 
 /***/ },
-/* 220 */
+/* 221 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var connect = __webpack_require__(163).connect;
 
-	var RegistrationPage = __webpack_require__(221);
+	var storage = __webpack_require__(201);
+	var RegistrationPage = __webpack_require__(222);
+	var actionDispatchers = __webpack_require__(196);
+	var registrationAjaxCall = __webpack_require__(224);
+	var validateNickNameAjaxCall = __webpack_require__(217);
+	var validateNameAjaxCall = __webpack_require__(225);
+	var validateEmailAjaxCall = __webpack_require__(226);
+	var validatePasswordAjaxCall = __webpack_require__(218);
+
+	//---------------------
+
+	var nickNameValidationDelay;
+	var nameValidationDelay;
+	var surnameValidationDelay;
+	var emailValidationDelay;
+	var passwordValidationDelay;
+	var confirmPasswordValidationDelay;
+	var comparePasswordsDelay;
+
+	function beginDelayedPasswordValidation(newPassword) {
+	    var passwordAjaxValidationCallbacks = {
+	        onStart: actionDispatchers.reg.dispatchPasswordValidationBeginsAction,
+	        onValid: function onValid() {
+	            actionDispatchers.reg.dispatchPasswordValidAction();
+	            actionDispatchers.reg.dispatchAssessIfRegistrationAllowedAction();
+	        },
+	        onInvalid: actionDispatchers.reg.dispatchPasswordInvalidAction
+	    };
+	    validatePasswordAjaxCall(newPassword, passwordAjaxValidationCallbacks);
+	}
+
+	function beginDelayedConfirmPasswordValidation(newConfirmPassword) {
+	    var confirmPasswordAjaxValidationCallbacks = {
+	        onStart: actionDispatchers.reg.dispatchConfirmPasswordValidationBeginsAction,
+	        onValid: function onValid() {
+	            actionDispatchers.reg.dispatchConfirmPasswordValidAction();
+	            actionDispatchers.reg.dispatchAssessIfRegistrationAllowedAction();
+	        },
+	        onInvalid: actionDispatchers.reg.dispatchConfirmPasswordInvalidAction
+	    };
+	    validatePasswordAjaxCall(newConfirmPassword, confirmPasswordAjaxValidationCallbacks);
+	}
+
+	function beginDelayedNickNameValidation(newNickName) {
+	    var nickNameAjaxValidationCallbacks = {
+	        onStart: actionDispatchers.reg.dispatchNickNameValidationBeginsAction,
+	        onValid: function onValid() {
+	            actionDispatchers.reg.dispatchNickNameValidAction();
+	            actionDispatchers.reg.dispatchAssessIfRegistrationAllowedAction();
+	        },
+	        onInvalid: actionDispatchers.reg.dispatchNickNameInvalidAction
+	    };
+	    validateNickNameAjaxCall(newNickName, nickNameAjaxValidationCallbacks);
+	}
+
+	function beginDelayedSurnameValidation(newSurname) {
+	    var surnameAjaxValidationCallbacks = {
+	        onStart: actionDispatchers.reg.dispatchSurnameValidationBeginsAction,
+	        onValid: function onValid() {
+	            actionDispatchers.reg.dispatchSurnameValidAction();
+	            actionDispatchers.reg.dispatchAssessIfRegistrationAllowedAction();
+	        },
+	        onInvalid: actionDispatchers.reg.dispatchSurnameInvalidAction
+	    };
+	    validateNameAjaxCall(newSurname, surnameAjaxValidationCallbacks);
+	}
+
+	function beginDelayedNameValidation(newName) {
+	    var nameAjaxValidationCallbacks = {
+	        onStart: actionDispatchers.reg.dispatchNameValidationBeginsAction,
+	        onValid: function onValid() {
+	            actionDispatchers.reg.dispatchNameValidAction();
+	            actionDispatchers.reg.dispatchAssessIfRegistrationAllowedAction();
+	        },
+	        onInvalid: actionDispatchers.reg.dispatchNameInvalidAction
+	    };
+	    validateNameAjaxCall(newName, nameAjaxValidationCallbacks);
+	}
+
+	function beginDelayedEmailValidation(newEmail) {
+	    var emailAjaxValidationCallbacks = {
+	        onStart: actionDispatchers.reg.dispatchEmailValidationBeginsAction,
+	        onValid: function onValid() {
+	            actionDispatchers.reg.dispatchEmailValidAction();
+	            actionDispatchers.reg.dispatchAssessIfRegistrationAllowedAction();
+	        },
+	        onInvalid: actionDispatchers.reg.dispatchEmailInvalidAction
+	    };
+	    validateEmailAjaxCall(newEmail, emailAjaxValidationCallbacks);
+	}
+
+	function comparePasswords(password, confirmPassword) {
+	    if (password === confirmPassword) {
+	        actionDispatchers.reg.dispatchPasswordsEqualAction();
+	        actionDispatchers.reg.dispatchAssessIfRegistrationAllowedAction();
+	    } else {
+	        actionDispatchers.reg.dispatchPasswordsDifferAction();
+	    }
+	}
+
+	function nickNameChanged(newNickName) {
+	    window.clearTimeout(nickNameValidationDelay);
+	    actionDispatchers.reg.dispatchNickNameChangedAction(newNickName);
+	    nickNameValidationDelay = window.setTimeout(beginDelayedNickNameValidation, 700, newNickName);
+	}
+
+	function nameChanged(newName) {
+	    window.clearTimeout(nameValidationDelay);
+	    actionDispatchers.reg.dispatchNameChangedAction(newName);
+	    nameValidationDelay = window.setTimeout(beginDelayedNameValidation, 700, newName);
+	}
+
+	function surnameChanged(newSurname) {
+	    window.clearTimeout(surnameValidationDelay);
+	    actionDispatchers.reg.dispatchSurnameChangedAction(newSurname);
+	    surnameValidationDelay = window.setTimeout(beginDelayedSurnameValidation, 700, newSurname);
+	}
+
+	function emailChanged(newEmail) {
+	    window.clearTimeout(emailValidationDelay);
+	    actionDispatchers.reg.dispatchEmailChangedAction(newEmail);
+	    emailValidationDelay = window.setTimeout(beginDelayedEmailValidation, 700, newEmail);
+	}
+
+	function passwordChangedAndCompare(newPassword, newConfirmPassword) {
+	    window.clearTimeout(passwordValidationDelay);
+	    window.clearTimeout(comparePasswordsDelay);
+	    actionDispatchers.reg.dispatchPasswordChangedAction(newPassword);
+	    passwordValidationDelay = window.setTimeout(beginDelayedPasswordValidation, 700, newPassword);
+	    comparePasswordsDelay = window.setTimeout(comparePasswords, 700, newPassword, newConfirmPassword);
+	}
+
+	function confirmPasswordChangedAndCompare(newPassword, newConfirmPassword) {
+	    window.clearTimeout(confirmPasswordValidationDelay);
+	    window.clearTimeout(comparePasswordsDelay);
+	    actionDispatchers.reg.dispatchConfirmPasswordChangedAction(newConfirmPassword);
+	    confirmPasswordValidationDelay = window.setTimeout(beginDelayedConfirmPasswordValidation, 700, newConfirmPassword);
+	    comparePasswordsDelay = window.setTimeout(comparePasswords, 700, newPassword, newConfirmPassword);
+	}
+
+	function invokeRegistrationCall(regData) {
+	    var regAjaxCallbacks = {
+	        onStart: actionDispatchers.reg.dispatchRegistrationAttemptBegins,
+	        onSuccess: function onSuccess(jwtString) {
+	            actionDispatchers.reg.dispatchRegistrationSuccessAction(storage.saveAndParseJwt(jwtString));
+	        },
+	        onUnauthorized: actionDispatchers.reg.dispatchRegistrationFailedAction,
+	        onBadRequest: actionDispatchers.reg.dispatchRegistrationFailedAction
+	    };
+	    registrationAjaxCall(regData, regAjaxCallbacks);
+	}
 
 	function mapStateToProps(state) {
-	    return {};
+	    return {
+	        nickName: state.registrationPage.nickName,
+	        nickNameValid: state.registrationPage.nickNameValid,
+	        nickNameInvalidMessage: state.registrationPage.nickNameInvalidMessage,
+	        nickNameValidationInProgress: state.registrationPage.nickNameValidationInProgress,
+
+	        name: state.registrationPage.name,
+	        nameValid: state.registrationPage.nameValid,
+	        nameInvalidMessage: state.registrationPage.nameInvalidMessage,
+	        nameValidationInProgress: state.registrationPage.nameValidationInProgress,
+
+	        surname: state.registrationPage.surname,
+	        surnameValid: state.registrationPage.surnameValid,
+	        surnameInvalidMessage: state.registrationPage.surnameInvalidMessage,
+	        surnameValidationInProgress: state.registrationPage.surnameValidationInProgress,
+
+	        email: state.registrationPage.email,
+	        emailValid: state.registrationPage.emailValid,
+	        emailInvalidMessage: state.registrationPage.emailInvalidMessage,
+	        emailValidationInProgress: state.registrationPage.emailValidationInProgress,
+
+	        password: state.registrationPage.password,
+	        passwordValid: state.registrationPage.passwordValid,
+	        passwordInvalidMessage: state.registrationPage.passwordInvalidMessage,
+	        passwordValidationInProgress: state.registrationPage.passwordValidationInProgress,
+
+	        confirmPassword: state.registrationPage.confirmPassword,
+	        confirmPasswordValid: state.registrationPage.confirmPasswordValid,
+	        confirmPasswordInvalidMessage: state.registrationPage.confirmPasswordInvalidMessage,
+	        confirmPasswordValidationInProgress: state.registrationPage.confirmPasswordValidationInProgress,
+
+	        registrationFailureMessage: state.registrationPage.registrationFailureMessage,
+	        passwordsDifferFailureMessage: state.registrationPage.passwordsDifferFailureMessage,
+
+	        goToLanding: actionDispatchers.app.dispatchGoToLandingPageAction,
+	        tryToRegister: function tryToRegister() {
+	            if (state.registrationPage.registrationAllowed) {
+	                var regData = {
+	                    "nickName": state.registrationPage.nickName,
+	                    "name": state.registrationPage.name,
+	                    "surname": state.registrationPage.surname,
+	                    "email": state.registrationPage.email,
+	                    "password": state.registrationPage.password
+	                };
+	                invokeRegistrationCall(regData);
+	            }
+	        },
+	        registrationAllowed: state.registrationPage.registrationAllowed,
+	        nickNameChanged: nickNameChanged,
+	        nameChanged: nameChanged,
+	        surnameChanged: surnameChanged,
+	        emailChanged: emailChanged,
+	        passwordChanged: function passwordChanged(newPassword) {
+	            passwordChangedAndCompare(newPassword, state.registrationPage.confirmPassword);
+	        },
+	        confirmPasswordChanged: function confirmPasswordChanged(newConfirmPassword) {
+	            confirmPasswordChangedAndCompare(state.registrationPage.password, newConfirmPassword);
+	        }
+	    };
 	}
 
 	var RegistrationPageContainer = connect(mapStateToProps)(RegistrationPage);
@@ -33769,12 +34725,15 @@
 	module.exports = RegistrationPageContainer;
 
 /***/ },
-/* 221 */
+/* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var React = __webpack_require__(1);
+
+	var RegistrationForm = __webpack_require__(223);
+	var FormFailureMessage = __webpack_require__(215);
 
 	var RegistrationPage = React.createClass({
 	    displayName: "RegistrationPage",
@@ -33785,15 +34744,414 @@
 	            "div",
 	            { className: "registration-page" },
 	            React.createElement(
-	                "span",
+	                "button",
+	                {
+	                    type: "button",
+	                    className: "go-to-landing-button-on-login",
+	                    onClick: this.props.goToLanding },
+	                "Back"
+	            ),
+	            React.createElement(
+	                "div",
 	                null,
 	                "Registration page"
-	            )
+	            ),
+	            React.createElement(RegistrationForm, {
+	                nickName: this.props.nickName,
+	                nickNameValid: this.props.nickNameValid,
+	                nickNameInvalidMessage: this.props.nickNameInvalidMessage,
+	                nickNameValidationInProgress: this.props.nickNameValidationInProgress,
+
+	                name: this.props.name,
+	                nameValid: this.props.nameValid,
+	                nameInvalidMessage: this.props.nameInvalidMessage,
+	                nameValidationInProgress: this.props.nameValidationInProgress,
+
+	                surname: this.props.surname,
+	                surnameValid: this.props.surnameValid,
+	                surnameInvalidMessage: this.props.surnameInvalidMessage,
+	                surnameValidationInProgress: this.props.surnameValidationInProgress,
+
+	                email: this.props.email,
+	                emailValid: this.props.emailValid,
+	                emailInvalidMessage: this.props.emailInvalidMessage,
+	                emailValidationInProgress: this.props.emailValidationInProgress,
+
+	                password: this.props.password,
+	                passwordValid: this.props.passwordValid,
+	                passwordInvalidMessage: this.props.passwordInvalidMessage,
+	                passwordValidationInProgress: this.props.passwordValidationInProgress,
+
+	                confirmPassword: this.props.confirmPassword,
+	                confirmPasswordValid: this.props.confirmPasswordValid,
+	                confirmPasswordInvalidMessage: this.props.confirmPasswordInvalidMessage,
+	                confirmPasswordValidationInProgress: this.props.confirmPasswordValidationInProgress,
+
+	                registrationAllowed: this.props.registrationAllowed,
+	                registerAction: this.props.tryToRegister,
+	                nickNameChanged: this.props.nickNameChanged,
+	                nameChanged: this.props.nameChanged,
+	                surnameChanged: this.props.surnameChanged,
+	                emailChanged: this.props.emailChanged,
+	                passwordChanged: this.props.passwordChanged,
+	                confirmPasswordChanged: this.props.confirmPasswordChanged
+	            }),
+	            React.createElement(FormFailureMessage, {
+	                message: this.props.registrationFailureMessage }),
+	            React.createElement(FormFailureMessage, {
+	                message: this.props.passwordsDifferFailureMessage })
 	        );
 	    }
 	});
 
 	module.exports = RegistrationPage;
+
+/***/ },
+/* 223 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+
+	var inlineStyles = __webpack_require__(211);
+	var AcceptedSign = __webpack_require__(212);
+	var FormFieldInvalidMessage = __webpack_require__(213);
+
+	// -------------------------
+
+	var RegistrationForm = React.createClass({
+	    displayName: 'RegistrationForm',
+
+
+	    nickNameInputChanged: function nickNameInputChanged(event) {
+	        this.props.nickNameChanged(event.target.value);
+	    },
+
+	    nameInputChanged: function nameInputChanged(event) {
+	        this.props.nameChanged(event.target.value);
+	    },
+
+	    surnameInputChanged: function surnameInputChanged(event) {
+	        this.props.surnameChanged(event.target.value);
+	    },
+
+	    emailInputChanged: function emailInputChanged(event) {
+	        this.props.emailChanged(event.target.value);
+	    },
+
+	    passwordInputChanged: function passwordInputChanged(event) {
+	        this.props.passwordChanged(event.target.value);
+	    },
+
+	    confirmPasswordInputChanged: function confirmPasswordInputChanged(event) {
+	        this.props.confirmPasswordChanged(event.target.value);
+	    },
+
+	    getNickNameInputStyle: function getNickNameInputStyle() {
+	        return inlineStyles.getInputStyle(this.props.nickNameValid);
+	    },
+
+	    getNameInputStyle: function getNameInputStyle() {
+	        return inlineStyles.getInputStyle(this.props.nameValid);
+	    },
+
+	    getSurnameInputStyle: function getSurnameInputStyle() {
+	        return inlineStyles.getInputStyle(this.props.surnameValid);
+	    },
+
+	    getEmailInputStyle: function getEmailInputStyle() {
+	        return inlineStyles.getInputStyle(this.props.emailValid);
+	    },
+
+	    getPasswordInputStyle: function getPasswordInputStyle() {
+	        return inlineStyles.getInputStyle(this.props.passwordValid);
+	    },
+
+	    getRegButtonStyle: function getRegButtonStyle() {
+	        return inlineStyles.getRegistrationButtonStyle(this.props.registrationAllowed);
+	    },
+
+	    getConfirmPasswordInputStyle: function getConfirmPasswordInputStyle() {
+	        return inlineStyles.getInputStyle(this.props.passwordValid && this.props.confirmPasswordValid && this.props.passwordValid === this.props.confirmPasswordValid);
+	    },
+
+	    isNickNameAccepted: function isNickNameAccepted() {
+	        return this.props.nickNameValid && this.props.nickName != "" && !this.props.nickNameValidationInProgress;
+	    },
+
+	    isNameAccepted: function isNameAccepted() {
+	        return this.props.nameValid && this.props.name != "" && !this.props.nameValidationInProgress;
+	    },
+
+	    isSurnameAccepted: function isSurnameAccepted() {
+	        return this.props.surnameValid && this.props.surname != "" && !this.props.surnameValidationInProgress;
+	    },
+
+	    isEmailAccepted: function isEmailAccepted() {
+	        return this.props.emailValid && this.props.email != "" && !this.props.emailValidationInProgress;
+	    },
+
+	    isPasswordAccepted: function isPasswordAccepted() {
+	        return this.props.passwordValid && this.props.password != "" && !this.props.passwordValidationInProgress;
+	    },
+
+	    isConfirmPasswordAccepted: function isConfirmPasswordAccepted() {
+	        return this.props.passwordValid && this.props.confirmPasswordValid && this.props.passwordValid === this.props.confirmPasswordValid && this.props.confirmPasswordValid && this.props.confirmPassword != "" && !this.props.confirmPasswordValidationInProgress;
+	    },
+
+	    render: function render() {
+	        var nickNameInputStyle = this.getNickNameInputStyle();
+	        var nameInputStyle = this.getNameInputStyle();
+	        var surnameInputStyle = this.getSurnameInputStyle();
+	        var emailInputStyle = this.getEmailInputStyle();
+	        var passwordInputStyle = this.getPasswordInputStyle();
+	        var confirmedPasswordInputStyle = this.getConfirmPasswordInputStyle();
+	        var regButtonStyle = this.getRegButtonStyle();
+	        return React.createElement(
+	            'div',
+	            { className: 'registration-form' },
+	            React.createElement(
+	                'form',
+	                null,
+	                React.createElement(
+	                    'fieldset',
+	                    null,
+	                    React.createElement(
+	                        'label',
+	                        { className: 'registration-form-label' },
+	                        'Nickname:'
+	                    ),
+	                    React.createElement('br', null),
+	                    React.createElement('input', { type: 'text',
+	                        className: 'registration-form-input',
+	                        placeholder: 'nick_name',
+	                        style: nickNameInputStyle,
+	                        value: this.props.nickName,
+	                        onChange: this.nickNameInputChanged }),
+	                    React.createElement(AcceptedSign, { accepted: this.isNickNameAccepted() }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.nickNameInvalidMessage }),
+	                    React.createElement('br', null),
+	                    React.createElement(
+	                        'label',
+	                        { className: 'registration-form-label' },
+	                        'Name:'
+	                    ),
+	                    React.createElement('br', null),
+	                    React.createElement('input', { type: 'text',
+	                        className: 'registration-form-input',
+	                        placeholder: 'name',
+	                        style: nameInputStyle,
+	                        value: this.props.name,
+	                        onChange: this.nameInputChanged }),
+	                    React.createElement(AcceptedSign, { accepted: this.isNameAccepted() }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.nameInvalidMessage }),
+	                    React.createElement('br', null),
+	                    React.createElement(
+	                        'label',
+	                        { className: 'registration-form-label' },
+	                        'Surname:'
+	                    ),
+	                    React.createElement('br', null),
+	                    React.createElement('input', { type: 'text',
+	                        className: 'registration-form-input',
+	                        placeholder: 'surname',
+	                        style: surnameInputStyle,
+	                        value: this.props.surname,
+	                        onChange: this.surnameInputChanged }),
+	                    React.createElement(AcceptedSign, { accepted: this.isSurnameAccepted() }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.surnameInvalidMessage }),
+	                    React.createElement('br', null),
+	                    React.createElement(
+	                        'label',
+	                        { className: 'registration-form-label' },
+	                        'Email:'
+	                    ),
+	                    React.createElement('br', null),
+	                    React.createElement('input', { type: 'text',
+	                        className: 'registration-form-input',
+	                        placeholder: '...@...',
+	                        style: emailInputStyle,
+	                        value: this.props.email,
+	                        onChange: this.emailInputChanged }),
+	                    React.createElement(AcceptedSign, { accepted: this.isEmailAccepted() }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.emailInvalidMessage }),
+	                    React.createElement('br', null),
+	                    React.createElement(
+	                        'label',
+	                        { className: 'registration-form-label' },
+	                        'Enter password:'
+	                    ),
+	                    React.createElement('br', null),
+	                    React.createElement('input', { type: 'password',
+	                        className: 'registration-form-input',
+	                        style: passwordInputStyle,
+	                        value: this.props.password,
+	                        onChange: this.passwordInputChanged }),
+	                    React.createElement(AcceptedSign, { accepted: this.isPasswordAccepted() }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.passwordInvalidMessage }),
+	                    React.createElement('br', null),
+	                    React.createElement(
+	                        'label',
+	                        { className: 'registration-form-label' },
+	                        'Confirm password:'
+	                    ),
+	                    React.createElement('br', null),
+	                    React.createElement('input', { type: 'password',
+	                        className: 'registration-form-input',
+	                        style: confirmedPasswordInputStyle,
+	                        value: this.props.confirmedPassword,
+	                        onChange: this.confirmPasswordInputChanged }),
+	                    React.createElement(AcceptedSign, { accepted: this.isConfirmPasswordAccepted() }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.confirmPasswordInvalidMessage }),
+	                    React.createElement('br', null)
+	                )
+	            ),
+	            React.createElement(
+	                'button',
+	                { type: 'button',
+	                    className: 'registration-button',
+	                    style: regButtonStyle,
+	                    onClick: this.props.registerAction },
+	                'Register!'
+	            )
+	        );
+	    }
+	});
+
+	module.exports = RegistrationForm;
+
+/***/ },
+/* 224 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var $ = __webpack_require__(199);
+
+	var resources = __webpack_require__(200);
+
+	// --------------------------------
+
+	function ajaxLog(message) {
+	    console.log("[APP] [AJAX CALL] [REGISTRATION] " + message);
+	}
+
+	function registerCall(regData, callbacks) {
+	    callbacks.onStart();
+	    ajaxLog("starts...");
+	    console.log(regData);
+	    $.ajax({
+	        url: resources.registration.url,
+	        method: resources.registration.method,
+	        data: JSON.stringify(regData),
+	        dataType: "json",
+	        contentType: "application/json; charset=utf-8",
+	        cache: false,
+	        statusCode: {
+	            200: function _(xhr) {
+	                ajaxLog("success with jwt : " + xhr.getResponseHeader("jwt"));
+	                callbacks.onSuccess(xhr.getResponseHeader("jwt"));
+	            },
+	            400: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("fail, bad request with : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onBadRequest(JSON.parse(xhr.responseText).message);
+	            },
+	            401: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("fail, unauthorized with : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onUnauthorized(JSON.parse(xhr.responseText).message);
+	            }
+	        }
+	    });
+	}
+
+	module.exports = registerCall;
+
+/***/ },
+/* 225 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var $ = __webpack_require__(199);
+
+	var resources = __webpack_require__(200);
+
+	// --------------------------------
+
+	function ajaxLog(message) {
+	    console.log("[APP] [AJAX CALL] [NAME VALIDATION] " + message);
+	}
+
+	function validateName(name, callbacks) {
+	    callbacks.onStart();
+	    ajaxLog("starts...");
+	    console.log(name);
+	    var payload = { "payload": name };
+	    $.ajax({
+	        url: resources.validation.names.url,
+	        method: resources.validation.names.method,
+	        data: JSON.stringify(payload),
+	        dataType: "json",
+	        contentType: "application/json; charset=utf-8",
+	        cache: false,
+	        statusCode: {
+	            200: function _() {
+	                ajaxLog("valid.");
+	                callbacks.onValid();
+	            },
+	            400: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("invalid : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onInvalid(JSON.parse(xhr.responseText).message);
+	            }
+	        }
+	    });
+	}
+
+	module.exports = validateName;
+
+/***/ },
+/* 226 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var $ = __webpack_require__(199);
+
+	var resources = __webpack_require__(200);
+
+	// --------------------------------
+
+	function ajaxLog(message) {
+	    console.log("[APP] [AJAX CALL] [EMAIL VALIDATION] " + message);
+	}
+
+	function validateEmail(email, callbacks) {
+	    callbacks.onStart();
+	    ajaxLog("starts...");
+	    console.log(email);
+	    var payload = { "payload": email };
+	    $.ajax({
+	        url: resources.validation.emails.url,
+	        method: resources.validation.emails.method,
+	        data: JSON.stringify(payload),
+	        dataType: "json",
+	        contentType: "application/json; charset=utf-8",
+	        cache: false,
+	        statusCode: {
+	            200: function _() {
+	                ajaxLog("valid.");
+	                callbacks.onValid();
+	            },
+	            400: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("invalid : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onInvalid(JSON.parse(xhr.responseText).message);
+	            }
+	        }
+	    });
+	}
+
+	module.exports = validateEmail;
 
 /***/ }
 /******/ ]);

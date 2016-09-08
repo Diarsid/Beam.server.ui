@@ -13,6 +13,8 @@ var initialLoginPageState = {
     passwordInvalidMessage : "",
     passwordValidationInProgress : false,
 
+    loginAllowed : false,
+
     loginFailureMessage : ""
 
 };
@@ -27,7 +29,8 @@ function defineLoginPageState(loginPageState = initialLoginPageState, action) {
             return Object.assign({}, loginPageState, {
                 nickNameValidationInProgress : false,
                 nickNameValid : false,
-                nickNameInvalidMessage : action.message
+                nickNameInvalidMessage : action.message,
+                loginAllowed : false
             });
         case actionTypes.loginNickNameValid :
             return Object.assign({}, loginPageState, {
@@ -36,7 +39,10 @@ function defineLoginPageState(loginPageState = initialLoginPageState, action) {
                 nickNameInvalidMessage : ""
             });
         case actionTypes.loginNickNameValidationBegins :
-            return Object.assign({}, loginPageState, {nickNameValidationInProgress : true});
+            return Object.assign({}, loginPageState, {
+                nickNameValidationInProgress : true,
+                loginAllowed : false
+            });
 
         // actions to process password input field
         case actionTypes.loginPasswordChanged :
@@ -45,7 +51,8 @@ function defineLoginPageState(loginPageState = initialLoginPageState, action) {
             return Object.assign({}, loginPageState, {
                 passwordValid : false,
                 passwordValidationInProgress: false,
-                passwordInvalidMessage: action.message
+                passwordInvalidMessage: action.message,
+                loginAllowed : false
             });
         case actionTypes.loginPasswordValid :
             return Object.assign({}, loginPageState, {
@@ -54,11 +61,29 @@ function defineLoginPageState(loginPageState = initialLoginPageState, action) {
                 passwordInvalidMessage: ""
             });
         case actionTypes.loginPasswordValidationBegins :
-            return Object.assign({}, loginPageState, {passwordValidationInProgress : true});
+            return Object.assign({}, loginPageState, {
+                passwordValidationInProgress : true,
+                loginAllowed : false
+            });
+
+
+        case actionTypes.loginAssessIfAllowed :
+            return Object.assign({}, loginPageState, {
+                loginAllowed : (
+                    loginPageState.nickName != "" &&
+                    loginPageState.password != "" &&
+                    loginPageState.nickNameValid &&
+                    loginPageState.passwordValid &&
+                    ! loginPageState.nickNameValidationInProgress &&
+                    ! loginPageState.passwordValidationInProgress)
+            });
 
         // login attempt
         case actionTypes.loginFailed :
-            return Object.assign({}, loginPageState, {loginFailureMessage : action.message});
+            return Object.assign({}, loginPageState, {
+                loginFailureMessage : action.message,
+                loginAllowed : false
+            });
         case actionTypes.loginSuccess :
             return initialLoginPageState;
 
@@ -69,6 +94,8 @@ function defineLoginPageState(loginPageState = initialLoginPageState, action) {
         case actionTypes.goToMain :
             return initialLoginPageState;
         case actionTypes.goToError :
+            return initialLoginPageState;
+        case actionTypes.logout :
             return initialLoginPageState;
 
         // default

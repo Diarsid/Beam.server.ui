@@ -4,12 +4,18 @@ var LandingPage = React.createClass({
 
     render: function () {
         return (
-            <div>
+            <div className="landing-page">
                 <button type="button"
-                        className="login-button-on-landing-page"
+                        className="go-tologin-button-on-landing-page"
                         onClick={this.props.goToLogin}>
                     Login
                 </button>
+                <button type="button"
+                        className="go-to-registration-button-on-landing-page"
+                        onClick={this.props.goToRegistration}>
+                    Registration
+                </button>
+                <br/>
                 Landing page.
             </div>
         );

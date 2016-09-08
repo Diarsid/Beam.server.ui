@@ -2,8 +2,8 @@ var React = require('react');
 
 var LoginForm =
     require("./../inner/login/login-form.js");
-var LoginFailureMessage =
-    require("./../inner/login/login-failure-message.js");
+var FormFailureMessage =
+    require("./../inner/common/form-failure-message.js");
 
 var LoginPage = React.createClass({
 
@@ -12,10 +12,17 @@ var LoginPage = React.createClass({
             <div className="login-page">Login page
                 <button
                     type="button"
-                    className="go-to-registration-button"
+                    className="go-to-registration-button-on-login"
                     onClick={this.props.goToRegistration} >
                     Registration
                 </button>
+                <button
+                    type="button"
+                    className="go-to-landing-button-on-login"
+                    onClick={this.props.goToLanding} >
+                    Back
+                </button>
+                <br/>
                 <LoginForm
                     nickName={this.props.nickName}
                     nickNameValid={this.props.nickNameValid}
@@ -27,10 +34,11 @@ var LoginPage = React.createClass({
                     passwordInvalidMessage={this.props.passwordInvalidMessage}
                     passwordValidationInProgress={this.props.passwordValidationInProgress}
 
+                    loginAllowed={this.props.loginAllowed}
                     loginAction={this.props.tryToLogin}
                     nickNameChanged={this.props.nickNameChanged}
                     passwordChanged={this.props.passwordChanged} />
-                <LoginFailureMessage
+                <FormFailureMessage
                     message={this.props.loginFailureMessage}/>
             </div>
         );

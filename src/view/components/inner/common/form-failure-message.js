@@ -1,12 +1,10 @@
 var React = require('react');
 
-var LoginFailureMessage = React.createClass({
+var FormFailureMessage = React.createClass({
     render : function () {
         if ( this.props.message != "" ) {
             return (
-                <div className="login-failure-message">
-                    Login failure:
-                    <br/>
+                <div className="form-failure-message">
                     {this.props.message}
                 </div>
             );
@@ -16,4 +14,4 @@ var LoginFailureMessage = React.createClass({
     }
 });
 
-module.exports = LoginFailureMessage;
+module.exports = FormFailureMessage;

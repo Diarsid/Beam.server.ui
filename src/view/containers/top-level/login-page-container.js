@@ -21,7 +21,10 @@ var nickNameValidationDelay;
 function beginDelayedPasswordValidation(newPassword) {
     var passwordAjaxValidationCallbacks = {
         onStart : actionDispatchers.login.dispatchPasswordValidationBeginsAction,
-        onValid : actionDispatchers.login.dispatchPasswordValidAction,
+        onValid : function () {
+            actionDispatchers.login.dispatchPasswordValidAction();
+            actionDispatchers.login.dispatchAssessIfLoginAllowedAction();
+        },
         onInvalid : actionDispatchers.login.dispatchPasswordInvalidAction
     };
     validatePasswordAjaxCall(newPassword, passwordAjaxValidationCallbacks);
@@ -30,7 +33,10 @@ function beginDelayedPasswordValidation(newPassword) {
 function beginDelayedNickNameValidation(newNickName) {
     var nickNameAjaxValidationCallbacks = {
         onStart : actionDispatchers.login.dispatchNickNameValidationBeginsAction,
-        onValid : actionDispatchers.login.dispatchNickNameValidAction,
+        onValid : function () {
+            actionDispatchers.login.dispatchNickNameValidAction();
+            actionDispatchers.login.dispatchAssessIfLoginAllowedAction();
+        },
         onInvalid : actionDispatchers.login.dispatchNickNameInvalidAction
     };
     validateNickNameAjaxCall(newNickName, nickNameAjaxValidationCallbacks);
@@ -39,13 +45,13 @@ function beginDelayedNickNameValidation(newNickName) {
 function passwordChanged (newPassword) {
     window.clearTimeout(passwordValidationDelay);
     actionDispatchers.login.dispatchPasswordChangedAction(newPassword);
-    passwordValidationDelay = window.setTimeout(beginDelayedPasswordValidation, 1000, newPassword);
+    passwordValidationDelay = window.setTimeout(beginDelayedPasswordValidation, 700, newPassword);
 }
 
 function nickNameChanged (newNickName) {
     window.clearTimeout(nickNameValidationDelay);
     actionDispatchers.login.dispatchNickNameChangedAction(newNickName);
-    nickNameValidationDelay = window.setTimeout(beginDelayedNickNameValidation, 1000, newNickName);
+    nickNameValidationDelay = window.setTimeout(beginDelayedNickNameValidation, 700, newNickName);
 }
 
 function goToRegistration() {
@@ -78,13 +84,18 @@ function mapStateToProps(state) {
 
         loginFailureMessage : state.loginPage.loginFailureMessage,
 
+        loginAllowed : state.loginPage.loginAllowed,
+
+        goToLanding : actionDispatchers.app.dispatchGoToLandingPageAction,
         goToRegistration : goToRegistration,
         tryToLogin : function() {
-            var loginData = {
-                "nickName" : state.loginPage.nickName,
-                "password" : state.loginPage.password
-            };
-            tryToLogin(loginData);
+            if (state.loginPage.loginAllowed) {
+                var loginData = {
+                    "nickName" : state.loginPage.nickName,
+                    "password" : state.loginPage.password
+                };
+                tryToLogin(loginData);
+            }
         },
         nickNameChanged : nickNameChanged,
         passwordChanged : passwordChanged

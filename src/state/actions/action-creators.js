@@ -12,6 +12,12 @@ var actionCreators = {
             return {
                 type : actionTypes.goToLanding
             }
+        },
+
+        logoutAction : function () {
+            return {
+                type : actionTypes.logout
+            }
         }
     },
 
@@ -106,6 +112,12 @@ var actionCreators = {
             }
         },
 
+        assessIfAllowedAction : function () {
+            return {
+                type : actionTypes.loginAssessIfAllowed
+            }
+        },
+
         attemptBegins : function () {
             return {
                 type : actionTypes.loginAttemptBegins
@@ -127,8 +139,220 @@ var actionCreators = {
         }
     },
 
-    pages : {
+    reg : {
 
+        nickNameChangedAction : function (newNickName) {
+            creatorLog("registr nickName changed to : " + newNickName);
+            return {
+                type : actionTypes.regNickNameChanged,
+                newNickName : newNickName
+            }
+        },
+
+        nickNameValidationBeginsAction : function () {
+            creatorLog("registr nickName validation begins...");
+            return {
+                type : actionTypes.regNickNameValidationBegins
+            }
+        },
+
+        nickNameValidAction : function () {
+            creatorLog("registr nickName valid.");
+            return {
+                type : actionTypes.regNickNameValid
+            }
+        },
+
+        nickNameInvalidAction : function (message) {
+            creatorLog("registr nickName invalid : " + message);
+            return {
+                type : actionTypes.regNickNameInvalid,
+                message : message
+            }
+        },
+
+        nameChangedAction : function (newName) {
+            creatorLog("registr name changed to : " + newName);
+            return {
+                type : actionTypes.regNameChanged,
+                newName : newName
+            }
+        },
+
+        nameValidationBeginsAction : function () {
+            creatorLog("registr name validation begins...");
+            return {
+                type : actionTypes.regNameValidationBegins
+            }
+        },
+
+        nameValidAction : function () {
+            creatorLog("registr name valid.");
+            return {
+                type : actionTypes.regNameValid
+            }
+        },
+
+        nameInvalidAction : function (message) {
+            creatorLog("registr name invalid : " + message);
+            return {
+                type : actionTypes.regNameInvalid,
+                message : message
+            }
+        },
+
+        surnameChangedAction : function (newSurname) {
+            creatorLog("registr surname changed to : " + newSurname);
+            return {
+                type : actionTypes.regSurnameChanged,
+                newSurname : newSurname
+            }
+        },
+
+        surnameValidationBeginsAction : function () {
+            creatorLog("registr surname validation begins...");
+            return {
+                type : actionTypes.regSurnameValidationBegins
+            }
+        },
+
+        surnameValidAction : function () {
+            creatorLog("registr surname valid.");
+            return {
+                type : actionTypes.regSurnameValid
+            }
+        },
+
+        surnameInvalidAction : function (message) {
+            creatorLog("registr surname invalid : " + message);
+            return {
+                type : actionTypes.regSurnameInvalid,
+                message : message
+            }
+        },
+
+        emailChangedAction : function (newEmail) {
+            creatorLog("registr email changed to : " + newEmail);
+            return {
+                type : actionTypes.regEmailChanged,
+                newEmail : newEmail
+            }
+        },
+
+        emailValidationBeginsAction : function () {
+            creatorLog("registr email validation begins...");
+            return {
+                type : actionTypes.regEmailValidationBegins
+            }
+        },
+
+        emailValidAction : function () {
+            creatorLog("registr email valid.");
+            return {
+                type : actionTypes.regEmailValid
+            }
+        },
+
+        emailInvalidAction : function (message) {
+            creatorLog("registr email invalid : " + message);
+            return {
+                type : actionTypes.regEmailInvalid,
+                message : message
+            }
+        },
+
+        passwordChangedAction : function (newPassword) {
+            creatorLog("registr password changed : " + newPassword);
+            return {
+                type : actionTypes.regPasswordChanged,
+                newPassword : newPassword
+            }
+        },
+
+        passwordValidationBeginsAction : function () {
+            return {
+                type : actionTypes.regPasswordValidationBegins
+            }
+        },
+
+        passwordValidAction : function () {
+            return {
+                type : actionTypes.regPasswordValid
+            }
+        },
+
+        passwordInvalidAction : function (message) {
+            return {
+                type : actionTypes.regPasswordInvalid,
+                message : message
+            }
+        },
+
+
+        confirmPasswordChangedAction : function (newConfirmPassword) {
+            creatorLog("registr confirmPassword changed : " + newConfirmPassword);
+            return {
+                type : actionTypes.regConfirmPasswordChanged,
+                newConfirmPassword : newConfirmPassword
+            }
+        },
+
+        confirmPasswordValidationBeginsAction : function () {
+            return {
+                type : actionTypes.regConfirmPasswordValidationBegins
+            }
+        },
+
+        confirmPasswordValidAction : function () {
+            return {
+                type : actionTypes.regConfirmPasswordValid
+            }
+        },
+
+        confirmPasswordInvalidAction : function (message) {
+            return {
+                type : actionTypes.regConfirmPasswordInvalid,
+                message : message
+            }
+        },
+
+        assessIfAlowedAction : function () {
+            return {
+                type : actionTypes.regAssessIfAllowed
+            }
+        },
+
+        attemptBegins : function () {
+            return {
+                type : actionTypes.regAttemptBegins
+            }
+        },
+
+        attemptFailedAction : function (message) {
+            return {
+                type : actionTypes.regFailed,
+                message : message
+            }
+        },
+
+        attemptSuccessAction : function (userInfo) {
+            return {
+                type : actionTypes.regSuccess,
+                userInfo : userInfo
+            }
+        },
+
+        passwordsDifferAction : function () {
+            return {
+                type : actionTypes.regPasswordsDiffer
+            }
+        },
+
+        passwordsEqualAction : function () {
+            return {
+                type : actionTypes.regPasswordsEqual
+            }
+        }
     }
 
 };

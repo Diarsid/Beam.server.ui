@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Diarsid/Beam.server_UI.git"
+    "url": "git+https://github.com/Diarsid/Beam.server.ui.git"
   },
   "author": "Diarsid",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Diarsid/Beam.server_UI/issues"
+    "url": "https://github.com/Diarsid/Beam.server.ui/issues"
   },
-  "homepage": "https://github.com/Diarsid/Beam.server_UI#readme",
+  "homepage": "https://github.com/Diarsid/Beam.server.ui#readme",
   "devDependencies": {
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",

@@ -7,7 +7,8 @@ var LandingPage =
 
 function mapStateToProps(state) {
     return {
-        goToLogin : actionDispatchers.app.dispatchGoToLoginAction
+        goToLogin : actionDispatchers.app.dispatchGoToLoginAction,
+        goToRegistration : actionDispatchers.app.dispatchGoToRegisterAction
     };
 }
 
