@@ -7,8 +7,8 @@ module.exports = {
         "./src/main.js"
     ],
     output : {
-        path: "./dist",
-        publicPath: "/dev-server/",
+        path: "./dist.env.dev",
+        publicPath: "http://localhost:8787/dev-server/",
         filename: "bundle.js"
     },
     module: {

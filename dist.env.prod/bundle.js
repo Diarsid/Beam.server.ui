@@ -22577,13 +22577,6 @@
 
 	        // reg attempt
 	        case actionTypes.regFailed:
-	            console.log("Registration debug, before state: ");
-	            console.log(regPageState);
-	            console.log("Registration debug, assign: ");
-	            console.log(Object.assign({}, regPageState, {
-	                registrationAllowed: false,
-	                registrationFailureMessage: action.message
-	            }));
 	            return Object.assign({}, regPageState, {
 	                registrationAllowed: false,
 	                registrationFailureMessage: action.message
@@ -33813,7 +33806,7 @@
 	                "Registration"
 	            ),
 	            React.createElement("br", null),
-	            "Landing page."
+	            "Landing page. v2."
 	        );
 	    }
 	});
