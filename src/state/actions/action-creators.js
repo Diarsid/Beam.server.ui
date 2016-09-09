@@ -8,6 +8,12 @@ var actionCreators = {
 
     app : {
 
+        appStartsAction : function () {
+            return {
+                type : actionTypes.appStarts
+            }
+        },
+
         goToLandingPageAction : function () {
             return {
                 type : actionTypes.goToLanding
@@ -17,6 +23,53 @@ var actionCreators = {
         logoutAction : function () {
             return {
                 type : actionTypes.logout
+            }
+        }
+    },
+
+    main : {
+        webPanel : {
+
+            loadingBegins : function () {
+                return {
+                    type : actionTypes.webPanelLoadingBegins
+                }
+            },
+
+            loaded : function (dirs) {
+                return {
+                    type : actionTypes.webPanelLoaded,
+                    dirs : dirs
+                }
+            },
+
+            loadingFailed : function (message) {
+                return {
+                    type : actionTypes.webPanelLoadingFailed,
+                    message : message
+                }
+            }
+        },
+
+        bookmarks : {
+            loadingBegins : function () {
+                return {
+                    type : actionTypes.bookmarksLoadingBegins
+                }
+            },
+
+            loaded : function (dirs) {
+                return {
+                    type : actionTypes.bookmarksLoaded,
+                    dirs : dirs
+                }
+            },
+
+            loadingFailed : function (message) {
+                return {
+                    type : actionTypes.bookmarksLoadingFailed,
+                    message : message
+                }
             }
         }
     },

@@ -63,7 +63,15 @@ var actionTypes = {
     regFailed : "REGISTR_FAILED",
     regSuccess : "REGISTR_SUCCESS",
 
-    logout : "LOGOUT"
+    logout : "LOGOUT",
+
+    webPanelLoadingBegins : "WEB_PANEL_LOADING_BEGINS",
+    webPanelLoaded : "WEB_PANEL_LOADED",
+    webPanelLoadingFailed : "WEB_PANEL_LOADING_FAILED",
+
+    bookmarksLoadingBegins : "BOOKMARKS_LOADING_BEGINS",
+    bookmarksLoaded : "BOOKMARKS_LOADED",
+    bookmarksLoadingFailed : "BOOKMARKS_LOADING_FAILED"
 };
 
 module.exports = actionTypes;

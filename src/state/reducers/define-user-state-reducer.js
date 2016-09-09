@@ -9,6 +9,10 @@ var userInitialState = {
 
 function defineUserState(userState = userInitialState, action) {
     switch ( action.type ) {
+
+        case actionTypes.appStarts :
+            return userInitialState;
+
         case actionTypes.goToLogin :
             return userInitialState;
         case actionTypes.goToRegister :

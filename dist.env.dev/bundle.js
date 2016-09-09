@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "bf68cd54d825e36a69e2"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "8a691d109e0201450cd0"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -8267,10 +8267,10 @@
 	var Provider = __webpack_require__(257).Provider;
 
 	var appStore = __webpack_require__(280);
-	var actionDispatchers = __webpack_require__(293);
-	var ajaxJwtValidation = __webpack_require__(295);
-	var storage = __webpack_require__(298);
-	var RootPageContainer = __webpack_require__(299);
+	var actionDispatchers = __webpack_require__(296);
+	var ajaxJwtValidation = __webpack_require__(298);
+	var storage = __webpack_require__(299);
+	var RootPageContainer = __webpack_require__(300);
 
 	// --------------------------------------------
 
@@ -8308,6 +8308,7 @@
 
 	function startApp() {
 	    console.log('[APP] [MAIN] start app...');
+	    actionDispatchers.app.dispatchAppStartsAction();
 	    initialAppUserInfoProcessing();
 	    renderView();
 	}
@@ -31513,7 +31514,7 @@
 	var defineLoginPageState = __webpack_require__(289);
 	var defineRegistrationPageState = __webpack_require__(290);
 	var defineMainPageState = __webpack_require__(291);
-	var defineErrorPageState = __webpack_require__(292);
+	var defineErrorPageState = __webpack_require__(295);
 
 	var appInitialState = {
 	    user: {},
@@ -31714,6 +31715,10 @@
 	    var action = arguments[1];
 
 	    switch (action.type) {
+
+	        case actionTypes.appStarts:
+	            return userInitialState;
+
 	        case actionTypes.goToLogin:
 	            return userInitialState;
 	        case actionTypes.goToRegister:
@@ -31812,7 +31817,15 @@
 	    regFailed: "REGISTR_FAILED",
 	    regSuccess: "REGISTR_SUCCESS",
 
-	    logout: "LOGOUT"
+	    logout: "LOGOUT",
+
+	    webPanelLoadingBegins: "WEB_PANEL_LOADING_BEGINS",
+	    webPanelLoaded: "WEB_PANEL_LOADED",
+	    webPanelLoadingFailed: "WEB_PANEL_LOADING_FAILED",
+
+	    bookmarksLoadingBegins: "BOOKMARKS_LOADING_BEGINS",
+	    bookmarksLoaded: "BOOKMARKS_LOADED",
+	    bookmarksLoadingFailed: "BOOKMARKS_LOADING_FAILED"
 	};
 
 	module.exports = actionTypes;
@@ -31840,6 +31853,9 @@
 	    var action = arguments[1];
 
 	    switch (action.type) {
+
+	        case actionTypes.appStarts:
+	            return appPages.initial;
 
 	        case actionTypes.goToLanding:
 	            currentPageLog("goToLanding");
@@ -31907,6 +31923,9 @@
 	    var action = arguments[1];
 
 	    switch (action.type) {
+
+	        case actionTypes.appStarts:
+	            return initialLoginPageState;
 
 	        // actions to process nick name input field
 	        case actionTypes.loginNickNameChanged:
@@ -32042,6 +32061,9 @@
 
 
 	    switch (action.type) {
+
+	        case actionTypes.appStarts:
+	            return initialRegPageState;
 
 	        // actions to process nick name input field
 	        case actionTypes.regNickNameChanged:
@@ -32227,8 +32249,25 @@
 
 	var actionTypes = __webpack_require__(287);
 
+	var getDirectoriesAjaxCall = __webpack_require__(292);
+
+	var mainPageViews = {
+	    webPanel: "webPanel",
+	    bookmarks: "bookmarks"
+	};
+
 	var mainPageInitialState = {
-	    content: "Main page accessed."
+
+	    mainView: mainPageViews.webPanel,
+
+	    webPanelLoading: false,
+	    bookmarksLoading: false,
+
+	    webPanelLoadingFailedMessage: "",
+	    bookmarksLoadingFailedMessage: "",
+
+	    webPanelDirs: [],
+	    bookmarksDirs: []
 	};
 
 	function defineMainPageState() {
@@ -32237,8 +32276,45 @@
 
 	    switch (action.type) {
 
-	        default:
+	        case actionTypes.appStarts:
 	            return mainPageInitialState;
+
+	        // data loading progress
+	        case actionTypes.webPanelLoadingBegins:
+	            return Object.assign({}, mainPageState, {
+	                webPanelLoading: true
+	            });
+	        case actionTypes.bookmarksLoadingBegins:
+	            return Object.assign({}, mainPageState, {
+	                bookmarksLoading: true
+	            });
+
+	        // data loading failed
+	        case actionTypes.webPanelLoadingFailed:
+	            return Object.assign({}, mainPageState, {
+	                webPanelLoading: false,
+	                webPanelLoadingFailedMessage: action.message
+	            });
+	        case actionTypes.bookmarksLoadingFailed:
+	            return Object.assign({}, mainPageState, {
+	                bookmarksLoading: false,
+	                bookmarksLoadingFailedMessage: action.message
+	            });
+
+	        // data loaded
+	        case actionTypes.webPanelLoaded:
+	            return Object.assign({}, mainPageState, {
+	                webPanelLoading: false,
+	                webPanelDirs: action.dirs
+	            });
+	        case actionTypes.bookmarksLoaded:
+	            return Object.assign({}, mainPageState, {
+	                bookmarksLoading: false,
+	                bookmarksDirs: action.dirs
+	            });
+
+	        default:
+	            return mainPageState;
 	    }
 	}
 
@@ -32255,725 +32331,45 @@
 
 	"use strict";
 
-	var actionTypes = __webpack_require__(287);
+	var $ = __webpack_require__(293);
 
-	var errorPageInitialState = {};
-
-	function defineErrorPageState() {
-	    var errorPageState = arguments.length <= 0 || arguments[0] === undefined ? errorPageInitialState : arguments[0];
-	    var action = arguments[1];
-
-	    switch (action.type) {
-
-	        default:
-	            return errorPageInitialState;
-	    }
-	}
-
-	module.exports = defineErrorPageState;
-
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "define-error-page-state-reducer.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
-
-/***/ },
-/* 293 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
-
-	"use strict";
-
-	var dispatch = __webpack_require__(280).dispatch;
-	var actionCreators = __webpack_require__(294);
-
-	function dispatchLog(message) {
-	    console.log("[APP] [ACTION DISPATCHER] " + message);
-	}
-
-	var actionDispatchers = {
-
-	    app: {
-
-	        dispatchGoToLandingPageAction: function dispatchGoToLandingPageAction() {
-	            dispatchLog("go to landing.");
-	            dispatch(actionCreators.app.goToLandingPageAction());
-	        },
-
-	        dispatchGoToLoginAction: function dispatchGoToLoginAction() {
-	            dispatchLog("go to login.");
-	            dispatch(actionCreators.initialAuthCheck.goToLoginAction());
-	        },
-
-	        dispatchGoToRegisterAction: function dispatchGoToRegisterAction() {
-	            dispatchLog("go to register.");
-	            dispatch(actionCreators.initialAuthCheck.goToRegisterAction());
-	        },
-
-	        dispatchLogoutAction: function dispatchLogoutAction() {
-	            dispatchLog("logout.");
-	            dispatch(actionCreators.app.logoutAction());
-	        }
-	    },
-
-	    initialAuthCheck: {
-
-	        dispatchStoredUserInfoValidationBeginsAction: function dispatchStoredUserInfoValidationBeginsAction() {
-	            dispatchLog("stored user info validation... ");
-	            dispatch(actionCreators.initialAuthCheck.storedUserInfoValidationBeginsAction());
-	        },
-
-	        dispatchStoredUserInfoValidAction: function dispatchStoredUserInfoValidAction(userInfo) {
-	            dispatchLog("stored user info valid, " + userInfo);
-	            dispatch(actionCreators.initialAuthCheck.storedUserInfoValidAction(userInfo));
-	        }
-
-	    },
-
-	    login: {
-
-	        dispatchNickNameChangedAction: function dispatchNickNameChangedAction(newNickName) {
-	            dispatchLog("nickName changed : " + newNickName);
-	            dispatch(actionCreators.login.nickNameChangedAction(newNickName));
-	        },
-
-	        dispatchNickNameValidAction: function dispatchNickNameValidAction() {
-	            dispatchLog("nickNameValid");
-	            dispatch(actionCreators.login.nickNameValidAction());
-	        },
-
-	        dispatchNickNameInvalidAction: function dispatchNickNameInvalidAction(message) {
-	            dispatchLog("nickName invalid : " + message);
-	            dispatch(actionCreators.login.nickNameInvalidAction(message));
-	        },
-
-	        dispatchNickNameValidationBeginsAction: function dispatchNickNameValidationBeginsAction() {
-	            dispatchLog("nickName validation begins... ");
-	            dispatch(actionCreators.login.nickNameValidationBeginsAction());
-	        },
-
-	        dispatchPasswordChangedAction: function dispatchPasswordChangedAction(newPassword) {
-	            dispatchLog("password changed : " + newPassword);
-	            dispatch(actionCreators.login.passwordChangedAction(newPassword));
-	        },
-
-	        dispatchPasswordValidAction: function dispatchPasswordValidAction() {
-	            dispatchLog("password valid.");
-	            dispatch(actionCreators.login.passwordValidAction());
-	        },
-
-	        dispatchPasswordInvalidAction: function dispatchPasswordInvalidAction(message) {
-	            dispatchLog("password invalid : " + message);
-	            dispatch(actionCreators.login.passwordInvalidAction(message));
-	        },
-
-	        dispatchPasswordValidationBeginsAction: function dispatchPasswordValidationBeginsAction() {
-	            dispatchLog("password validation begins...");
-	            dispatch(actionCreators.login.passwordValidationBeginsAction());
-	        },
-
-	        dispatchAssessIfLoginAllowedAction: function dispatchAssessIfLoginAllowedAction() {
-	            dispatchLog("is login allowed?");
-	            dispatch(actionCreators.login.assessIfAllowedAction());
-	        },
-
-	        dispatchLoginAttemptBegins: function dispatchLoginAttemptBegins() {
-	            dispatchLog("login call begins...");
-	            dispatch(actionCreators.login.attemptBegins());
-	        },
-
-	        dispatchLoginFailedAction: function dispatchLoginFailedAction(message) {
-	            dispatchLog("login failed : " + message);
-	            dispatch(actionCreators.login.attemptFailedAction(message));
-	        },
-
-	        dispatchLoginSuccessAction: function dispatchLoginSuccessAction(userInfo) {
-	            dispatchLog("login success - " + userInfo);
-	            dispatch(actionCreators.login.attemptSuccessAction(userInfo));
-	        }
-	    },
-
-	    reg: {
-
-	        dispatchNickNameChangedAction: function dispatchNickNameChangedAction(newNickName) {
-	            dispatchLog("nickName changed : " + newNickName);
-	            dispatch(actionCreators.reg.nickNameChangedAction(newNickName));
-	        },
-
-	        dispatchNickNameValidAction: function dispatchNickNameValidAction() {
-	            dispatchLog("nickNameValid");
-	            dispatch(actionCreators.reg.nickNameValidAction());
-	        },
-
-	        dispatchNickNameInvalidAction: function dispatchNickNameInvalidAction(message) {
-	            dispatchLog("nickName invalid : " + message);
-	            dispatch(actionCreators.reg.nickNameInvalidAction(message));
-	        },
-
-	        dispatchNickNameValidationBeginsAction: function dispatchNickNameValidationBeginsAction() {
-	            dispatchLog("nickName validation begins... ");
-	            dispatch(actionCreators.reg.nickNameValidationBeginsAction());
-	        },
-
-	        dispatchNameChangedAction: function dispatchNameChangedAction(newName) {
-	            dispatchLog("name changed : " + newName);
-	            dispatch(actionCreators.reg.nameChangedAction(newName));
-	        },
-
-	        dispatchNameValidAction: function dispatchNameValidAction() {
-	            dispatchLog("nameValid");
-	            dispatch(actionCreators.reg.nameValidAction());
-	        },
-
-	        dispatchNameInvalidAction: function dispatchNameInvalidAction(message) {
-	            dispatchLog("name invalid : " + message);
-	            dispatch(actionCreators.reg.nameInvalidAction(message));
-	        },
-
-	        dispatchNameValidationBeginsAction: function dispatchNameValidationBeginsAction() {
-	            dispatchLog("name validation begins... ");
-	            dispatch(actionCreators.reg.nameValidationBeginsAction());
-	        },
-
-	        dispatchSurnameChangedAction: function dispatchSurnameChangedAction(newSurname) {
-	            dispatchLog("surname changed : " + newSurname);
-	            dispatch(actionCreators.reg.surnameChangedAction(newSurname));
-	        },
-
-	        dispatchSurnameValidAction: function dispatchSurnameValidAction() {
-	            dispatchLog("surname valid");
-	            dispatch(actionCreators.reg.surnameValidAction());
-	        },
-
-	        dispatchSurnameInvalidAction: function dispatchSurnameInvalidAction(message) {
-	            dispatchLog("surname invalid : " + message);
-	            dispatch(actionCreators.reg.surnameInvalidAction(message));
-	        },
-
-	        dispatchSurnameValidationBeginsAction: function dispatchSurnameValidationBeginsAction() {
-	            dispatchLog("surname validation begins... ");
-	            dispatch(actionCreators.reg.surnameValidationBeginsAction());
-	        },
-
-	        dispatchEmailChangedAction: function dispatchEmailChangedAction(newEmail) {
-	            dispatchLog("email changed : " + newEmail);
-	            dispatch(actionCreators.reg.emailChangedAction(newEmail));
-	        },
-
-	        dispatchEmailValidAction: function dispatchEmailValidAction() {
-	            dispatchLog("email valid");
-	            dispatch(actionCreators.reg.emailValidAction());
-	        },
-
-	        dispatchEmailInvalidAction: function dispatchEmailInvalidAction(message) {
-	            dispatchLog("email invalid : " + message);
-	            dispatch(actionCreators.reg.emailInvalidAction(message));
-	        },
-
-	        dispatchEmailValidationBeginsAction: function dispatchEmailValidationBeginsAction() {
-	            dispatchLog("email validation begins... ");
-	            dispatch(actionCreators.reg.emailValidationBeginsAction());
-	        },
-
-	        dispatchPasswordChangedAction: function dispatchPasswordChangedAction(newPassword) {
-	            dispatchLog("password changed : " + newPassword);
-	            dispatch(actionCreators.reg.passwordChangedAction(newPassword));
-	        },
-
-	        dispatchPasswordValidAction: function dispatchPasswordValidAction() {
-	            dispatchLog("password valid.");
-	            dispatch(actionCreators.reg.passwordValidAction());
-	        },
-
-	        dispatchPasswordInvalidAction: function dispatchPasswordInvalidAction(message) {
-	            dispatchLog("password invalid : " + message);
-	            dispatch(actionCreators.reg.passwordInvalidAction(message));
-	        },
-
-	        dispatchPasswordValidationBeginsAction: function dispatchPasswordValidationBeginsAction() {
-	            dispatchLog("password validation begins...");
-	            dispatch(actionCreators.reg.passwordValidationBeginsAction());
-	        },
-
-	        dispatchConfirmPasswordChangedAction: function dispatchConfirmPasswordChangedAction(newConfirmPassword) {
-	            dispatchLog("confirm password changed : " + newConfirmPassword);
-	            dispatch(actionCreators.reg.confirmPasswordChangedAction(newConfirmPassword));
-	        },
-
-	        dispatchConfirmPasswordValidAction: function dispatchConfirmPasswordValidAction() {
-	            dispatchLog("confirm password valid.");
-	            dispatch(actionCreators.reg.confirmPasswordValidAction());
-	        },
-
-	        dispatchConfirmPasswordInvalidAction: function dispatchConfirmPasswordInvalidAction(message) {
-	            dispatchLog("confirm password invalid : " + message);
-	            dispatch(actionCreators.reg.confirmPasswordInvalidAction(message));
-	        },
-
-	        dispatchConfirmPasswordValidationBeginsAction: function dispatchConfirmPasswordValidationBeginsAction() {
-	            dispatchLog("confirm password validation begins...");
-	            dispatch(actionCreators.reg.confirmPasswordValidationBeginsAction());
-	        },
-
-	        dispatchAssessIfRegistrationAllowedAction: function dispatchAssessIfRegistrationAllowedAction() {
-	            dispatchLog("is registr allowed?");
-	            dispatch(actionCreators.reg.assessIfAlowedAction());
-	        },
-
-	        dispatchRegistrationAttemptBegins: function dispatchRegistrationAttemptBegins() {
-	            dispatchLog("registr call begins...");
-	            dispatch(actionCreators.reg.attemptBegins());
-	        },
-
-	        dispatchRegistrationFailedAction: function dispatchRegistrationFailedAction(message) {
-	            dispatchLog("registr failed : " + message);
-	            dispatch(actionCreators.reg.attemptFailedAction(message));
-	        },
-
-	        dispatchRegistrationSuccessAction: function dispatchRegistrationSuccessAction(userInfo) {
-	            dispatchLog("registr success - " + userInfo);
-	            dispatch(actionCreators.reg.attemptSuccessAction(userInfo));
-	        },
-
-	        dispatchPasswordsDifferAction: function dispatchPasswordsDifferAction() {
-	            dispatchLog("passwords differ.");
-	            dispatch(actionCreators.reg.passwordsDifferAction());
-	        },
-
-	        dispatchPasswordsEqualAction: function dispatchPasswordsEqualAction() {
-	            dispatchLog("passwords equal.");
-	            dispatch(actionCreators.reg.passwordsEqualAction());
-	        }
-	    }
-	};
-
-	module.exports = actionDispatchers;
-
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "action-dispatchers.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
-
-/***/ },
-/* 294 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
-
-	"use strict";
-
-	var actionTypes = __webpack_require__(287);
-
-	function creatorLog(message) {
-	    console.log("[APP] [ACTION CREATOR] " + message);
-	}
-
-	var actionCreators = {
-
-	    app: {
-
-	        goToLandingPageAction: function goToLandingPageAction() {
-	            return {
-	                type: actionTypes.goToLanding
-	            };
-	        },
-
-	        logoutAction: function logoutAction() {
-	            return {
-	                type: actionTypes.logout
-	            };
-	        }
-	    },
-
-	    initialAuthCheck: {
-
-	        goToLoginAction: function goToLoginAction() {
-	            creatorLog("force to login.");
-	            return {
-	                type: actionTypes.goToLogin
-	            };
-	        },
-
-	        goToRegisterAction: function goToRegisterAction() {
-	            creatorLog("force to register.");
-	            return {
-	                type: actionTypes.goToRegister
-	            };
-	        },
-
-	        storedUserInfoValidationBeginsAction: function storedUserInfoValidationBeginsAction() {
-	            creatorLog("stored user info validation... ");
-	            return {
-	                type: actionTypes.storedUserInfoValidationBegins
-	            };
-	        },
-
-	        storedUserInfoValidAction: function storedUserInfoValidAction(userInfo) {
-	            creatorLog("stored user info valid: " + userInfo);
-	            return {
-	                type: actionTypes.storedUserInfoValid,
-	                userInfo: userInfo
-	            };
-	        }
-	    },
-
-	    login: {
-
-	        nickNameChangedAction: function nickNameChangedAction(newNickName) {
-	            creatorLog("login nickName changed to : " + newNickName);
-	            return {
-	                type: actionTypes.loginNickNameChanged,
-	                newNickName: newNickName
-	            };
-	        },
-
-	        nickNameValidationBeginsAction: function nickNameValidationBeginsAction() {
-	            creatorLog("login nickName validation begins...");
-	            return {
-	                type: actionTypes.loginNickNameValidationBegins
-	            };
-	        },
-
-	        nickNameValidAction: function nickNameValidAction() {
-	            creatorLog("login nickName valid.");
-	            return {
-	                type: actionTypes.loginNickNameValid
-	            };
-	        },
-
-	        nickNameInvalidAction: function nickNameInvalidAction(message) {
-	            creatorLog("login nickName invalid : " + message);
-	            return {
-	                type: actionTypes.loginNickNameInvalid,
-	                message: message
-	            };
-	        },
-
-	        passwordChangedAction: function passwordChangedAction(newPassword) {
-	            creatorLog("login password changed : " + newPassword);
-	            return {
-	                type: actionTypes.loginPasswordChanged,
-	                newPassword: newPassword
-	            };
-	        },
-
-	        passwordValidationBeginsAction: function passwordValidationBeginsAction() {
-	            return {
-	                type: actionTypes.loginPasswordValidationBegins
-	            };
-	        },
-
-	        passwordValidAction: function passwordValidAction() {
-	            return {
-	                type: actionTypes.loginPasswordValid
-	            };
-	        },
-
-	        passwordInvalidAction: function passwordInvalidAction(message) {
-	            return {
-	                type: actionTypes.loginPasswordInvalid,
-	                message: message
-	            };
-	        },
-
-	        assessIfAllowedAction: function assessIfAllowedAction() {
-	            return {
-	                type: actionTypes.loginAssessIfAllowed
-	            };
-	        },
-
-	        attemptBegins: function attemptBegins() {
-	            return {
-	                type: actionTypes.loginAttemptBegins
-	            };
-	        },
-
-	        attemptFailedAction: function attemptFailedAction(message) {
-	            return {
-	                type: actionTypes.loginFailed,
-	                message: message
-	            };
-	        },
-
-	        attemptSuccessAction: function attemptSuccessAction(userInfo) {
-	            return {
-	                type: actionTypes.loginSuccess,
-	                userInfo: userInfo
-	            };
-	        }
-	    },
-
-	    reg: {
-
-	        nickNameChangedAction: function nickNameChangedAction(newNickName) {
-	            creatorLog("registr nickName changed to : " + newNickName);
-	            return {
-	                type: actionTypes.regNickNameChanged,
-	                newNickName: newNickName
-	            };
-	        },
-
-	        nickNameValidationBeginsAction: function nickNameValidationBeginsAction() {
-	            creatorLog("registr nickName validation begins...");
-	            return {
-	                type: actionTypes.regNickNameValidationBegins
-	            };
-	        },
-
-	        nickNameValidAction: function nickNameValidAction() {
-	            creatorLog("registr nickName valid.");
-	            return {
-	                type: actionTypes.regNickNameValid
-	            };
-	        },
-
-	        nickNameInvalidAction: function nickNameInvalidAction(message) {
-	            creatorLog("registr nickName invalid : " + message);
-	            return {
-	                type: actionTypes.regNickNameInvalid,
-	                message: message
-	            };
-	        },
-
-	        nameChangedAction: function nameChangedAction(newName) {
-	            creatorLog("registr name changed to : " + newName);
-	            return {
-	                type: actionTypes.regNameChanged,
-	                newName: newName
-	            };
-	        },
-
-	        nameValidationBeginsAction: function nameValidationBeginsAction() {
-	            creatorLog("registr name validation begins...");
-	            return {
-	                type: actionTypes.regNameValidationBegins
-	            };
-	        },
-
-	        nameValidAction: function nameValidAction() {
-	            creatorLog("registr name valid.");
-	            return {
-	                type: actionTypes.regNameValid
-	            };
-	        },
-
-	        nameInvalidAction: function nameInvalidAction(message) {
-	            creatorLog("registr name invalid : " + message);
-	            return {
-	                type: actionTypes.regNameInvalid,
-	                message: message
-	            };
-	        },
-
-	        surnameChangedAction: function surnameChangedAction(newSurname) {
-	            creatorLog("registr surname changed to : " + newSurname);
-	            return {
-	                type: actionTypes.regSurnameChanged,
-	                newSurname: newSurname
-	            };
-	        },
-
-	        surnameValidationBeginsAction: function surnameValidationBeginsAction() {
-	            creatorLog("registr surname validation begins...");
-	            return {
-	                type: actionTypes.regSurnameValidationBegins
-	            };
-	        },
-
-	        surnameValidAction: function surnameValidAction() {
-	            creatorLog("registr surname valid.");
-	            return {
-	                type: actionTypes.regSurnameValid
-	            };
-	        },
-
-	        surnameInvalidAction: function surnameInvalidAction(message) {
-	            creatorLog("registr surname invalid : " + message);
-	            return {
-	                type: actionTypes.regSurnameInvalid,
-	                message: message
-	            };
-	        },
-
-	        emailChangedAction: function emailChangedAction(newEmail) {
-	            creatorLog("registr email changed to : " + newEmail);
-	            return {
-	                type: actionTypes.regEmailChanged,
-	                newEmail: newEmail
-	            };
-	        },
-
-	        emailValidationBeginsAction: function emailValidationBeginsAction() {
-	            creatorLog("registr email validation begins...");
-	            return {
-	                type: actionTypes.regEmailValidationBegins
-	            };
-	        },
-
-	        emailValidAction: function emailValidAction() {
-	            creatorLog("registr email valid.");
-	            return {
-	                type: actionTypes.regEmailValid
-	            };
-	        },
-
-	        emailInvalidAction: function emailInvalidAction(message) {
-	            creatorLog("registr email invalid : " + message);
-	            return {
-	                type: actionTypes.regEmailInvalid,
-	                message: message
-	            };
-	        },
-
-	        passwordChangedAction: function passwordChangedAction(newPassword) {
-	            creatorLog("registr password changed : " + newPassword);
-	            return {
-	                type: actionTypes.regPasswordChanged,
-	                newPassword: newPassword
-	            };
-	        },
-
-	        passwordValidationBeginsAction: function passwordValidationBeginsAction() {
-	            return {
-	                type: actionTypes.regPasswordValidationBegins
-	            };
-	        },
-
-	        passwordValidAction: function passwordValidAction() {
-	            return {
-	                type: actionTypes.regPasswordValid
-	            };
-	        },
-
-	        passwordInvalidAction: function passwordInvalidAction(message) {
-	            return {
-	                type: actionTypes.regPasswordInvalid,
-	                message: message
-	            };
-	        },
-
-	        confirmPasswordChangedAction: function confirmPasswordChangedAction(newConfirmPassword) {
-	            creatorLog("registr confirmPassword changed : " + newConfirmPassword);
-	            return {
-	                type: actionTypes.regConfirmPasswordChanged,
-	                newConfirmPassword: newConfirmPassword
-	            };
-	        },
-
-	        confirmPasswordValidationBeginsAction: function confirmPasswordValidationBeginsAction() {
-	            return {
-	                type: actionTypes.regConfirmPasswordValidationBegins
-	            };
-	        },
-
-	        confirmPasswordValidAction: function confirmPasswordValidAction() {
-	            return {
-	                type: actionTypes.regConfirmPasswordValid
-	            };
-	        },
-
-	        confirmPasswordInvalidAction: function confirmPasswordInvalidAction(message) {
-	            return {
-	                type: actionTypes.regConfirmPasswordInvalid,
-	                message: message
-	            };
-	        },
-
-	        assessIfAlowedAction: function assessIfAlowedAction() {
-	            return {
-	                type: actionTypes.regAssessIfAllowed
-	            };
-	        },
-
-	        attemptBegins: function attemptBegins() {
-	            return {
-	                type: actionTypes.regAttemptBegins
-	            };
-	        },
-
-	        attemptFailedAction: function attemptFailedAction(message) {
-	            return {
-	                type: actionTypes.regFailed,
-	                message: message
-	            };
-	        },
-
-	        attemptSuccessAction: function attemptSuccessAction(userInfo) {
-	            return {
-	                type: actionTypes.regSuccess,
-	                userInfo: userInfo
-	            };
-	        },
-
-	        passwordsDifferAction: function passwordsDifferAction() {
-	            return {
-	                type: actionTypes.regPasswordsDiffer
-	            };
-	        },
-
-	        passwordsEqualAction: function passwordsEqualAction() {
-	            return {
-	                type: actionTypes.regPasswordsEqual
-	            };
-	        }
-	    }
-
-	};
-
-	module.exports = actionCreators;
-
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "action-creators.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
-
-/***/ },
-/* 295 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
-
-	"use strict";
-
-	var $ = __webpack_require__(296);
-
-	var resources = __webpack_require__(297);
+	var resources = __webpack_require__(294);
 
 	// --------------------------------
 
 	function ajaxLog(message) {
-	    console.log("[APP] [AJAX CALL] [JWT] " + message);
+	    console.log("[APP] [AJAX CALL] [GET DIRECTORIES] " + message);
 	}
 
-	function validateJwt(jwtString, callbacks) {
-	    ajaxLog("validation call starts...");
+	function validateName(userId, placement, callbacks) {
 	    callbacks.onStart();
+	    ajaxLog("starts with userId:" + userId + ", place:" + placement);
 	    $.ajax({
-	        method: resources.validation.jwt.method,
-	        url: resources.validation.jwt.url,
+	        url: resources.directories.url(userId, placement),
+	        method: resources.directories.method,
+	        dataType: 'json',
 	        cache: false,
-	        beforeSend: function beforeSend(xhr) {
-	            xhr.setRequestHeader('Authentication', 'Bearer ' + jwtString);
-	        },
 	        statusCode: {
-	            200: function _() {
-	                ajaxLog("valid, parse user info and proceed.");
-	                callbacks.onJwtValid();
+	            200: function _(xhr) {
+	                ajaxLog("get...");
+	                console.log(xhr);
+	                callbacks.onSuccess();
 	            },
-	            302: function _() {
-	                ajaxLog("valid, but expired, force to login.");
-	                callbacks.onJwtExpired();
-	            },
-	            401: function _() {
-	                ajaxLog("invalid, force to register.");
-	                callbacks.onJwtInvalid();
+	            400: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("bad request : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onBadRequest(JSON.parse(xhr.responseText).message);
 	            }
 	        }
 	    });
 	}
 
-	module.exports = validateJwt;
+	module.exports = validateName;
 
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "validate-jwt-call.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "get-directories-call.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 296 */
+/* 293 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*eslint-disable no-unused-vars*/
@@ -43053,7 +42449,7 @@
 
 
 /***/ },
-/* 297 */
+/* 294 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43138,8 +42534,10 @@
 	        badRequest: 400
 	    },
 
-	    objects: {
-	        url: serverRootUrl + "/objects/object",
+	    directories: {
+	        url: function url(userId, placement) {
+	            return serverRootUrl + "/" + userId + "/" + placement + "/directories";
+	        },
 	        method: "GET",
 	        success: 200
 	    }
@@ -43152,7 +42550,829 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
+/* 295 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	"use strict";
+
+	var actionTypes = __webpack_require__(287);
+
+	var errorPageInitialState = {};
+
+	function defineErrorPageState() {
+	    var errorPageState = arguments.length <= 0 || arguments[0] === undefined ? errorPageInitialState : arguments[0];
+	    var action = arguments[1];
+
+	    switch (action.type) {
+
+	        default:
+	            return errorPageInitialState;
+	    }
+	}
+
+	module.exports = defineErrorPageState;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "define-error-page-state-reducer.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 296 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	"use strict";
+
+	var dispatch = __webpack_require__(280).dispatch;
+	var actionCreators = __webpack_require__(297);
+
+	function dispatchLog(message) {
+	    console.log("[APP] [ACTION DISPATCHER] " + message);
+	}
+
+	var actionDispatchers = {
+
+	    app: {
+
+	        dispatchAppStartsAction: function dispatchAppStartsAction() {
+	            dispatchLog("app starts.");
+	            dispatch(actionCreators.app.appStartsAction());
+	        },
+
+	        dispatchGoToLandingPageAction: function dispatchGoToLandingPageAction() {
+	            dispatchLog("go to landing.");
+	            dispatch(actionCreators.app.goToLandingPageAction());
+	        },
+
+	        dispatchGoToLoginAction: function dispatchGoToLoginAction() {
+	            dispatchLog("go to login.");
+	            dispatch(actionCreators.initialAuthCheck.goToLoginAction());
+	        },
+
+	        dispatchGoToRegisterAction: function dispatchGoToRegisterAction() {
+	            dispatchLog("go to register.");
+	            dispatch(actionCreators.initialAuthCheck.goToRegisterAction());
+	        },
+
+	        dispatchLogoutAction: function dispatchLogoutAction() {
+	            dispatchLog("logout.");
+	            dispatch(actionCreators.app.logoutAction());
+	        }
+	    },
+
+	    initialAuthCheck: {
+
+	        dispatchStoredUserInfoValidationBeginsAction: function dispatchStoredUserInfoValidationBeginsAction() {
+	            dispatchLog("stored user info validation... ");
+	            dispatch(actionCreators.initialAuthCheck.storedUserInfoValidationBeginsAction());
+	        },
+
+	        dispatchStoredUserInfoValidAction: function dispatchStoredUserInfoValidAction(userInfo) {
+	            dispatchLog("stored user info valid, " + userInfo);
+	            dispatch(actionCreators.initialAuthCheck.storedUserInfoValidAction(userInfo));
+	        }
+
+	    },
+
+	    login: {
+
+	        dispatchNickNameChangedAction: function dispatchNickNameChangedAction(newNickName) {
+	            dispatchLog("nickName changed : " + newNickName);
+	            dispatch(actionCreators.login.nickNameChangedAction(newNickName));
+	        },
+
+	        dispatchNickNameValidAction: function dispatchNickNameValidAction() {
+	            dispatchLog("nickNameValid");
+	            dispatch(actionCreators.login.nickNameValidAction());
+	        },
+
+	        dispatchNickNameInvalidAction: function dispatchNickNameInvalidAction(message) {
+	            dispatchLog("nickName invalid : " + message);
+	            dispatch(actionCreators.login.nickNameInvalidAction(message));
+	        },
+
+	        dispatchNickNameValidationBeginsAction: function dispatchNickNameValidationBeginsAction() {
+	            dispatchLog("nickName validation begins... ");
+	            dispatch(actionCreators.login.nickNameValidationBeginsAction());
+	        },
+
+	        dispatchPasswordChangedAction: function dispatchPasswordChangedAction(newPassword) {
+	            dispatchLog("password changed : " + newPassword);
+	            dispatch(actionCreators.login.passwordChangedAction(newPassword));
+	        },
+
+	        dispatchPasswordValidAction: function dispatchPasswordValidAction() {
+	            dispatchLog("password valid.");
+	            dispatch(actionCreators.login.passwordValidAction());
+	        },
+
+	        dispatchPasswordInvalidAction: function dispatchPasswordInvalidAction(message) {
+	            dispatchLog("password invalid : " + message);
+	            dispatch(actionCreators.login.passwordInvalidAction(message));
+	        },
+
+	        dispatchPasswordValidationBeginsAction: function dispatchPasswordValidationBeginsAction() {
+	            dispatchLog("password validation begins...");
+	            dispatch(actionCreators.login.passwordValidationBeginsAction());
+	        },
+
+	        dispatchAssessIfLoginAllowedAction: function dispatchAssessIfLoginAllowedAction() {
+	            dispatchLog("is login allowed?");
+	            dispatch(actionCreators.login.assessIfAllowedAction());
+	        },
+
+	        dispatchLoginAttemptBegins: function dispatchLoginAttemptBegins() {
+	            dispatchLog("login call begins...");
+	            dispatch(actionCreators.login.attemptBegins());
+	        },
+
+	        dispatchLoginFailedAction: function dispatchLoginFailedAction(message) {
+	            dispatchLog("login failed : " + message);
+	            dispatch(actionCreators.login.attemptFailedAction(message));
+	        },
+
+	        dispatchLoginSuccessAction: function dispatchLoginSuccessAction(userInfo) {
+	            dispatchLog("login success - " + userInfo);
+	            dispatch(actionCreators.login.attemptSuccessAction(userInfo));
+	        }
+	    },
+
+	    reg: {
+
+	        dispatchNickNameChangedAction: function dispatchNickNameChangedAction(newNickName) {
+	            dispatchLog("nickName changed : " + newNickName);
+	            dispatch(actionCreators.reg.nickNameChangedAction(newNickName));
+	        },
+
+	        dispatchNickNameValidAction: function dispatchNickNameValidAction() {
+	            dispatchLog("nickNameValid");
+	            dispatch(actionCreators.reg.nickNameValidAction());
+	        },
+
+	        dispatchNickNameInvalidAction: function dispatchNickNameInvalidAction(message) {
+	            dispatchLog("nickName invalid : " + message);
+	            dispatch(actionCreators.reg.nickNameInvalidAction(message));
+	        },
+
+	        dispatchNickNameValidationBeginsAction: function dispatchNickNameValidationBeginsAction() {
+	            dispatchLog("nickName validation begins... ");
+	            dispatch(actionCreators.reg.nickNameValidationBeginsAction());
+	        },
+
+	        dispatchNameChangedAction: function dispatchNameChangedAction(newName) {
+	            dispatchLog("name changed : " + newName);
+	            dispatch(actionCreators.reg.nameChangedAction(newName));
+	        },
+
+	        dispatchNameValidAction: function dispatchNameValidAction() {
+	            dispatchLog("nameValid");
+	            dispatch(actionCreators.reg.nameValidAction());
+	        },
+
+	        dispatchNameInvalidAction: function dispatchNameInvalidAction(message) {
+	            dispatchLog("name invalid : " + message);
+	            dispatch(actionCreators.reg.nameInvalidAction(message));
+	        },
+
+	        dispatchNameValidationBeginsAction: function dispatchNameValidationBeginsAction() {
+	            dispatchLog("name validation begins... ");
+	            dispatch(actionCreators.reg.nameValidationBeginsAction());
+	        },
+
+	        dispatchSurnameChangedAction: function dispatchSurnameChangedAction(newSurname) {
+	            dispatchLog("surname changed : " + newSurname);
+	            dispatch(actionCreators.reg.surnameChangedAction(newSurname));
+	        },
+
+	        dispatchSurnameValidAction: function dispatchSurnameValidAction() {
+	            dispatchLog("surname valid");
+	            dispatch(actionCreators.reg.surnameValidAction());
+	        },
+
+	        dispatchSurnameInvalidAction: function dispatchSurnameInvalidAction(message) {
+	            dispatchLog("surname invalid : " + message);
+	            dispatch(actionCreators.reg.surnameInvalidAction(message));
+	        },
+
+	        dispatchSurnameValidationBeginsAction: function dispatchSurnameValidationBeginsAction() {
+	            dispatchLog("surname validation begins... ");
+	            dispatch(actionCreators.reg.surnameValidationBeginsAction());
+	        },
+
+	        dispatchEmailChangedAction: function dispatchEmailChangedAction(newEmail) {
+	            dispatchLog("email changed : " + newEmail);
+	            dispatch(actionCreators.reg.emailChangedAction(newEmail));
+	        },
+
+	        dispatchEmailValidAction: function dispatchEmailValidAction() {
+	            dispatchLog("email valid");
+	            dispatch(actionCreators.reg.emailValidAction());
+	        },
+
+	        dispatchEmailInvalidAction: function dispatchEmailInvalidAction(message) {
+	            dispatchLog("email invalid : " + message);
+	            dispatch(actionCreators.reg.emailInvalidAction(message));
+	        },
+
+	        dispatchEmailValidationBeginsAction: function dispatchEmailValidationBeginsAction() {
+	            dispatchLog("email validation begins... ");
+	            dispatch(actionCreators.reg.emailValidationBeginsAction());
+	        },
+
+	        dispatchPasswordChangedAction: function dispatchPasswordChangedAction(newPassword) {
+	            dispatchLog("password changed : " + newPassword);
+	            dispatch(actionCreators.reg.passwordChangedAction(newPassword));
+	        },
+
+	        dispatchPasswordValidAction: function dispatchPasswordValidAction() {
+	            dispatchLog("password valid.");
+	            dispatch(actionCreators.reg.passwordValidAction());
+	        },
+
+	        dispatchPasswordInvalidAction: function dispatchPasswordInvalidAction(message) {
+	            dispatchLog("password invalid : " + message);
+	            dispatch(actionCreators.reg.passwordInvalidAction(message));
+	        },
+
+	        dispatchPasswordValidationBeginsAction: function dispatchPasswordValidationBeginsAction() {
+	            dispatchLog("password validation begins...");
+	            dispatch(actionCreators.reg.passwordValidationBeginsAction());
+	        },
+
+	        dispatchConfirmPasswordChangedAction: function dispatchConfirmPasswordChangedAction(newConfirmPassword) {
+	            dispatchLog("confirm password changed : " + newConfirmPassword);
+	            dispatch(actionCreators.reg.confirmPasswordChangedAction(newConfirmPassword));
+	        },
+
+	        dispatchConfirmPasswordValidAction: function dispatchConfirmPasswordValidAction() {
+	            dispatchLog("confirm password valid.");
+	            dispatch(actionCreators.reg.confirmPasswordValidAction());
+	        },
+
+	        dispatchConfirmPasswordInvalidAction: function dispatchConfirmPasswordInvalidAction(message) {
+	            dispatchLog("confirm password invalid : " + message);
+	            dispatch(actionCreators.reg.confirmPasswordInvalidAction(message));
+	        },
+
+	        dispatchConfirmPasswordValidationBeginsAction: function dispatchConfirmPasswordValidationBeginsAction() {
+	            dispatchLog("confirm password validation begins...");
+	            dispatch(actionCreators.reg.confirmPasswordValidationBeginsAction());
+	        },
+
+	        dispatchAssessIfRegistrationAllowedAction: function dispatchAssessIfRegistrationAllowedAction() {
+	            dispatchLog("is registr allowed?");
+	            dispatch(actionCreators.reg.assessIfAlowedAction());
+	        },
+
+	        dispatchRegistrationAttemptBegins: function dispatchRegistrationAttemptBegins() {
+	            dispatchLog("registr call begins...");
+	            dispatch(actionCreators.reg.attemptBegins());
+	        },
+
+	        dispatchRegistrationFailedAction: function dispatchRegistrationFailedAction(message) {
+	            dispatchLog("registr failed : " + message);
+	            dispatch(actionCreators.reg.attemptFailedAction(message));
+	        },
+
+	        dispatchRegistrationSuccessAction: function dispatchRegistrationSuccessAction(userInfo) {
+	            dispatchLog("registr success - " + userInfo);
+	            dispatch(actionCreators.reg.attemptSuccessAction(userInfo));
+	        },
+
+	        dispatchPasswordsDifferAction: function dispatchPasswordsDifferAction() {
+	            dispatchLog("passwords differ.");
+	            dispatch(actionCreators.reg.passwordsDifferAction());
+	        },
+
+	        dispatchPasswordsEqualAction: function dispatchPasswordsEqualAction() {
+	            dispatchLog("passwords equal.");
+	            dispatch(actionCreators.reg.passwordsEqualAction());
+	        }
+	    },
+
+	    main: {
+	        webPanel: {
+
+	            dispatchLoadingBeginsAction: function dispatchLoadingBeginsAction() {
+	                dispatchLog("webPanel loading begins...");
+	                dispatch(actionCreators.main.webPanel.loadingBegins());
+	            },
+
+	            dispatchLoadedAction: function dispatchLoadedAction(dirs) {
+	                dispatchLog("webPanel loaded: ");
+	                console.log(dirs);
+	                dispatch(actionCreators.main.webPanel.loaded(dirs));
+	            },
+
+	            dispatchLoadingFailedAction: function dispatchLoadingFailedAction(message) {
+	                dispatchLog("webPanel loading fails: " + message);
+	                dispatch(actionCreators.main.webPanel.loadingFailed(message));
+	            }
+	        },
+
+	        bookmarks: {
+	            dispatchLoadingBeginsAction: function dispatchLoadingBeginsAction() {
+	                dispatchLog("bookmarks loading begins...");
+	                dispatch(actionCreators.main.bookmarks.loadingBegins());
+	            },
+
+	            dispatchLoadedAction: function dispatchLoadedAction(dirs) {
+	                dispatchLog("bookmarks loaded: ");
+	                console.log(dirs);
+	                dispatch(actionCreators.main.bookmarks.loaded(dirs));
+	            },
+
+	            dispatchLoadingFailedAction: function dispatchLoadingFailedAction(message) {
+	                dispatchLog("bookmarks loading fails: " + message);
+	                dispatch(actionCreators.main.bookmarks.loadingFailed(message));
+	            }
+	        }
+	    }
+	};
+
+	module.exports = actionDispatchers;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "action-dispatchers.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 297 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	"use strict";
+
+	var actionTypes = __webpack_require__(287);
+
+	function creatorLog(message) {
+	    console.log("[APP] [ACTION CREATOR] " + message);
+	}
+
+	var actionCreators = {
+
+	    app: {
+
+	        appStartsAction: function appStartsAction() {
+	            return {
+	                type: actionTypes.appStarts
+	            };
+	        },
+
+	        goToLandingPageAction: function goToLandingPageAction() {
+	            return {
+	                type: actionTypes.goToLanding
+	            };
+	        },
+
+	        logoutAction: function logoutAction() {
+	            return {
+	                type: actionTypes.logout
+	            };
+	        }
+	    },
+
+	    main: {
+	        webPanel: {
+
+	            loadingBegins: function loadingBegins() {
+	                return {
+	                    type: actionTypes.webPanelLoadingBegins
+	                };
+	            },
+
+	            loaded: function loaded(dirs) {
+	                return {
+	                    type: actionTypes.webPanelLoaded,
+	                    dirs: dirs
+	                };
+	            },
+
+	            loadingFailed: function loadingFailed(message) {
+	                return {
+	                    type: actionTypes.webPanelLoadingFailed,
+	                    message: message
+	                };
+	            }
+	        },
+
+	        bookmarks: {
+	            loadingBegins: function loadingBegins() {
+	                return {
+	                    type: actionTypes.bookmarksLoadingBegins
+	                };
+	            },
+
+	            loaded: function loaded(dirs) {
+	                return {
+	                    type: actionTypes.bookmarksLoaded,
+	                    dirs: dirs
+	                };
+	            },
+
+	            loadingFailed: function loadingFailed(message) {
+	                return {
+	                    type: actionTypes.bookmarksLoadingFailed,
+	                    message: message
+	                };
+	            }
+	        }
+	    },
+
+	    initialAuthCheck: {
+
+	        goToLoginAction: function goToLoginAction() {
+	            creatorLog("force to login.");
+	            return {
+	                type: actionTypes.goToLogin
+	            };
+	        },
+
+	        goToRegisterAction: function goToRegisterAction() {
+	            creatorLog("force to register.");
+	            return {
+	                type: actionTypes.goToRegister
+	            };
+	        },
+
+	        storedUserInfoValidationBeginsAction: function storedUserInfoValidationBeginsAction() {
+	            creatorLog("stored user info validation... ");
+	            return {
+	                type: actionTypes.storedUserInfoValidationBegins
+	            };
+	        },
+
+	        storedUserInfoValidAction: function storedUserInfoValidAction(userInfo) {
+	            creatorLog("stored user info valid: " + userInfo);
+	            return {
+	                type: actionTypes.storedUserInfoValid,
+	                userInfo: userInfo
+	            };
+	        }
+	    },
+
+	    login: {
+
+	        nickNameChangedAction: function nickNameChangedAction(newNickName) {
+	            creatorLog("login nickName changed to : " + newNickName);
+	            return {
+	                type: actionTypes.loginNickNameChanged,
+	                newNickName: newNickName
+	            };
+	        },
+
+	        nickNameValidationBeginsAction: function nickNameValidationBeginsAction() {
+	            creatorLog("login nickName validation begins...");
+	            return {
+	                type: actionTypes.loginNickNameValidationBegins
+	            };
+	        },
+
+	        nickNameValidAction: function nickNameValidAction() {
+	            creatorLog("login nickName valid.");
+	            return {
+	                type: actionTypes.loginNickNameValid
+	            };
+	        },
+
+	        nickNameInvalidAction: function nickNameInvalidAction(message) {
+	            creatorLog("login nickName invalid : " + message);
+	            return {
+	                type: actionTypes.loginNickNameInvalid,
+	                message: message
+	            };
+	        },
+
+	        passwordChangedAction: function passwordChangedAction(newPassword) {
+	            creatorLog("login password changed : " + newPassword);
+	            return {
+	                type: actionTypes.loginPasswordChanged,
+	                newPassword: newPassword
+	            };
+	        },
+
+	        passwordValidationBeginsAction: function passwordValidationBeginsAction() {
+	            return {
+	                type: actionTypes.loginPasswordValidationBegins
+	            };
+	        },
+
+	        passwordValidAction: function passwordValidAction() {
+	            return {
+	                type: actionTypes.loginPasswordValid
+	            };
+	        },
+
+	        passwordInvalidAction: function passwordInvalidAction(message) {
+	            return {
+	                type: actionTypes.loginPasswordInvalid,
+	                message: message
+	            };
+	        },
+
+	        assessIfAllowedAction: function assessIfAllowedAction() {
+	            return {
+	                type: actionTypes.loginAssessIfAllowed
+	            };
+	        },
+
+	        attemptBegins: function attemptBegins() {
+	            return {
+	                type: actionTypes.loginAttemptBegins
+	            };
+	        },
+
+	        attemptFailedAction: function attemptFailedAction(message) {
+	            return {
+	                type: actionTypes.loginFailed,
+	                message: message
+	            };
+	        },
+
+	        attemptSuccessAction: function attemptSuccessAction(userInfo) {
+	            return {
+	                type: actionTypes.loginSuccess,
+	                userInfo: userInfo
+	            };
+	        }
+	    },
+
+	    reg: {
+
+	        nickNameChangedAction: function nickNameChangedAction(newNickName) {
+	            creatorLog("registr nickName changed to : " + newNickName);
+	            return {
+	                type: actionTypes.regNickNameChanged,
+	                newNickName: newNickName
+	            };
+	        },
+
+	        nickNameValidationBeginsAction: function nickNameValidationBeginsAction() {
+	            creatorLog("registr nickName validation begins...");
+	            return {
+	                type: actionTypes.regNickNameValidationBegins
+	            };
+	        },
+
+	        nickNameValidAction: function nickNameValidAction() {
+	            creatorLog("registr nickName valid.");
+	            return {
+	                type: actionTypes.regNickNameValid
+	            };
+	        },
+
+	        nickNameInvalidAction: function nickNameInvalidAction(message) {
+	            creatorLog("registr nickName invalid : " + message);
+	            return {
+	                type: actionTypes.regNickNameInvalid,
+	                message: message
+	            };
+	        },
+
+	        nameChangedAction: function nameChangedAction(newName) {
+	            creatorLog("registr name changed to : " + newName);
+	            return {
+	                type: actionTypes.regNameChanged,
+	                newName: newName
+	            };
+	        },
+
+	        nameValidationBeginsAction: function nameValidationBeginsAction() {
+	            creatorLog("registr name validation begins...");
+	            return {
+	                type: actionTypes.regNameValidationBegins
+	            };
+	        },
+
+	        nameValidAction: function nameValidAction() {
+	            creatorLog("registr name valid.");
+	            return {
+	                type: actionTypes.regNameValid
+	            };
+	        },
+
+	        nameInvalidAction: function nameInvalidAction(message) {
+	            creatorLog("registr name invalid : " + message);
+	            return {
+	                type: actionTypes.regNameInvalid,
+	                message: message
+	            };
+	        },
+
+	        surnameChangedAction: function surnameChangedAction(newSurname) {
+	            creatorLog("registr surname changed to : " + newSurname);
+	            return {
+	                type: actionTypes.regSurnameChanged,
+	                newSurname: newSurname
+	            };
+	        },
+
+	        surnameValidationBeginsAction: function surnameValidationBeginsAction() {
+	            creatorLog("registr surname validation begins...");
+	            return {
+	                type: actionTypes.regSurnameValidationBegins
+	            };
+	        },
+
+	        surnameValidAction: function surnameValidAction() {
+	            creatorLog("registr surname valid.");
+	            return {
+	                type: actionTypes.regSurnameValid
+	            };
+	        },
+
+	        surnameInvalidAction: function surnameInvalidAction(message) {
+	            creatorLog("registr surname invalid : " + message);
+	            return {
+	                type: actionTypes.regSurnameInvalid,
+	                message: message
+	            };
+	        },
+
+	        emailChangedAction: function emailChangedAction(newEmail) {
+	            creatorLog("registr email changed to : " + newEmail);
+	            return {
+	                type: actionTypes.regEmailChanged,
+	                newEmail: newEmail
+	            };
+	        },
+
+	        emailValidationBeginsAction: function emailValidationBeginsAction() {
+	            creatorLog("registr email validation begins...");
+	            return {
+	                type: actionTypes.regEmailValidationBegins
+	            };
+	        },
+
+	        emailValidAction: function emailValidAction() {
+	            creatorLog("registr email valid.");
+	            return {
+	                type: actionTypes.regEmailValid
+	            };
+	        },
+
+	        emailInvalidAction: function emailInvalidAction(message) {
+	            creatorLog("registr email invalid : " + message);
+	            return {
+	                type: actionTypes.regEmailInvalid,
+	                message: message
+	            };
+	        },
+
+	        passwordChangedAction: function passwordChangedAction(newPassword) {
+	            creatorLog("registr password changed : " + newPassword);
+	            return {
+	                type: actionTypes.regPasswordChanged,
+	                newPassword: newPassword
+	            };
+	        },
+
+	        passwordValidationBeginsAction: function passwordValidationBeginsAction() {
+	            return {
+	                type: actionTypes.regPasswordValidationBegins
+	            };
+	        },
+
+	        passwordValidAction: function passwordValidAction() {
+	            return {
+	                type: actionTypes.regPasswordValid
+	            };
+	        },
+
+	        passwordInvalidAction: function passwordInvalidAction(message) {
+	            return {
+	                type: actionTypes.regPasswordInvalid,
+	                message: message
+	            };
+	        },
+
+	        confirmPasswordChangedAction: function confirmPasswordChangedAction(newConfirmPassword) {
+	            creatorLog("registr confirmPassword changed : " + newConfirmPassword);
+	            return {
+	                type: actionTypes.regConfirmPasswordChanged,
+	                newConfirmPassword: newConfirmPassword
+	            };
+	        },
+
+	        confirmPasswordValidationBeginsAction: function confirmPasswordValidationBeginsAction() {
+	            return {
+	                type: actionTypes.regConfirmPasswordValidationBegins
+	            };
+	        },
+
+	        confirmPasswordValidAction: function confirmPasswordValidAction() {
+	            return {
+	                type: actionTypes.regConfirmPasswordValid
+	            };
+	        },
+
+	        confirmPasswordInvalidAction: function confirmPasswordInvalidAction(message) {
+	            return {
+	                type: actionTypes.regConfirmPasswordInvalid,
+	                message: message
+	            };
+	        },
+
+	        assessIfAlowedAction: function assessIfAlowedAction() {
+	            return {
+	                type: actionTypes.regAssessIfAllowed
+	            };
+	        },
+
+	        attemptBegins: function attemptBegins() {
+	            return {
+	                type: actionTypes.regAttemptBegins
+	            };
+	        },
+
+	        attemptFailedAction: function attemptFailedAction(message) {
+	            return {
+	                type: actionTypes.regFailed,
+	                message: message
+	            };
+	        },
+
+	        attemptSuccessAction: function attemptSuccessAction(userInfo) {
+	            return {
+	                type: actionTypes.regSuccess,
+	                userInfo: userInfo
+	            };
+	        },
+
+	        passwordsDifferAction: function passwordsDifferAction() {
+	            return {
+	                type: actionTypes.regPasswordsDiffer
+	            };
+	        },
+
+	        passwordsEqualAction: function passwordsEqualAction() {
+	            return {
+	                type: actionTypes.regPasswordsEqual
+	            };
+	        }
+	    }
+
+	};
+
+	module.exports = actionCreators;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "action-creators.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
 /* 298 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	"use strict";
+
+	var $ = __webpack_require__(293);
+
+	var resources = __webpack_require__(294);
+
+	// --------------------------------
+
+	function ajaxLog(message) {
+	    console.log("[APP] [AJAX CALL] [JWT] " + message);
+	}
+
+	function validateJwt(jwtString, callbacks) {
+	    ajaxLog("validation call starts...");
+	    callbacks.onStart();
+	    $.ajax({
+	        method: resources.validation.jwt.method,
+	        url: resources.validation.jwt.url,
+	        cache: false,
+	        beforeSend: function beforeSend(xhr) {
+	            xhr.setRequestHeader('Authentication', 'Bearer ' + jwtString);
+	        },
+	        statusCode: {
+	            200: function _() {
+	                ajaxLog("valid, parse user info and proceed.");
+	                callbacks.onJwtValid();
+	            },
+	            302: function _() {
+	                ajaxLog("valid, but expired, force to login.");
+	                callbacks.onJwtExpired();
+	            },
+	            401: function _() {
+	                ajaxLog("invalid, force to register.");
+	                callbacks.onJwtInvalid();
+	            }
+	        }
+	    });
+	}
+
+	module.exports = validateJwt;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "validate-jwt-call.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 299 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43225,7 +43445,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 299 */
+/* 300 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43234,7 +43454,7 @@
 
 	var connect = __webpack_require__(257).connect;
 
-	var RootPage = __webpack_require__(300);
+	var RootPage = __webpack_require__(301);
 
 	function mapStateToProps(state) {
 	    return {
@@ -43250,7 +43470,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 300 */
+/* 301 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43261,11 +43481,11 @@
 
 	var appPages = __webpack_require__(282);
 
-	var MainPageContainer = __webpack_require__(301);
-	var LandingPageContainer = __webpack_require__(303);
-	var LoginPageContainer = __webpack_require__(305);
-	var ErrorPageContainer = __webpack_require__(316);
-	var RegistrationPageContainer = __webpack_require__(318);
+	var MainPageContainer = __webpack_require__(302);
+	var LandingPageContainer = __webpack_require__(309);
+	var LoginPageContainer = __webpack_require__(311);
+	var ErrorPageContainer = __webpack_require__(322);
+	var RegistrationPageContainer = __webpack_require__(324);
 
 	// ----------------------
 
@@ -43340,7 +43560,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 301 */
+/* 302 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43349,9 +43569,11 @@
 
 	var connect = __webpack_require__(257).connect;
 
-	var MainPage = __webpack_require__(302);
-	var storage = __webpack_require__(298);
-	var actionDispatchers = __webpack_require__(293);
+	var MainPage = __webpack_require__(303);
+	var storage = __webpack_require__(299);
+	var actionDispatchers = __webpack_require__(296);
+
+	var getDirectoriesAjaxCall = __webpack_require__(292);
 
 	// ----------------------
 
@@ -43360,9 +43582,46 @@
 	    storage.deleteJwt();
 	}
 
+	function loadWebPanel(userId) {
+	    var callbacks = {
+	        onStart: actionDispatchers.main.webPanel.dispatchLoadingBeginsAction,
+	        onSuccess: actionDispatchers.main.webPanel.dispatchLoadedAction,
+	        onBadRequest: actionDispatchers.main.webPanel.dispatchLoadingFailedAction
+	    };
+	    getDirectoriesAjaxCall(userId, "webpanel", callbacks);
+	}
+
+	function loadBookmarks(userId) {
+	    var callbacks = {
+	        onStart: actionDispatchers.main.bookmarks.dispatchLoadingBeginsAction,
+	        onSuccess: actionDispatchers.main.bookmarks.dispatchLoadedAction,
+	        onBadRequest: actionDispatchers.main.bookmarks.dispatchLoadingFailedAction
+	    };
+	    getDirectoriesAjaxCall(userId, "bookmarks", callbacks);
+	}
+
 	function mapStateToProps(state) {
 	    return {
+
 	        nickName: state.user.nickName,
+	        id: state.user.id,
+	        role: state.user.role,
+
+	        mainView: state.mainPage.mainView,
+
+	        webPanelLoading: state.mainPage.webPanelLoading,
+	        bookmarksLoading: state.mainPage.bookmarksLoading,
+
+	        webPanelLoadingFailedMessage: state.mainPage.webPanelLoadingFailedMessage,
+	        bookmarksLoadingFailedMessage: state.mainPage.bookmarksLoadingFailedMessage,
+
+	        webPanelDirs: state.mainPage.webPanelDirs,
+	        bookmarksDirs: state.mainPage.bookmarksDirs,
+
+	        loadInitialData: function loadInitialData() {
+	            loadWebPanel(state.user.id);
+	            loadBookmarks(state.user.id);
+	        },
 	        logout: performLogout
 	    };
 	}
@@ -43375,7 +43634,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 302 */
+/* 303 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43384,9 +43643,18 @@
 
 	var React = __webpack_require__(155);
 
+	var MainPageBar = __webpack_require__(304);
+	var MainPageContent = __webpack_require__(305);
+
+	// -------------------
+
 	var MainPage = React.createClass({
 	    displayName: "MainPage",
 
+
+	    componentWillMount: function componentWillMount() {
+	        this.props.loadInitialData();
+	    },
 
 	    render: function render() {
 	        return React.createElement(
@@ -43405,7 +43673,9 @@
 	                "Welcome, ",
 	                this.props.nickName,
 	                "!"
-	            )
+	            ),
+	            React.createElement(MainPageBar, null),
+	            React.createElement(MainPageContent, { dirs: this.props.webPanelDirs })
 	        );
 	    }
 	});
@@ -43416,7 +43686,160 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 303 */
+/* 304 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	"use strict";
+
+	var React = __webpack_require__(155);
+
+	var MainPageBar = React.createClass({
+	    displayName: "MainPageBar",
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "main-page-bar" },
+	            "Main page bar."
+	        );
+	    }
+	});
+
+	module.exports = MainPageBar;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "main-page-bar.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 305 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	"use strict";
+
+	var React = __webpack_require__(155);
+
+	var WebPanel = __webpack_require__(306);
+
+	// ---------------
+
+	var MainPageContent = React.createClass({
+	    displayName: "MainPageContent",
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "main-page-content" },
+	            React.createElement(WebPanel, { dirs: this.props.dirs })
+	        );
+	    }
+	});
+
+	module.exports = MainPageContent;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "main-page-content.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 306 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	"use strict";
+
+	var React = __webpack_require__(155);
+
+	var Directory = __webpack_require__(307);
+
+	// --------------------
+
+	var WebPanel = React.createClass({
+	    displayName: "WebPanel",
+
+	    render: function render() {
+	        var self = this;
+	        var renderedDirs = this.props.dirs.map(function (dir) {
+	            return React.createElement(Directory, {
+	                dir: dir,
+	                key: dir.name });
+	        });
+	        return React.createElement(
+	            "div",
+	            { className: "web-panel" },
+	            renderedDirs
+	        );
+	    }
+	});
+
+	module.exports = WebPanel;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "web-panel.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 307 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	"use strict";
+
+	var React = __webpack_require__(155);
+
+	var Page = __webpack_require__(308);
+
+	// ------------------
+
+	var Directory = React.createClass({
+	    displayName: "Directory",
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "directory" },
+	            this.props.dir
+	        );
+	    }
+	});
+
+	module.exports = Directory;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "directory.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 308 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	"use strict";
+
+	var React = __webpack_require__(155);
+
+	var Page = React.createClass({
+	    displayName: "Page",
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "page" },
+	            this.props.name
+	        );
+	    }
+	});
+
+	module.exports = Page;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(283); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "page.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 309 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43425,8 +43848,8 @@
 
 	var connect = __webpack_require__(257).connect;
 
-	var actionDispatchers = __webpack_require__(293);
-	var LandingPage = __webpack_require__(304);
+	var actionDispatchers = __webpack_require__(296);
+	var LandingPage = __webpack_require__(310);
 
 	function mapStateToProps(state) {
 	    return {
@@ -43443,7 +43866,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 304 */
+/* 310 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43475,7 +43898,7 @@
 	                "Registration"
 	            ),
 	            React.createElement("br", null),
-	            "Landing page. v2."
+	            "Landing page."
 	        );
 	    }
 	});
@@ -43486,7 +43909,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 305 */
+/* 311 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43495,12 +43918,12 @@
 
 	var connect = __webpack_require__(257).connect;
 
-	var storage = __webpack_require__(298);
-	var LoginPage = __webpack_require__(306);
-	var actionDispatchers = __webpack_require__(293);
-	var loginAjaxCall = __webpack_require__(313);
-	var validateNickNameAjaxCall = __webpack_require__(314);
-	var validatePasswordAjaxCall = __webpack_require__(315);
+	var storage = __webpack_require__(299);
+	var LoginPage = __webpack_require__(312);
+	var actionDispatchers = __webpack_require__(296);
+	var loginAjaxCall = __webpack_require__(319);
+	var validateNickNameAjaxCall = __webpack_require__(320);
+	var validatePasswordAjaxCall = __webpack_require__(321);
 
 	// ----------------------
 
@@ -43599,7 +44022,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 306 */
+/* 312 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43608,8 +44031,8 @@
 
 	var React = __webpack_require__(155);
 
-	var LoginForm = __webpack_require__(307);
-	var FormFailureMessage = __webpack_require__(312);
+	var LoginForm = __webpack_require__(313);
+	var FormFailureMessage = __webpack_require__(318);
 
 	var LoginPage = React.createClass({
 	    displayName: "LoginPage",
@@ -43664,7 +44087,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 307 */
+/* 313 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43673,10 +44096,10 @@
 
 	var React = __webpack_require__(155);
 
-	var inlineStyles = __webpack_require__(308);
-	var AcceptedSign = __webpack_require__(309);
-	var FormFieldInvalidMessage = __webpack_require__(310);
-	var Spinner = __webpack_require__(311);
+	var inlineStyles = __webpack_require__(314);
+	var AcceptedSign = __webpack_require__(315);
+	var FormFieldInvalidMessage = __webpack_require__(316);
+	var Spinner = __webpack_require__(317);
 
 	var LoginForm = React.createClass({
 	    displayName: 'LoginForm',
@@ -43776,7 +44199,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 308 */
+/* 314 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43896,7 +44319,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 309 */
+/* 315 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43931,7 +44354,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 310 */
+/* 316 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -43966,7 +44389,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 311 */
+/* 317 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -44001,7 +44424,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 312 */
+/* 318 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -44032,16 +44455,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 313 */
+/* 319 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 
 	"use strict";
 
-	var $ = __webpack_require__(296);
+	var $ = __webpack_require__(293);
 
-	var resources = __webpack_require__(297);
+	var resources = __webpack_require__(294);
 
 	// --------------------------------
 
@@ -44082,16 +44505,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 314 */
+/* 320 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 
 	"use strict";
 
-	var $ = __webpack_require__(296);
+	var $ = __webpack_require__(293);
 
-	var resources = __webpack_require__(297);
+	var resources = __webpack_require__(294);
 
 	// --------------------------------
 
@@ -44130,16 +44553,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 315 */
+/* 321 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 
 	"use strict";
 
-	var $ = __webpack_require__(296);
+	var $ = __webpack_require__(293);
 
-	var resources = __webpack_require__(297);
+	var resources = __webpack_require__(294);
 
 	// --------------------------------
 
@@ -44178,7 +44601,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 316 */
+/* 322 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -44187,7 +44610,7 @@
 
 	var connect = __webpack_require__(257).connect;
 
-	var ErrorPage = __webpack_require__(317);
+	var ErrorPage = __webpack_require__(323);
 
 	function mapStateToProps(state) {
 	    return {};
@@ -44201,7 +44624,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 317 */
+/* 323 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -44229,7 +44652,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 318 */
+/* 324 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -44238,14 +44661,14 @@
 
 	var connect = __webpack_require__(257).connect;
 
-	var storage = __webpack_require__(298);
-	var RegistrationPage = __webpack_require__(319);
-	var actionDispatchers = __webpack_require__(293);
-	var registrationAjaxCall = __webpack_require__(321);
-	var validateNickNameAjaxCall = __webpack_require__(314);
-	var validateNameAjaxCall = __webpack_require__(322);
-	var validateEmailAjaxCall = __webpack_require__(323);
-	var validatePasswordAjaxCall = __webpack_require__(315);
+	var storage = __webpack_require__(299);
+	var RegistrationPage = __webpack_require__(325);
+	var actionDispatchers = __webpack_require__(296);
+	var registrationAjaxCall = __webpack_require__(327);
+	var validateNickNameAjaxCall = __webpack_require__(320);
+	var validateNameAjaxCall = __webpack_require__(328);
+	var validateEmailAjaxCall = __webpack_require__(329);
+	var validatePasswordAjaxCall = __webpack_require__(321);
 
 	//---------------------
 
@@ -44460,7 +44883,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 319 */
+/* 325 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -44469,8 +44892,8 @@
 
 	var React = __webpack_require__(155);
 
-	var RegistrationForm = __webpack_require__(320);
-	var FormFailureMessage = __webpack_require__(312);
+	var RegistrationForm = __webpack_require__(326);
+	var FormFailureMessage = __webpack_require__(318);
 
 	var RegistrationPage = React.createClass({
 	    displayName: "RegistrationPage",
@@ -44547,7 +44970,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 320 */
+/* 326 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -44556,9 +44979,9 @@
 
 	var React = __webpack_require__(155);
 
-	var inlineStyles = __webpack_require__(308);
-	var AcceptedSign = __webpack_require__(309);
-	var FormFieldInvalidMessage = __webpack_require__(310);
+	var inlineStyles = __webpack_require__(314);
+	var AcceptedSign = __webpack_require__(315);
+	var FormFieldInvalidMessage = __webpack_require__(316);
 
 	// -------------------------
 
@@ -44767,16 +45190,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 321 */
+/* 327 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 
 	"use strict";
 
-	var $ = __webpack_require__(296);
+	var $ = __webpack_require__(293);
 
-	var resources = __webpack_require__(297);
+	var resources = __webpack_require__(294);
 
 	// --------------------------------
 
@@ -44818,16 +45241,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 322 */
+/* 328 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 
 	"use strict";
 
-	var $ = __webpack_require__(296);
+	var $ = __webpack_require__(293);
 
-	var resources = __webpack_require__(297);
+	var resources = __webpack_require__(294);
 
 	// --------------------------------
 
@@ -44866,16 +45289,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 323 */
+/* 329 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 
 	"use strict";
 
-	var $ = __webpack_require__(296);
+	var $ = __webpack_require__(293);
 
-	var resources = __webpack_require__(297);
+	var resources = __webpack_require__(294);
 
 	// --------------------------------
 

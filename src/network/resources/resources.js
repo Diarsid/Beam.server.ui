@@ -76,10 +76,12 @@ var resources = {
         badRequest: 400
     },
 
-    objects: {
-        url: serverRootUrl + "/objects/object",
-        method: "GET",
-        success: 200
+    directories : {
+        url : function (userId, placement) {
+            return serverRootUrl + "/users/" + userId + "/" + placement + "/directories"
+        },
+        method : "GET",
+        success : 200
     }
 
 };

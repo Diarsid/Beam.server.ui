@@ -11,6 +11,11 @@ var actionDispatchers = {
 
     app : {
 
+        dispatchAppStartsAction : function () {
+            dispatchLog("app starts.");
+            dispatch(actionCreators.app.appStartsAction());
+        },
+
         dispatchGoToLandingPageAction : function () {
             dispatchLog("go to landing.");
             dispatch(actionCreators.app.goToLandingPageAction());
@@ -260,6 +265,45 @@ var actionDispatchers = {
         dispatchPasswordsEqualAction : function () {
             dispatchLog("passwords equal.");
             dispatch(actionCreators.reg.passwordsEqualAction());
+        }
+    },
+
+    main : {
+        webPanel : {
+
+            dispatchLoadingBeginsAction : function () {
+                dispatchLog("webPanel loading begins...");
+                dispatch(actionCreators.main.webPanel.loadingBegins());
+            },
+
+            dispatchLoadedAction : function (dirs) {
+                dispatchLog("webPanel loaded: ");
+                console.log(dirs);
+                dispatch(actionCreators.main.webPanel.loaded(dirs));
+            },
+
+            dispatchLoadingFailedAction : function (message) {
+                dispatchLog("webPanel loading fails: " + message);
+                dispatch(actionCreators.main.webPanel.loadingFailed(message));
+            }
+        },
+
+        bookmarks : {
+            dispatchLoadingBeginsAction : function () {
+                dispatchLog("bookmarks loading begins...");
+                dispatch(actionCreators.main.bookmarks.loadingBegins());
+            },
+
+            dispatchLoadedAction : function (dirs) {
+                dispatchLog("bookmarks loaded: ");
+                console.log(dirs);
+                dispatch(actionCreators.main.bookmarks.loaded(dirs));
+            },
+
+            dispatchLoadingFailedAction : function (message) {
+                dispatchLog("bookmarks loading fails: " + message);
+                dispatch(actionCreators.main.bookmarks.loadingFailed(message));
+            }
         }
     }
 };

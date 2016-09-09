@@ -51,6 +51,7 @@ function renderView() {
 
 function startApp() {
     console.log('[APP] [MAIN] start app...');
+    actionDispatchers.app.dispatchAppStartsAction();
     initialAppUserInfoProcessing();
     renderView();
 }

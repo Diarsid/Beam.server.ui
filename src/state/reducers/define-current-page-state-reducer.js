@@ -10,6 +10,9 @@ function currentPageLog(message) {
 function defineCurrentPageState(currentPageState = appPages.landing, action) {
     switch ( action.type ) {
 
+        case actionTypes.appStarts :
+            return appPages.initial;
+
         case actionTypes.goToLanding :
             currentPageLog("goToLanding");
             return appPages.landing;
