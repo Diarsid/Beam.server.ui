@@ -71,7 +71,11 @@ var actionTypes = {
 
     bookmarksLoadingBegins : "BOOKMARKS_LOADING_BEGINS",
     bookmarksLoaded : "BOOKMARKS_LOADED",
-    bookmarksLoadingFailed : "BOOKMARKS_LOADING_FAILED"
+    bookmarksLoadingFailed : "BOOKMARKS_LOADING_FAILED",
+
+    directoryCreationStart : "DIR_CREATION_START",
+    directoryCreationSuccess : "DIR_CREATION_SUCCESS",
+    directoryCreationFail : "DIR_CREATION_FAIL"
 };
 
 module.exports = actionTypes;

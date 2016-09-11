@@ -4,7 +4,9 @@ var ErrorPage =
     require("./../../components/top-level/error-page.js");
 
 function mapStateToProps(state) {
-    return {};
+    return {
+        message : state.errorPage.message
+    };
 }
 
 var ErrorPageContainer = connect(mapStateToProps)(ErrorPage);

@@ -24,10 +24,18 @@ var actionCreators = {
             return {
                 type : actionTypes.logout
             }
+        },
+
+        goToErrorAction : function (message) {
+            return {
+                type : actionTypes.goToError,
+                message : message
+            }
         }
     },
 
     main : {
+
         webPanel : {
 
             loadingBegins : function () {
@@ -68,6 +76,30 @@ var actionCreators = {
             loadingFailed : function (message) {
                 return {
                     type : actionTypes.bookmarksLoadingFailed,
+                    message : message
+                }
+            }
+        },
+
+        directory : {
+
+            creationStartAction() {
+                return {
+                    type : actionTypes.directoryCreationStart
+                }
+            },
+
+            creationSuccessAction(placement, dirName) {
+                return {
+                    type : actionTypes.directoryCreationSuccess,
+                    placement : placement,
+                    dirName : dirName
+                }
+            },
+
+            creationFailAction(message) {
+                return {
+                    type : actionTypes.directoryCreationFail,
                     message : message
                 }
             }

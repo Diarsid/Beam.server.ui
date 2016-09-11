@@ -27,7 +27,7 @@ function tryToLogin (loginData, callbacks) {
             },
             401 : function ( xhr, statusText, errorThrown ) {
                 ajaxLog("fail, unauthorized with : " + (JSON.parse(xhr.responseText)).message);
-                callbacks.onUnauthorized((JSON.parse(xhr.responseText)).message);
+                callbacks.onUnauthenticated((JSON.parse(xhr.responseText)).message);
             },
             400 : function ( xhr, statusText, errorThrown ) {
                 ajaxLog("fail, bad request with : " + (JSON.parse(xhr.responseText)).message);

@@ -9,7 +9,7 @@ var actionDispatchers =
 var registrationAjaxCall =
     require("./../../../network/prepared-ajax-calls/registration-call.js");
 var validateNickNameAjaxCall =
-    require("./../../../network/prepared-ajax-calls/validate-nick-name-call.js");
+    require("./../../../network/prepared-ajax-calls/validate-nick-name-free-call.js");
 var validateNameAjaxCall =
     require("./../../../network/prepared-ajax-calls/validate-name-call.js");
 var validateEmailAjaxCall =

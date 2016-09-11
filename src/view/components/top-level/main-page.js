@@ -1,9 +1,9 @@
 var React = require('react');
 
-var MainPageBar =
-    require("./../inner/main/common/main-page-bar.js");
-var MainPageContent =
-    require("./../inner/main/common/main-page-content.js");
+var MainPageBarContainer =
+    require("./../../containers/inner/main/common/main-page-bar-container.js");
+var MainPageContentContainer =
+    require("./../../containers/inner/main/common/main-page-content-container.js");
 
 // -------------------
 
@@ -16,14 +16,9 @@ var MainPage = React.createClass({
     render: function () {
         return (
             <div className="main-page">
-                <button type="button"
-                        className="logout-button-on-landing-page"
-                        onClick={this.props.logout}>
-                    Logout
-                </button>
-                <span>Welcome, {this.props.nickName}!</span>
-                <MainPageBar />
-                <MainPageContent dirs={this.props.webPanelDirs} />
+                <span>Main page.</span>
+                <MainPageBarContainer logout={this.props.logout} />
+                <MainPageContentContainer />
             </div>
         );
     }

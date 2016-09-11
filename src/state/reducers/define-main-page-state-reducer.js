@@ -1,9 +1,6 @@
 var actionTypes =
     require("./../actions/action-types.js");
 
-var getDirectoriesAjaxCall =
-    require("./../../network/prepared-ajax-calls/get-directories-call.js");
-
 var mainPageViews = {
     webPanel : "webPanel",
     bookmarks : "bookmarks"
@@ -11,7 +8,7 @@ var mainPageViews = {
 
 var mainPageInitialState = {
 
-    mainView : mainPageViews.webPanel,
+    currentView : mainPageViews.webPanel,
 
     webPanelLoading : false,
     bookmarksLoading : false,

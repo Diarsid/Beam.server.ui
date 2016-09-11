@@ -9,6 +9,21 @@ function obtainServerRootUrl() {
 
 var serverRootUrl = obtainServerRootUrl() + "/services";
 
+var urls = {
+
+    directories : function (userId, placement) {
+        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories";
+    },
+
+    singleDirectory : function (userId, placement, name) {
+        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + name;
+    },
+
+    singleDirectoryProp : function (userId, placement, name, prop) {
+        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + name + "/" + prop;
+    }
+};
+
 var resources = {
 
     appRootUrl: serverRootUrl,
@@ -65,6 +80,19 @@ var resources = {
             method: "POST",
             found: 302,
             badRequest: 400
+        },
+
+        webObjects : {
+
+            names : {
+                url : serverRootUrl + "/validation/webobjects/names",
+                method : "POST"
+            },
+
+            urls : {
+                url : serverRootUrl + "/validation/webobjects/urls",
+                method : "POST"
+            }
         }
     },
 
@@ -77,11 +105,35 @@ var resources = {
     },
 
     directories : {
-        url : function (userId, placement) {
-            return serverRootUrl + "/users/" + userId + "/" + placement + "/directories"
+
+        getAllInPlace : {
+            url : urls.directories,
+            method : "GET"
         },
-        method : "GET",
-        success : 200
+
+        postNew : {
+            url : urls.directories,
+            method : "POST"
+        },
+
+        single : {
+
+            getDirectory : {
+                url : urls.singleDirectory,
+                method : "GET"
+            },
+
+            editProp : {
+                url : urls.singleDirectoryProp,
+                method : "PUT"
+            },
+
+            remove : {
+                url : urls.singleDirectory,
+                method : "DELETE"
+            }
+        }
+
     }
 
 };

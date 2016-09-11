@@ -92,6 +92,7 @@
 
 	function startApp() {
 	    console.log('[APP] [MAIN] start app...');
+	    actionDispatchers.app.dispatchAppStartsAction();
 	    initialAppUserInfoProcessing();
 	    renderView();
 	}
@@ -22130,6 +22131,10 @@
 	    var action = arguments[1];
 
 	    switch (action.type) {
+
+	        case actionTypes.appStarts:
+	            return userInitialState;
+
 	        case actionTypes.goToLogin:
 	            return userInitialState;
 	        case actionTypes.goToRegister:
@@ -22223,7 +22228,19 @@
 	    regFailed: "REGISTR_FAILED",
 	    regSuccess: "REGISTR_SUCCESS",
 
-	    logout: "LOGOUT"
+	    logout: "LOGOUT",
+
+	    webPanelLoadingBegins: "WEB_PANEL_LOADING_BEGINS",
+	    webPanelLoaded: "WEB_PANEL_LOADED",
+	    webPanelLoadingFailed: "WEB_PANEL_LOADING_FAILED",
+
+	    bookmarksLoadingBegins: "BOOKMARKS_LOADING_BEGINS",
+	    bookmarksLoaded: "BOOKMARKS_LOADED",
+	    bookmarksLoadingFailed: "BOOKMARKS_LOADING_FAILED",
+
+	    directoryCreationStart: "DIR_CREATION_START",
+	    directoryCreationSuccess: "DIR_CREATION_SUCCESS",
+	    directoryCreationFail: "DIR_CREATION_FAIL"
 	};
 
 	module.exports = actionTypes;
@@ -22247,6 +22264,9 @@
 
 	    switch (action.type) {
 
+	        case actionTypes.appStarts:
+	            return appPages.initial;
+
 	        case actionTypes.goToLanding:
 	            currentPageLog("goToLanding");
 	            return appPages.landing;
@@ -22268,9 +22288,10 @@
 	        case actionTypes.logout:
 	            currentPageLog("logout");
 	            return appPages.landing;
+	        case actionTypes.goToError:
+	            return appPages.error;
 
 	        default:
-	            currentPageLog("default: " + currentPageState);
 	            return currentPageState;
 	    }
 	}
@@ -22308,6 +22329,9 @@
 	    var action = arguments[1];
 
 	    switch (action.type) {
+
+	        case actionTypes.appStarts:
+	            return initialLoginPageState;
 
 	        // actions to process nick name input field
 	        case actionTypes.loginNickNameChanged:
@@ -22438,6 +22462,9 @@
 
 
 	    switch (action.type) {
+
+	        case actionTypes.appStarts:
+	            return initialRegPageState;
 
 	        // actions to process nick name input field
 	        case actionTypes.regNickNameChanged:
@@ -22618,8 +22645,23 @@
 
 	var actionTypes = __webpack_require__(190);
 
+	var mainPageViews = {
+	    webPanel: "webPanel",
+	    bookmarks: "bookmarks"
+	};
+
 	var mainPageInitialState = {
-	    content: "Main page accessed."
+
+	    currentView: mainPageViews.webPanel,
+
+	    webPanelLoading: false,
+	    bookmarksLoading: false,
+
+	    webPanelLoadingFailedMessage: "",
+	    bookmarksLoadingFailedMessage: "",
+
+	    webPanelDirs: [],
+	    bookmarksDirs: []
 	};
 
 	function defineMainPageState() {
@@ -22628,8 +22670,45 @@
 
 	    switch (action.type) {
 
-	        default:
+	        case actionTypes.appStarts:
 	            return mainPageInitialState;
+
+	        // data loading progress
+	        case actionTypes.webPanelLoadingBegins:
+	            return Object.assign({}, mainPageState, {
+	                webPanelLoading: true
+	            });
+	        case actionTypes.bookmarksLoadingBegins:
+	            return Object.assign({}, mainPageState, {
+	                bookmarksLoading: true
+	            });
+
+	        // data loading failed
+	        case actionTypes.webPanelLoadingFailed:
+	            return Object.assign({}, mainPageState, {
+	                webPanelLoading: false,
+	                webPanelLoadingFailedMessage: action.message
+	            });
+	        case actionTypes.bookmarksLoadingFailed:
+	            return Object.assign({}, mainPageState, {
+	                bookmarksLoading: false,
+	                bookmarksLoadingFailedMessage: action.message
+	            });
+
+	        // data loaded
+	        case actionTypes.webPanelLoaded:
+	            return Object.assign({}, mainPageState, {
+	                webPanelLoading: false,
+	                webPanelDirs: action.dirs
+	            });
+	        case actionTypes.bookmarksLoaded:
+	            return Object.assign({}, mainPageState, {
+	                bookmarksLoading: false,
+	                bookmarksDirs: action.dirs
+	            });
+
+	        default:
+	            return mainPageState;
 	    }
 	}
 
@@ -22643,7 +22722,9 @@
 
 	var actionTypes = __webpack_require__(190);
 
-	var errorPageInitialState = {};
+	var errorPageInitialState = {
+	    message: ""
+	};
 
 	function defineErrorPageState() {
 	    var errorPageState = arguments.length <= 0 || arguments[0] === undefined ? errorPageInitialState : arguments[0];
@@ -22651,8 +22732,15 @@
 
 	    switch (action.type) {
 
-	        default:
+	        case actionTypes.appStarts:
 	            return errorPageInitialState;
+
+	        case actionTypes.goToError:
+	            return Object.assign({}, errorPageState, {
+	                message: action.message
+	            });
+	        default:
+	            return errorPageState;
 	    }
 	}
 
@@ -22675,6 +22763,11 @@
 
 	    app: {
 
+	        dispatchAppStartsAction: function dispatchAppStartsAction() {
+	            dispatchLog("app starts.");
+	            dispatch(actionCreators.app.appStartsAction());
+	        },
+
 	        dispatchGoToLandingPageAction: function dispatchGoToLandingPageAction() {
 	            dispatchLog("go to landing.");
 	            dispatch(actionCreators.app.goToLandingPageAction());
@@ -22693,6 +22786,11 @@
 	        dispatchLogoutAction: function dispatchLogoutAction() {
 	            dispatchLog("logout.");
 	            dispatch(actionCreators.app.logoutAction());
+	        },
+
+	        dispatchGoToErrorAction: function dispatchGoToErrorAction(message) {
+	            dispatchLog("Error occurs : " + message);
+	            dispatch(actionCreators.app.goToErrorAction(message));
 	        }
 	    },
 
@@ -22924,6 +23022,60 @@
 	            dispatchLog("passwords equal.");
 	            dispatch(actionCreators.reg.passwordsEqualAction());
 	        }
+	    },
+
+	    main: {
+	        webPanel: {
+
+	            dispatchLoadingBeginsAction: function dispatchLoadingBeginsAction() {
+	                dispatchLog("webPanel loading begins...");
+	                dispatch(actionCreators.main.webPanel.loadingBegins());
+	            },
+
+	            dispatchLoadedAction: function dispatchLoadedAction(dirs) {
+	                dispatchLog("webPanel loaded: ");
+	                console.log(dirs);
+	                dispatch(actionCreators.main.webPanel.loaded(dirs));
+	            },
+
+	            dispatchLoadingFailedAction: function dispatchLoadingFailedAction(message) {
+	                dispatchLog("webPanel loading fails: " + message);
+	                dispatch(actionCreators.main.webPanel.loadingFailed(message));
+	            }
+	        },
+
+	        bookmarks: {
+	            dispatchLoadingBeginsAction: function dispatchLoadingBeginsAction() {
+	                dispatchLog("bookmarks loading begins...");
+	                dispatch(actionCreators.main.bookmarks.loadingBegins());
+	            },
+
+	            dispatchLoadedAction: function dispatchLoadedAction(dirs) {
+	                dispatchLog("bookmarks loaded: ");
+	                console.log(dirs);
+	                dispatch(actionCreators.main.bookmarks.loaded(dirs));
+	            },
+
+	            dispatchLoadingFailedAction: function dispatchLoadingFailedAction(message) {
+	                dispatchLog("bookmarks loading fails: " + message);
+	                dispatch(actionCreators.main.bookmarks.loadingFailed(message));
+	            }
+	        },
+
+	        directory: {
+	            dispatchCreationStartAction: function dispatchCreationStartAction() {
+	                dispatchLog("directory creation start...");
+	                dispatch(actionCreators.main.directory.creationStartAction());
+	            },
+	            directoryCreationSuccess: function directoryCreationSuccess(placement, dirName) {
+	                dispatchLog("directory created : " + placement + "::" + dirName);
+	                dispatch(actionCreators.main.directory.creationSuccessAction(placement, dirName));
+	            },
+	            dispatchCreationFailAction: function dispatchCreationFailAction(message) {
+	                dispatchLog("directory creation fails : " + message);
+	                dispatch(actionCreators.main.directory.creationFailAction(message));
+	            }
+	        }
 	    }
 	};
 
@@ -22945,6 +23097,12 @@
 
 	    app: {
 
+	        appStartsAction: function appStartsAction() {
+	            return {
+	                type: actionTypes.appStarts
+	            };
+	        },
+
 	        goToLandingPageAction: function goToLandingPageAction() {
 	            return {
 	                type: actionTypes.goToLanding
@@ -22955,6 +23113,82 @@
 	            return {
 	                type: actionTypes.logout
 	            };
+	        },
+
+	        goToErrorAction: function goToErrorAction(message) {
+	            return {
+	                type: actionTypes.goToError,
+	                message: message
+	            };
+	        }
+	    },
+
+	    main: {
+
+	        webPanel: {
+
+	            loadingBegins: function loadingBegins() {
+	                return {
+	                    type: actionTypes.webPanelLoadingBegins
+	                };
+	            },
+
+	            loaded: function loaded(dirs) {
+	                return {
+	                    type: actionTypes.webPanelLoaded,
+	                    dirs: dirs
+	                };
+	            },
+
+	            loadingFailed: function loadingFailed(message) {
+	                return {
+	                    type: actionTypes.webPanelLoadingFailed,
+	                    message: message
+	                };
+	            }
+	        },
+
+	        bookmarks: {
+	            loadingBegins: function loadingBegins() {
+	                return {
+	                    type: actionTypes.bookmarksLoadingBegins
+	                };
+	            },
+
+	            loaded: function loaded(dirs) {
+	                return {
+	                    type: actionTypes.bookmarksLoaded,
+	                    dirs: dirs
+	                };
+	            },
+
+	            loadingFailed: function loadingFailed(message) {
+	                return {
+	                    type: actionTypes.bookmarksLoadingFailed,
+	                    message: message
+	                };
+	            }
+	        },
+
+	        directory: {
+	            creationStartAction: function creationStartAction() {
+	                return {
+	                    type: actionTypes.directoryCreationStart
+	                };
+	            },
+	            creationSuccessAction: function creationSuccessAction(placement, dirName) {
+	                return {
+	                    type: actionTypes.directoryCreationSuccess,
+	                    placement: placement,
+	                    dirName: dirName
+	                };
+	            },
+	            creationFailAction: function creationFailAction(message) {
+	                return {
+	                    type: actionTypes.directoryCreationFail,
+	                    message: message
+	                };
+	            }
 	        }
 	    },
 
@@ -33437,6 +33671,21 @@
 
 	var serverRootUrl = obtainServerRootUrl() + "/services";
 
+	var urls = {
+
+	    directories: function directories(userId, placement) {
+	        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories";
+	    },
+
+	    singleDirectory: function singleDirectory(userId, placement, name) {
+	        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + name;
+	    },
+
+	    singleDirectoryProp: function singleDirectoryProp(userId, placement, name, prop) {
+	        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + name + "/" + prop;
+	    }
+	};
+
 	var resources = {
 
 	    appRootUrl: serverRootUrl,
@@ -33493,7 +33742,9 @@
 	            method: "POST",
 	            found: 302,
 	            badRequest: 400
-	        }
+	        },
+
+	        webObjects: {}
 	    },
 
 	    login: {
@@ -33504,10 +33755,36 @@
 	        badRequest: 400
 	    },
 
-	    objects: {
-	        url: serverRootUrl + "/objects/object",
-	        method: "GET",
-	        success: 200
+	    directories: {
+
+	        getAllInPlace: {
+	            url: urls.directories,
+	            method: "GET"
+	        },
+
+	        postNew: {
+	            url: urls.directories,
+	            method: "POST"
+	        },
+
+	        single: {
+
+	            getDirectory: {
+	                url: urls.singleDirectory,
+	                method: "GET"
+	            },
+
+	            editProp: {
+	                url: urls.singleDirectoryProp,
+	                method: "PUT"
+	            },
+
+	            remove: {
+	                url: urls.singleDirectory,
+	                method: "DELETE"
+	            }
+	        }
+
 	    }
 
 	};
@@ -33613,10 +33890,10 @@
 	var appPages = __webpack_require__(188);
 
 	var MainPageContainer = __webpack_require__(204);
-	var LandingPageContainer = __webpack_require__(206);
-	var LoginPageContainer = __webpack_require__(208);
-	var ErrorPageContainer = __webpack_require__(219);
-	var RegistrationPageContainer = __webpack_require__(221);
+	var LandingPageContainer = __webpack_require__(238);
+	var LoginPageContainer = __webpack_require__(240);
+	var ErrorPageContainer = __webpack_require__(250);
+	var RegistrationPageContainer = __webpack_require__(252);
 
 	// ----------------------
 
@@ -33699,6 +33976,8 @@
 	var storage = __webpack_require__(201);
 	var actionDispatchers = __webpack_require__(196);
 
+	var getDirectoriesAjaxCall = __webpack_require__(237);
+
 	// ----------------------
 
 	function performLogout() {
@@ -33706,9 +33985,35 @@
 	    storage.deleteJwt();
 	}
 
+	function loadWebPanel(userId) {
+	    var callbacks = {
+	        onStart: actionDispatchers.main.webPanel.dispatchLoadingBeginsAction,
+	        onSuccess: actionDispatchers.main.webPanel.dispatchLoadedAction,
+	        onFail: actionDispatchers.main.webPanel.dispatchLoadingFailedAction,
+	        onUnauthenticated: actionDispatchers.app.dispatchGoToLoginAction,
+	        onServerError: actionDispatchers.app.dispatchGoToErrorAction
+	    };
+	    getDirectoriesAjaxCall(userId, "webpanel", callbacks);
+	}
+
+	function loadBookmarks(userId) {
+	    var callbacks = {
+	        onStart: actionDispatchers.main.bookmarks.dispatchLoadingBeginsAction,
+	        onSuccess: actionDispatchers.main.bookmarks.dispatchLoadedAction,
+	        onFail: actionDispatchers.main.bookmarks.dispatchLoadingFailedAction,
+	        onUnauthenticated: actionDispatchers.app.dispatchGoToLoginAction,
+	        onServerError: actionDispatchers.app.dispatchGoToErrorAction
+	    };
+	    getDirectoriesAjaxCall(userId, "bookmarks", callbacks);
+	}
+
 	function mapStateToProps(state) {
 	    return {
-	        nickName: state.user.nickName,
+
+	        loadInitialData: function loadInitialData() {
+	            loadWebPanel(state.user.id);
+	            loadBookmarks(state.user.id);
+	        },
 	        logout: performLogout
 	    };
 	}
@@ -33725,28 +34030,30 @@
 
 	var React = __webpack_require__(1);
 
+	var MainPageBarContainer = __webpack_require__(206);
+	var MainPageContentContainer = __webpack_require__(232);
+
+	// -------------------
+
 	var MainPage = React.createClass({
 	    displayName: "MainPage",
 
+
+	    componentWillMount: function componentWillMount() {
+	        this.props.loadInitialData();
+	    },
 
 	    render: function render() {
 	        return React.createElement(
 	            "div",
 	            { className: "main-page" },
 	            React.createElement(
-	                "button",
-	                { type: "button",
-	                    className: "logout-button-on-landing-page",
-	                    onClick: this.props.logout },
-	                "Logout"
-	            ),
-	            React.createElement(
 	                "span",
 	                null,
-	                "Welcome, ",
-	                this.props.nickName,
-	                "!"
-	            )
+	                "Main page."
+	            ),
+	            React.createElement(MainPageBarContainer, { logout: this.props.logout }),
+	            React.createElement(MainPageContentContainer, null)
 	        );
 	    }
 	});
@@ -33761,19 +34068,32 @@
 
 	var connect = __webpack_require__(163).connect;
 
+	var MainPageBar = __webpack_require__(207);
 	var actionDispatchers = __webpack_require__(196);
-	var LandingPage = __webpack_require__(207);
+	var createDirAjaxCall = __webpack_require__(231);
+
+	function _createDirectory(userId, currentView, newDirName) {
+	    var callbacks = {
+	        onStart: actionDispatchers.main.directory.dispatchCreationStartAction,
+	        onSuccess: actionDispatchers.main.directory.directoryCreationSuccess,
+	        onFail: actionDispatchers.main.directory.dispatchCreationFailAction,
+	        onUnauthenticated: actionDispatchers.app.dispatchGoToLoginAction,
+	        onServerError: actionDispatchers.app.dispatchGoToErrorAction
+	    };
+	    createDirAjaxCall(userId, currentView, newDirName, callbacks);
+	}
 
 	function mapStateToProps(state) {
 	    return {
-	        goToLogin: actionDispatchers.app.dispatchGoToLoginAction,
-	        goToRegistration: actionDispatchers.app.dispatchGoToRegisterAction
+	        createDirectory: function createDirectory(newDirName) {
+	            _createDirectory(state.user.id, state.mainPage.currentView, newDirName);
+	        }
 	    };
 	}
 
-	var LandingPageContainer = connect(mapStateToProps)(LandingPage);
+	var MainPageBarContainer = connect(mapStateToProps)(MainPageBar);
 
-	module.exports = LandingPageContainer;
+	module.exports = MainPageBarContainer;
 
 /***/ },
 /* 207 */
@@ -33783,318 +34103,2137 @@
 
 	var React = __webpack_require__(1);
 
-	var LandingPage = React.createClass({
-	    displayName: "LandingPage",
+	var CreateDirController = __webpack_require__(208);
+
+	// -----------------------
+
+	var MainPageBar = React.createClass({
+	    displayName: "MainPageBar",
 
 
 	    render: function render() {
 	        return React.createElement(
 	            "div",
-	            { className: "landing-page" },
+	            { className: "main-page-bar" },
 	            React.createElement(
 	                "button",
 	                { type: "button",
-	                    className: "go-tologin-button-on-landing-page",
-	                    onClick: this.props.goToLogin },
-	                "Login"
+	                    className: "logout-button-on-main-page",
+	                    onClick: this.props.logout },
+	                "Logout"
 	            ),
-	            React.createElement(
-	                "button",
-	                { type: "button",
-	                    className: "go-to-registration-button-on-landing-page",
-	                    onClick: this.props.goToRegistration },
-	                "Registration"
-	            ),
-	            React.createElement("br", null),
-	            "Landing page. v2."
+	            React.createElement(CreateDirController, { create: this.props.createDirectory }),
+	            "Main page bar."
 	        );
 	    }
 	});
 
-	module.exports = LandingPage;
+	module.exports = MainPageBar;
 
 /***/ },
 /* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
-
-	var connect = __webpack_require__(163).connect;
-
-	var storage = __webpack_require__(201);
-	var LoginPage = __webpack_require__(209);
-	var actionDispatchers = __webpack_require__(196);
-	var loginAjaxCall = __webpack_require__(216);
-	var validateNickNameAjaxCall = __webpack_require__(217);
-	var validatePasswordAjaxCall = __webpack_require__(218);
-
-	// ----------------------
-
-	var passwordValidationDelay;
-	var nickNameValidationDelay;
-
-	function beginDelayedPasswordValidation(newPassword) {
-	    var passwordAjaxValidationCallbacks = {
-	        onStart: actionDispatchers.login.dispatchPasswordValidationBeginsAction,
-	        onValid: function onValid() {
-	            actionDispatchers.login.dispatchPasswordValidAction();
-	            actionDispatchers.login.dispatchAssessIfLoginAllowedAction();
-	        },
-	        onInvalid: actionDispatchers.login.dispatchPasswordInvalidAction
-	    };
-	    validatePasswordAjaxCall(newPassword, passwordAjaxValidationCallbacks);
-	}
-
-	function beginDelayedNickNameValidation(newNickName) {
-	    var nickNameAjaxValidationCallbacks = {
-	        onStart: actionDispatchers.login.dispatchNickNameValidationBeginsAction,
-	        onValid: function onValid() {
-	            actionDispatchers.login.dispatchNickNameValidAction();
-	            actionDispatchers.login.dispatchAssessIfLoginAllowedAction();
-	        },
-	        onInvalid: actionDispatchers.login.dispatchNickNameInvalidAction
-	    };
-	    validateNickNameAjaxCall(newNickName, nickNameAjaxValidationCallbacks);
-	}
-
-	function passwordChanged(newPassword) {
-	    window.clearTimeout(passwordValidationDelay);
-	    actionDispatchers.login.dispatchPasswordChangedAction(newPassword);
-	    passwordValidationDelay = window.setTimeout(beginDelayedPasswordValidation, 700, newPassword);
-	}
-
-	function nickNameChanged(newNickName) {
-	    window.clearTimeout(nickNameValidationDelay);
-	    actionDispatchers.login.dispatchNickNameChangedAction(newNickName);
-	    nickNameValidationDelay = window.setTimeout(beginDelayedNickNameValidation, 700, newNickName);
-	}
-
-	function goToRegistration() {
-	    actionDispatchers.app.dispatchGoToRegisterAction();
-	}
-
-	function _tryToLogin(loginData) {
-	    var loginAjaxCallbacks = {
-	        onCallStart: actionDispatchers.login.dispatchLoginAttemptBegins,
-	        onCallSuccess: function onCallSuccess(jwtString) {
-	            actionDispatchers.login.dispatchLoginSuccessAction(storage.saveAndParseJwt(jwtString));
-	        },
-	        onUnauthorized: actionDispatchers.login.dispatchLoginFailedAction,
-	        onBadRequest: actionDispatchers.login.dispatchLoginFailedAction
-	    };
-	    loginAjaxCall(loginData, loginAjaxCallbacks);
-	}
-
-	function mapStateToProps(state) {
-	    return {
-	        nickName: state.loginPage.nickName,
-	        nickNameValid: state.loginPage.nickNameValid,
-	        nickNameInvalidMessage: state.loginPage.nickNameInvalidMessage,
-	        nickNameValidationInProgress: state.loginPage.nickNameValidationInProgress,
-
-	        password: state.loginPage.password,
-	        passwordValid: state.loginPage.passwordValid,
-	        passwordInvalidMessage: state.loginPage.passwordInvalidMessage,
-	        passwordValidationInProgress: state.loginPage.passwordValidationInProgress,
-
-	        loginFailureMessage: state.loginPage.loginFailureMessage,
-
-	        loginAllowed: state.loginPage.loginAllowed,
-
-	        goToLanding: actionDispatchers.app.dispatchGoToLandingPageAction,
-	        goToRegistration: goToRegistration,
-	        tryToLogin: function tryToLogin() {
-	            if (state.loginPage.loginAllowed) {
-	                var loginData = {
-	                    "nickName": state.loginPage.nickName,
-	                    "password": state.loginPage.password
-	                };
-	                _tryToLogin(loginData);
-	            }
-	        },
-	        nickNameChanged: nickNameChanged,
-	        passwordChanged: passwordChanged
-	    };
-	}
-
-	var LoginPageContainer = connect(mapStateToProps)(LoginPage);
-
-	module.exports = LoginPageContainer;
-
-/***/ },
-/* 209 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var React = __webpack_require__(1);
-
-	var LoginForm = __webpack_require__(210);
-	var FormFailureMessage = __webpack_require__(215);
-
-	var LoginPage = React.createClass({
-	    displayName: "LoginPage",
-
-
-	    render: function render() {
-	        return React.createElement(
-	            "div",
-	            { className: "login-page" },
-	            "Login page",
-	            React.createElement(
-	                "button",
-	                {
-	                    type: "button",
-	                    className: "go-to-registration-button-on-login",
-	                    onClick: this.props.goToRegistration },
-	                "Registration"
-	            ),
-	            React.createElement(
-	                "button",
-	                {
-	                    type: "button",
-	                    className: "go-to-landing-button-on-login",
-	                    onClick: this.props.goToLanding },
-	                "Back"
-	            ),
-	            React.createElement("br", null),
-	            React.createElement(LoginForm, {
-	                nickName: this.props.nickName,
-	                nickNameValid: this.props.nickNameValid,
-	                nickNameInvalidMessage: this.props.nickNameInvalidMessage,
-	                nickNameValidationInProgress: this.props.nickNameValidationInProgress,
-
-	                password: this.props.password,
-	                passwordValid: this.props.passwordValid,
-	                passwordInvalidMessage: this.props.passwordInvalidMessage,
-	                passwordValidationInProgress: this.props.passwordValidationInProgress,
-
-	                loginAllowed: this.props.loginAllowed,
-	                loginAction: this.props.tryToLogin,
-	                nickNameChanged: this.props.nickNameChanged,
-	                passwordChanged: this.props.passwordChanged }),
-	            React.createElement(FormFailureMessage, {
-	                message: this.props.loginFailureMessage })
-	        );
-	    }
-	});
-
-	module.exports = LoginPage;
-
-/***/ },
-/* 210 */
-/***/ function(module, exports, __webpack_require__) {
-
 	'use strict';
 
 	var React = __webpack_require__(1);
+	var Modal = __webpack_require__(209);
 
-	var inlineStyles = __webpack_require__(211);
-	var AcceptedSign = __webpack_require__(212);
-	var FormFieldInvalidMessage = __webpack_require__(213);
-	var Spinner = __webpack_require__(214);
+	var styles = __webpack_require__(229);
+	var DialogButtonsPane = __webpack_require__(230);
 
-	var LoginForm = React.createClass({
-	    displayName: 'LoginForm',
+	var CreateDirController = React.createClass({
+	    displayName: 'CreateDirController',
 
 
-	    nickNameInputChanged: function nickNameInputChanged(event) {
-	        this.props.nickNameChanged(event.target.value);
+	    getInitialState: function getInitialState() {
+	        return {
+	            open: false,
+	            newName: "",
+	            newNameValid: false
+	        };
 	    },
 
-	    passwordInputChanged: function passwordInputChanged(event) {
-	        this.props.passwordChanged(event.target.value);
+	    openCreateDirModal: function openCreateDirModal() {
+	        this.setState({
+	            open: true
+	        });
 	    },
 
-	    getLoginButtonStyle: function getLoginButtonStyle() {
-	        if (this.props.loginAllowed) {
-	            return inlineStyles.loginButtonActiveStyle;
-	        } else {
-	            return inlineStyles.loginButtonInactiveStyle;
-	        }
+	    inputChanged: function inputChanged(e) {
+	        e.target.value;
 	    },
 
-	    getNickNameInputStyle: function getNickNameInputStyle() {
-	        return inlineStyles.getInputStyle(this.props.nickNameValid);
-	    },
+	    submitDirCreation: function submitDirCreation() {},
 
-	    getPasswordInputStyle: function getPasswordInputStyle() {
-	        return inlineStyles.getInputStyle(this.props.passwordValid);
-	    },
-
-	    isNickNameAccepted: function isNickNameAccepted() {
-	        return this.props.nickNameValid && this.props.nickName != "" && !this.props.nickNameValidationInProgress;
-	    },
-
-	    isPasswordAccepted: function isPasswordAccepted() {
-	        return this.props.passwordValid && this.props.password != "" && !this.props.passwordValidationInProgress;
-	    },
+	    cancelDirCreation: function cancelDirCreation() {},
 
 	    render: function render() {
-	        var loginButtonStyle = this.getLoginButtonStyle();
-	        var nickNameInputStyle = this.getNickNameInputStyle();
-	        var passwordInputStyle = this.getPasswordInputStyle();
 	        return React.createElement(
 	            'div',
-	            { className: 'login-form' },
-	            React.createElement(
-	                'form',
-	                null,
-	                React.createElement(
-	                    'fieldset',
-	                    null,
-	                    React.createElement(
-	                        'label',
-	                        { className: 'login-form-label' },
-	                        'Nickname:'
-	                    ),
-	                    React.createElement('br', null),
-	                    React.createElement('input', { type: 'text',
-	                        className: 'login-form-input',
-	                        placeholder: 'nick_name',
-	                        style: nickNameInputStyle,
-	                        value: this.props.nickName,
-	                        onChange: this.nickNameInputChanged }),
-	                    React.createElement(AcceptedSign, { accepted: this.isNickNameAccepted() }),
-	                    React.createElement(FormFieldInvalidMessage, { message: this.props.nickNameInvalidMessage }),
-	                    React.createElement('br', null),
-	                    React.createElement(
-	                        'label',
-	                        { className: 'login-form-label' },
-	                        'Password:'
-	                    ),
-	                    React.createElement('br', null),
-	                    React.createElement('input', { type: 'password',
-	                        className: 'login-form-input',
-	                        style: passwordInputStyle,
-	                        value: this.props.password,
-	                        onChange: this.passwordInputChanged }),
-	                    React.createElement(AcceptedSign, { accepted: this.isPasswordAccepted() }),
-	                    React.createElement(FormFieldInvalidMessage, { message: this.props.passwordInvalidMessage }),
-	                    React.createElement('br', null)
-	                )
-	            ),
+	            { className: 'create-dir-controller' },
 	            React.createElement(
 	                'button',
 	                { type: 'button',
-	                    className: 'login-button',
-	                    style: loginButtonStyle,
-	                    onClick: this.props.loginAction },
-	                'Login'
+	                    className: 'create-directory-button-on-main-page',
+	                    onClick: this.openCreateDirModal },
+	                'Create dir'
+	            ),
+	            React.createElement(
+	                Modal,
+	                {
+	                    closeTimeoutMS: 0,
+	                    isOpen: this.state.open,
+	                    shouldCloseOnOverlayClick: false,
+	                    style: styles.modalDialogStyle },
+	                React.createElement(
+	                    'label',
+	                    { className: 'form-label' },
+	                    'Create new directory: '
+	                ),
+	                React.createElement('br', null),
+	                React.createElement('input', { type: 'text',
+	                    id: 'new-dir-name',
+	                    placeholder: 'name...',
+	                    className: 'form-input',
+	                    style: styles.getInputStyle(this.state.nameValid),
+	                    value: this.state.newName,
+	                    onChange: this.inputChanged }),
+	                React.createElement('br', null),
+	                React.createElement(DialogButtonsPane, {
+	                    submitAllowed: this.state.newNameValid,
+	                    submitText: 'Create',
+	                    submitAction: this.submitDirCreation,
+	                    cancelAction: this.cancelDirCreation
+	                })
 	            )
 	        );
 	    }
 	});
 
-	module.exports = LoginForm;
+	module.exports = CreateDirController;
+
+/***/ },
+/* 209 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(210);
+
+
+
+/***/ },
+/* 210 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(30);
+	var ExecutionEnvironment = __webpack_require__(211);
+	var ModalPortal = React.createFactory(__webpack_require__(212));
+	var ariaAppHider = __webpack_require__(227);
+	var elementClass = __webpack_require__(228);
+	var renderSubtreeIntoContainer = __webpack_require__(30).unstable_renderSubtreeIntoContainer;
+	var Assign = __webpack_require__(216);
+
+	var SafeHTMLElement = ExecutionEnvironment.canUseDOM ? window.HTMLElement : {};
+	var AppElement = ExecutionEnvironment.canUseDOM ? document.body : {appendChild: function() {}};
+
+	var Modal = React.createClass({
+
+	  displayName: 'Modal',
+	  statics: {
+	    setAppElement: function(element) {
+	        AppElement = ariaAppHider.setElement(element);
+	    },
+	    injectCSS: function() {
+	      "production" !== ("production")
+	        && console.warn('React-Modal: injectCSS has been deprecated ' +
+	                        'and no longer has any effect. It will be removed in a later version');
+	    }
+	  },
+
+	  propTypes: {
+	    isOpen: React.PropTypes.bool.isRequired,
+	    style: React.PropTypes.shape({
+	      content: React.PropTypes.object,
+	      overlay: React.PropTypes.object
+	    }),
+	    appElement: React.PropTypes.instanceOf(SafeHTMLElement),
+	    onAfterOpen: React.PropTypes.func,
+	    onRequestClose: React.PropTypes.func,
+	    closeTimeoutMS: React.PropTypes.number,
+	    ariaHideApp: React.PropTypes.bool,
+	    shouldCloseOnOverlayClick: React.PropTypes.bool
+	  },
+
+	  getDefaultProps: function () {
+	    return {
+	      isOpen: false,
+	      ariaHideApp: true,
+	      closeTimeoutMS: 0,
+	      shouldCloseOnOverlayClick: true
+	    };
+	  },
+
+	  componentDidMount: function() {
+	    this.node = document.createElement('div');
+	    this.node.className = 'ReactModalPortal';
+	    document.body.appendChild(this.node);
+	    this.renderPortal(this.props);
+	  },
+
+	  componentWillReceiveProps: function(newProps) {
+	    this.renderPortal(newProps);
+	  },
+
+	  componentWillUnmount: function() {
+	    ReactDOM.unmountComponentAtNode(this.node);
+	    document.body.removeChild(this.node);
+	    elementClass(document.body).remove('ReactModal__Body--open');
+	  },
+
+	  renderPortal: function(props) {
+	    if (props.isOpen) {
+	      elementClass(document.body).add('ReactModal__Body--open');
+	    } else {
+	      elementClass(document.body).remove('ReactModal__Body--open');
+	    }
+
+	    if (props.ariaHideApp) {
+	      ariaAppHider.toggle(props.isOpen, props.appElement);
+	    }
+
+	    this.portal = renderSubtreeIntoContainer(this, ModalPortal(Assign({}, props, {defaultStyles: Modal.defaultStyles})), this.node);
+	  },
+
+	  render: function () {
+	    return React.DOM.noscript();
+	  }
+	});
+
+	Modal.defaultStyles = {
+	  overlay: {
+	    position        : 'fixed',
+	    top             : 0,
+	    left            : 0,
+	    right           : 0,
+	    bottom          : 0,
+	    backgroundColor : 'rgba(255, 255, 255, 0.75)'
+	  },
+	  content: {
+	    position                : 'absolute',
+	    top                     : '40px',
+	    left                    : '40px',
+	    right                   : '40px',
+	    bottom                  : '40px',
+	    border                  : '1px solid #ccc',
+	    background              : '#fff',
+	    overflow                : 'auto',
+	    WebkitOverflowScrolling : 'touch',
+	    borderRadius            : '4px',
+	    outline                 : 'none',
+	    padding                 : '20px'
+	  }
+	}
+
+	module.exports = Modal
+
 
 /***/ },
 /* 211 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2015 Jed Watson.
+	  Based on code that is Copyright 2013-2015, Facebook, Inc.
+	  All rights reserved.
+	*/
+
+	(function () {
+		'use strict';
+
+		var canUseDOM = !!(
+			typeof window !== 'undefined' &&
+			window.document &&
+			window.document.createElement
+		);
+
+		var ExecutionEnvironment = {
+
+			canUseDOM: canUseDOM,
+
+			canUseWorkers: typeof Worker !== 'undefined',
+
+			canUseEventListeners:
+				canUseDOM && !!(window.addEventListener || window.attachEvent),
+
+			canUseViewport: canUseDOM && !!window.screen
+
+		};
+
+		if (true) {
+			!(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return ExecutionEnvironment;
+			}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else if (typeof module !== 'undefined' && module.exports) {
+			module.exports = ExecutionEnvironment;
+		} else {
+			window.ExecutionEnvironment = ExecutionEnvironment;
+		}
+
+	}());
+
+
+/***/ },
+/* 212 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	var div = React.DOM.div;
+	var focusManager = __webpack_require__(213);
+	var scopeTab = __webpack_require__(215);
+	var Assign = __webpack_require__(216);
+
+	// so that our CSS is statically analyzable
+	var CLASS_NAMES = {
+	  overlay: {
+	    base: 'ReactModal__Overlay',
+	    afterOpen: 'ReactModal__Overlay--after-open',
+	    beforeClose: 'ReactModal__Overlay--before-close'
+	  },
+	  content: {
+	    base: 'ReactModal__Content',
+	    afterOpen: 'ReactModal__Content--after-open',
+	    beforeClose: 'ReactModal__Content--before-close'
+	  }
+	};
+
+	var ModalPortal = module.exports = React.createClass({
+
+	  displayName: 'ModalPortal',
+
+	  getDefaultProps: function() {
+	    return {
+	      style: {
+	        overlay: {},
+	        content: {}
+	      }
+	    };
+	  },
+
+	  getInitialState: function() {
+	    return {
+	      afterOpen: false,
+	      beforeClose: false
+	    };
+	  },
+
+	  componentDidMount: function() {
+	    // Focus needs to be set when mounting and already open
+	    if (this.props.isOpen) {
+	      this.setFocusAfterRender(true);
+	      this.open();
+	    }
+	  },
+
+	  componentWillUnmount: function() {
+	    clearTimeout(this.closeTimer);
+	  },
+
+	  componentWillReceiveProps: function(newProps) {
+	    // Focus only needs to be set once when the modal is being opened
+	    if (!this.props.isOpen && newProps.isOpen) {
+	      this.setFocusAfterRender(true);
+	      this.open();
+	    } else if (this.props.isOpen && !newProps.isOpen) {
+	      this.close();
+	    }
+	  },
+
+	  componentDidUpdate: function () {
+	    if (this.focusAfterRender) {
+	      this.focusContent();
+	      this.setFocusAfterRender(false);
+	    }
+	  },
+
+	  setFocusAfterRender: function (focus) {
+	    this.focusAfterRender = focus;
+	  },
+
+	  open: function() {
+	    if (this.state.afterOpen && this.state.beforeClose) {
+	      clearTimeout(this.closeTimer);
+	      this.setState({ beforeClose: false });
+	    } else {
+	      focusManager.setupScopedFocus(this.node);
+	      focusManager.markForFocusLater();
+	      this.setState({isOpen: true}, function() {
+	        this.setState({afterOpen: true});
+
+	        if (this.props.isOpen && this.props.onAfterOpen) {
+	          this.props.onAfterOpen();
+	        }
+	      }.bind(this));
+	    }
+	  },
+
+	  close: function() {
+	    if (!this.ownerHandlesClose())
+	      return;
+	    if (this.props.closeTimeoutMS > 0)
+	      this.closeWithTimeout();
+	    else
+	      this.closeWithoutTimeout();
+	  },
+
+	  focusContent: function() {
+	    this.refs.content.focus();
+	  },
+
+	  closeWithTimeout: function() {
+	    this.setState({beforeClose: true}, function() {
+	      this.closeTimer = setTimeout(this.closeWithoutTimeout, this.props.closeTimeoutMS);
+	    }.bind(this));
+	  },
+
+	  closeWithoutTimeout: function() {
+	    this.setState({
+	      beforeClose: false,
+	      isOpen: false,
+	      afterOpen: false,
+	    }, this.afterClose);
+	  },
+
+	  afterClose: function() {
+	    focusManager.returnFocus();
+	    focusManager.teardownScopedFocus();
+	  },
+
+	  handleKeyDown: function(event) {
+	    if (event.keyCode == 9 /*tab*/) scopeTab(this.refs.content, event);
+	    if (event.keyCode == 27 /*esc*/) {
+	      event.preventDefault();
+	      this.requestClose(event);
+	    }
+	  },
+
+	  handleOverlayClick: function(event) {
+	    var node = event.target
+
+	    while (node) {
+	      if (node === this.refs.content) return
+	      node = node.parentNode
+	    }
+
+	    if (this.props.shouldCloseOnOverlayClick) {
+	      if (this.ownerHandlesClose())
+	        this.requestClose(event);
+	      else
+	        this.focusContent();
+	    }
+	  },
+
+	  requestClose: function(event) {
+	    if (this.ownerHandlesClose())
+	      this.props.onRequestClose(event);
+	  },
+
+	  ownerHandlesClose: function() {
+	    return this.props.onRequestClose;
+	  },
+
+	  shouldBeClosed: function() {
+	    return !this.props.isOpen && !this.state.beforeClose;
+	  },
+
+	  buildClassName: function(which, additional) {
+	    var className = CLASS_NAMES[which].base;
+	    if (this.state.afterOpen)
+	      className += ' '+CLASS_NAMES[which].afterOpen;
+	    if (this.state.beforeClose)
+	      className += ' '+CLASS_NAMES[which].beforeClose;
+	    return additional ? className + ' ' + additional : className;
+	  },
+
+	  render: function() {
+	    var contentStyles = (this.props.className) ? {} : this.props.defaultStyles.content;
+	    var overlayStyles = (this.props.overlayClassName) ? {} : this.props.defaultStyles.overlay;
+
+	    return this.shouldBeClosed() ? div() : (
+	      div({
+	        ref: "overlay",
+	        className: this.buildClassName('overlay', this.props.overlayClassName),
+	        style: Assign({}, overlayStyles, this.props.style.overlay || {}),
+	        onClick: this.handleOverlayClick
+	      },
+	        div({
+	          ref: "content",
+	          style: Assign({}, contentStyles, this.props.style.content || {}),
+	          className: this.buildClassName('content', this.props.className),
+	          tabIndex: "-1",
+	          onKeyDown: this.handleKeyDown
+	        },
+	          this.props.children
+	        )
+	      )
+	    );
+	  }
+	});
+
+
+/***/ },
+/* 213 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var findTabbable = __webpack_require__(214);
+	var modalElement = null;
+	var focusLaterElement = null;
+	var needToFocus = false;
+
+	function handleBlur(event) {
+	  needToFocus = true;
+	}
+
+	function handleFocus(event) {
+	  if (needToFocus) {
+	    needToFocus = false;
+	    if (!modalElement) {
+	      return;
+	    }
+	    // need to see how jQuery shims document.on('focusin') so we don't need the
+	    // setTimeout, firefox doesn't support focusin, if it did, we could focus
+	    // the element outside of a setTimeout. Side-effect of this implementation 
+	    // is that the document.body gets focus, and then we focus our element right 
+	    // after, seems fine.
+	    setTimeout(function() {
+	      if (modalElement.contains(document.activeElement))
+	        return;
+	      var el = (findTabbable(modalElement)[0] || modalElement);
+	      el.focus();
+	    }, 0);
+	  }
+	}
+
+	exports.markForFocusLater = function() {
+	  focusLaterElement = document.activeElement;
+	};
+
+	exports.returnFocus = function() {
+	  try {
+	    focusLaterElement.focus();
+	  }
+	  catch (e) {
+	    console.warn('You tried to return focus to '+focusLaterElement+' but it is not in the DOM anymore');
+	  }
+	  focusLaterElement = null;
+	};
+
+	exports.setupScopedFocus = function(element) {
+	  modalElement = element;
+
+	  if (window.addEventListener) {
+	    window.addEventListener('blur', handleBlur, false);
+	    document.addEventListener('focus', handleFocus, true);
+	  } else {
+	    window.attachEvent('onBlur', handleBlur);
+	    document.attachEvent('onFocus', handleFocus);
+	  }
+	};
+
+	exports.teardownScopedFocus = function() {
+	  modalElement = null;
+
+	  if (window.addEventListener) {
+	    window.removeEventListener('blur', handleBlur);
+	    document.removeEventListener('focus', handleFocus);
+	  } else {
+	    window.detachEvent('onBlur', handleBlur);
+	    document.detachEvent('onFocus', handleFocus);
+	  }
+	};
+
+
+
+
+/***/ },
+/* 214 */
+/***/ function(module, exports) {
+
+	/*!
+	 * Adapted from jQuery UI core
+	 *
+	 * http://jqueryui.com
+	 *
+	 * Copyright 2014 jQuery Foundation and other contributors
+	 * Released under the MIT license.
+	 * http://jquery.org/license
+	 *
+	 * http://api.jqueryui.com/category/ui-core/
+	 */
+
+	function focusable(element, isTabIndexNotNaN) {
+	  var nodeName = element.nodeName.toLowerCase();
+	  return (/input|select|textarea|button|object/.test(nodeName) ?
+	    !element.disabled :
+	    "a" === nodeName ?
+	      element.href || isTabIndexNotNaN :
+	      isTabIndexNotNaN) && visible(element);
+	}
+
+	function hidden(el) {
+	  return (el.offsetWidth <= 0 && el.offsetHeight <= 0) ||
+	    el.style.display === 'none';
+	}
+
+	function visible(element) {
+	  while (element) {
+	    if (element === document.body) break;
+	    if (hidden(element)) return false;
+	    element = element.parentNode;
+	  }
+	  return true;
+	}
+
+	function tabbable(element) {
+	  var tabIndex = element.getAttribute('tabindex');
+	  if (tabIndex === null) tabIndex = undefined;
+	  var isTabIndexNaN = isNaN(tabIndex);
+	  return (isTabIndexNaN || tabIndex >= 0) && focusable(element, !isTabIndexNaN);
+	}
+
+	function findTabbableDescendants(element) {
+	  return [].slice.call(element.querySelectorAll('*'), 0).filter(function(el) {
+	    return tabbable(el);
+	  });
+	}
+
+	module.exports = findTabbableDescendants;
+
+
+
+/***/ },
+/* 215 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var findTabbable = __webpack_require__(214);
+
+	module.exports = function(node, event) {
+	  var tabbable = findTabbable(node);
+	  if (!tabbable.length) {
+	      event.preventDefault();
+	      return;
+	  }
+	  var finalTabbable = tabbable[event.shiftKey ? 0 : tabbable.length - 1];
+	  var leavingFinalTabbable = (
+	    finalTabbable === document.activeElement ||
+	    // handle immediate shift+tab after opening with mouse
+	    node === document.activeElement
+	  );
+	  if (!leavingFinalTabbable) return;
+	  event.preventDefault();
+	  var target = tabbable[event.shiftKey ? tabbable.length - 1 : 0];
+	  target.focus();
+	};
+
+
+/***/ },
+/* 216 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * lodash 3.2.0 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+	var baseAssign = __webpack_require__(217),
+	    createAssigner = __webpack_require__(223),
+	    keys = __webpack_require__(219);
+
+	/**
+	 * A specialized version of `_.assign` for customizing assigned values without
+	 * support for argument juggling, multiple sources, and `this` binding `customizer`
+	 * functions.
+	 *
+	 * @private
+	 * @param {Object} object The destination object.
+	 * @param {Object} source The source object.
+	 * @param {Function} customizer The function to customize assigned values.
+	 * @returns {Object} Returns `object`.
+	 */
+	function assignWith(object, source, customizer) {
+	  var index = -1,
+	      props = keys(source),
+	      length = props.length;
+
+	  while (++index < length) {
+	    var key = props[index],
+	        value = object[key],
+	        result = customizer(value, source[key], key, object, source);
+
+	    if ((result === result ? (result !== value) : (value === value)) ||
+	        (value === undefined && !(key in object))) {
+	      object[key] = result;
+	    }
+	  }
+	  return object;
+	}
+
+	/**
+	 * Assigns own enumerable properties of source object(s) to the destination
+	 * object. Subsequent sources overwrite property assignments of previous sources.
+	 * If `customizer` is provided it is invoked to produce the assigned values.
+	 * The `customizer` is bound to `thisArg` and invoked with five arguments:
+	 * (objectValue, sourceValue, key, object, source).
+	 *
+	 * **Note:** This method mutates `object` and is based on
+	 * [`Object.assign`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.assign).
+	 *
+	 * @static
+	 * @memberOf _
+	 * @alias extend
+	 * @category Object
+	 * @param {Object} object The destination object.
+	 * @param {...Object} [sources] The source objects.
+	 * @param {Function} [customizer] The function to customize assigned values.
+	 * @param {*} [thisArg] The `this` binding of `customizer`.
+	 * @returns {Object} Returns `object`.
+	 * @example
+	 *
+	 * _.assign({ 'user': 'barney' }, { 'age': 40 }, { 'user': 'fred' });
+	 * // => { 'user': 'fred', 'age': 40 }
+	 *
+	 * // using a customizer callback
+	 * var defaults = _.partialRight(_.assign, function(value, other) {
+	 *   return _.isUndefined(value) ? other : value;
+	 * });
+	 *
+	 * defaults({ 'user': 'barney' }, { 'age': 36 }, { 'user': 'fred' });
+	 * // => { 'user': 'barney', 'age': 36 }
+	 */
+	var assign = createAssigner(function(object, source, customizer) {
+	  return customizer
+	    ? assignWith(object, source, customizer)
+	    : baseAssign(object, source);
+	});
+
+	module.exports = assign;
+
+
+/***/ },
+/* 217 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * lodash 3.2.0 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+	var baseCopy = __webpack_require__(218),
+	    keys = __webpack_require__(219);
+
+	/**
+	 * The base implementation of `_.assign` without support for argument juggling,
+	 * multiple sources, and `customizer` functions.
+	 *
+	 * @private
+	 * @param {Object} object The destination object.
+	 * @param {Object} source The source object.
+	 * @returns {Object} Returns `object`.
+	 */
+	function baseAssign(object, source) {
+	  return source == null
+	    ? object
+	    : baseCopy(source, keys(source), object);
+	}
+
+	module.exports = baseAssign;
+
+
+/***/ },
+/* 218 */
+/***/ function(module, exports) {
+
+	/**
+	 * lodash 3.0.1 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+
+	/**
+	 * Copies properties of `source` to `object`.
+	 *
+	 * @private
+	 * @param {Object} source The object to copy properties from.
+	 * @param {Array} props The property names to copy.
+	 * @param {Object} [object={}] The object to copy properties to.
+	 * @returns {Object} Returns `object`.
+	 */
+	function baseCopy(source, props, object) {
+	  object || (object = {});
+
+	  var index = -1,
+	      length = props.length;
+
+	  while (++index < length) {
+	    var key = props[index];
+	    object[key] = source[key];
+	  }
+	  return object;
+	}
+
+	module.exports = baseCopy;
+
+
+/***/ },
+/* 219 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * lodash 3.1.2 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+	var getNative = __webpack_require__(220),
+	    isArguments = __webpack_require__(221),
+	    isArray = __webpack_require__(222);
+
+	/** Used to detect unsigned integer values. */
+	var reIsUint = /^\d+$/;
+
+	/** Used for native method references. */
+	var objectProto = Object.prototype;
+
+	/** Used to check objects for own properties. */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+
+	/* Native method references for those with the same name as other `lodash` methods. */
+	var nativeKeys = getNative(Object, 'keys');
+
+	/**
+	 * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
+	 * of an array-like value.
+	 */
+	var MAX_SAFE_INTEGER = 9007199254740991;
+
+	/**
+	 * The base implementation of `_.property` without support for deep paths.
+	 *
+	 * @private
+	 * @param {string} key The key of the property to get.
+	 * @returns {Function} Returns the new function.
+	 */
+	function baseProperty(key) {
+	  return function(object) {
+	    return object == null ? undefined : object[key];
+	  };
+	}
+
+	/**
+	 * Gets the "length" property value of `object`.
+	 *
+	 * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
+	 * that affects Safari on at least iOS 8.1-8.3 ARM64.
+	 *
+	 * @private
+	 * @param {Object} object The object to query.
+	 * @returns {*} Returns the "length" value.
+	 */
+	var getLength = baseProperty('length');
+
+	/**
+	 * Checks if `value` is array-like.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+	 */
+	function isArrayLike(value) {
+	  return value != null && isLength(getLength(value));
+	}
+
+	/**
+	 * Checks if `value` is a valid array-like index.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+	 * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+	 */
+	function isIndex(value, length) {
+	  value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
+	  length = length == null ? MAX_SAFE_INTEGER : length;
+	  return value > -1 && value % 1 == 0 && value < length;
+	}
+
+	/**
+	 * Checks if `value` is a valid array-like length.
+	 *
+	 * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+	 */
+	function isLength(value) {
+	  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+	}
+
+	/**
+	 * A fallback implementation of `Object.keys` which creates an array of the
+	 * own enumerable property names of `object`.
+	 *
+	 * @private
+	 * @param {Object} object The object to query.
+	 * @returns {Array} Returns the array of property names.
+	 */
+	function shimKeys(object) {
+	  var props = keysIn(object),
+	      propsLength = props.length,
+	      length = propsLength && object.length;
+
+	  var allowIndexes = !!length && isLength(length) &&
+	    (isArray(object) || isArguments(object));
+
+	  var index = -1,
+	      result = [];
+
+	  while (++index < propsLength) {
+	    var key = props[index];
+	    if ((allowIndexes && isIndex(key, length)) || hasOwnProperty.call(object, key)) {
+	      result.push(key);
+	    }
+	  }
+	  return result;
+	}
+
+	/**
+	 * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+	 * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+	 * @example
+	 *
+	 * _.isObject({});
+	 * // => true
+	 *
+	 * _.isObject([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObject(1);
+	 * // => false
+	 */
+	function isObject(value) {
+	  // Avoid a V8 JIT bug in Chrome 19-20.
+	  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+	  var type = typeof value;
+	  return !!value && (type == 'object' || type == 'function');
+	}
+
+	/**
+	 * Creates an array of the own enumerable property names of `object`.
+	 *
+	 * **Note:** Non-object values are coerced to objects. See the
+	 * [ES spec](http://ecma-international.org/ecma-262/6.0/#sec-object.keys)
+	 * for more details.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Object
+	 * @param {Object} object The object to query.
+	 * @returns {Array} Returns the array of property names.
+	 * @example
+	 *
+	 * function Foo() {
+	 *   this.a = 1;
+	 *   this.b = 2;
+	 * }
+	 *
+	 * Foo.prototype.c = 3;
+	 *
+	 * _.keys(new Foo);
+	 * // => ['a', 'b'] (iteration order is not guaranteed)
+	 *
+	 * _.keys('hi');
+	 * // => ['0', '1']
+	 */
+	var keys = !nativeKeys ? shimKeys : function(object) {
+	  var Ctor = object == null ? undefined : object.constructor;
+	  if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
+	      (typeof object != 'function' && isArrayLike(object))) {
+	    return shimKeys(object);
+	  }
+	  return isObject(object) ? nativeKeys(object) : [];
+	};
+
+	/**
+	 * Creates an array of the own and inherited enumerable property names of `object`.
+	 *
+	 * **Note:** Non-object values are coerced to objects.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Object
+	 * @param {Object} object The object to query.
+	 * @returns {Array} Returns the array of property names.
+	 * @example
+	 *
+	 * function Foo() {
+	 *   this.a = 1;
+	 *   this.b = 2;
+	 * }
+	 *
+	 * Foo.prototype.c = 3;
+	 *
+	 * _.keysIn(new Foo);
+	 * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
+	 */
+	function keysIn(object) {
+	  if (object == null) {
+	    return [];
+	  }
+	  if (!isObject(object)) {
+	    object = Object(object);
+	  }
+	  var length = object.length;
+	  length = (length && isLength(length) &&
+	    (isArray(object) || isArguments(object)) && length) || 0;
+
+	  var Ctor = object.constructor,
+	      index = -1,
+	      isProto = typeof Ctor == 'function' && Ctor.prototype === object,
+	      result = Array(length),
+	      skipIndexes = length > 0;
+
+	  while (++index < length) {
+	    result[index] = (index + '');
+	  }
+	  for (var key in object) {
+	    if (!(skipIndexes && isIndex(key, length)) &&
+	        !(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
+	      result.push(key);
+	    }
+	  }
+	  return result;
+	}
+
+	module.exports = keys;
+
+
+/***/ },
+/* 220 */
+/***/ function(module, exports) {
+
+	/**
+	 * lodash 3.9.1 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+
+	/** `Object#toString` result references. */
+	var funcTag = '[object Function]';
+
+	/** Used to detect host constructors (Safari > 5). */
+	var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+	/**
+	 * Checks if `value` is object-like.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+	 */
+	function isObjectLike(value) {
+	  return !!value && typeof value == 'object';
+	}
+
+	/** Used for native method references. */
+	var objectProto = Object.prototype;
+
+	/** Used to resolve the decompiled source of functions. */
+	var fnToString = Function.prototype.toString;
+
+	/** Used to check objects for own properties. */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+
+	/**
+	 * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+	 * of values.
+	 */
+	var objToString = objectProto.toString;
+
+	/** Used to detect if a method is native. */
+	var reIsNative = RegExp('^' +
+	  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
+	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+	);
+
+	/**
+	 * Gets the native function at `key` of `object`.
+	 *
+	 * @private
+	 * @param {Object} object The object to query.
+	 * @param {string} key The key of the method to get.
+	 * @returns {*} Returns the function if it's native, else `undefined`.
+	 */
+	function getNative(object, key) {
+	  var value = object == null ? undefined : object[key];
+	  return isNative(value) ? value : undefined;
+	}
+
+	/**
+	 * Checks if `value` is classified as a `Function` object.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	 * @example
+	 *
+	 * _.isFunction(_);
+	 * // => true
+	 *
+	 * _.isFunction(/abc/);
+	 * // => false
+	 */
+	function isFunction(value) {
+	  // The use of `Object#toString` avoids issues with the `typeof` operator
+	  // in older versions of Chrome and Safari which return 'function' for regexes
+	  // and Safari 8 equivalents which return 'object' for typed array constructors.
+	  return isObject(value) && objToString.call(value) == funcTag;
+	}
+
+	/**
+	 * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+	 * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+	 * @example
+	 *
+	 * _.isObject({});
+	 * // => true
+	 *
+	 * _.isObject([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObject(1);
+	 * // => false
+	 */
+	function isObject(value) {
+	  // Avoid a V8 JIT bug in Chrome 19-20.
+	  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+	  var type = typeof value;
+	  return !!value && (type == 'object' || type == 'function');
+	}
+
+	/**
+	 * Checks if `value` is a native function.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
+	 * @example
+	 *
+	 * _.isNative(Array.prototype.push);
+	 * // => true
+	 *
+	 * _.isNative(_);
+	 * // => false
+	 */
+	function isNative(value) {
+	  if (value == null) {
+	    return false;
+	  }
+	  if (isFunction(value)) {
+	    return reIsNative.test(fnToString.call(value));
+	  }
+	  return isObjectLike(value) && reIsHostCtor.test(value);
+	}
+
+	module.exports = getNative;
+
+
+/***/ },
+/* 221 */
+/***/ function(module, exports) {
+
+	/**
+	 * lodash (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modularize exports="npm" -o ./`
+	 * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+	 * Released under MIT license <https://lodash.com/license>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 */
+
+	/** Used as references for various `Number` constants. */
+	var MAX_SAFE_INTEGER = 9007199254740991;
+
+	/** `Object#toString` result references. */
+	var argsTag = '[object Arguments]',
+	    funcTag = '[object Function]',
+	    genTag = '[object GeneratorFunction]';
+
+	/** Used for built-in method references. */
+	var objectProto = Object.prototype;
+
+	/** Used to check objects for own properties. */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+
+	/**
+	 * Used to resolve the
+	 * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+	 * of values.
+	 */
+	var objectToString = objectProto.toString;
+
+	/** Built-in value references. */
+	var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+	/**
+	 * Checks if `value` is likely an `arguments` object.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 0.1.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+	 *  else `false`.
+	 * @example
+	 *
+	 * _.isArguments(function() { return arguments; }());
+	 * // => true
+	 *
+	 * _.isArguments([1, 2, 3]);
+	 * // => false
+	 */
+	function isArguments(value) {
+	  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+	  return isArrayLikeObject(value) && hasOwnProperty.call(value, 'callee') &&
+	    (!propertyIsEnumerable.call(value, 'callee') || objectToString.call(value) == argsTag);
+	}
+
+	/**
+	 * Checks if `value` is array-like. A value is considered array-like if it's
+	 * not a function and has a `value.length` that's an integer greater than or
+	 * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 4.0.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+	 * @example
+	 *
+	 * _.isArrayLike([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isArrayLike(document.body.children);
+	 * // => true
+	 *
+	 * _.isArrayLike('abc');
+	 * // => true
+	 *
+	 * _.isArrayLike(_.noop);
+	 * // => false
+	 */
+	function isArrayLike(value) {
+	  return value != null && isLength(value.length) && !isFunction(value);
+	}
+
+	/**
+	 * This method is like `_.isArrayLike` except that it also checks if `value`
+	 * is an object.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 4.0.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is an array-like object,
+	 *  else `false`.
+	 * @example
+	 *
+	 * _.isArrayLikeObject([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isArrayLikeObject(document.body.children);
+	 * // => true
+	 *
+	 * _.isArrayLikeObject('abc');
+	 * // => false
+	 *
+	 * _.isArrayLikeObject(_.noop);
+	 * // => false
+	 */
+	function isArrayLikeObject(value) {
+	  return isObjectLike(value) && isArrayLike(value);
+	}
+
+	/**
+	 * Checks if `value` is classified as a `Function` object.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 0.1.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+	 * @example
+	 *
+	 * _.isFunction(_);
+	 * // => true
+	 *
+	 * _.isFunction(/abc/);
+	 * // => false
+	 */
+	function isFunction(value) {
+	  // The use of `Object#toString` avoids issues with the `typeof` operator
+	  // in Safari 8-9 which returns 'object' for typed array and other constructors.
+	  var tag = isObject(value) ? objectToString.call(value) : '';
+	  return tag == funcTag || tag == genTag;
+	}
+
+	/**
+	 * Checks if `value` is a valid array-like length.
+	 *
+	 * **Note:** This method is loosely based on
+	 * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 4.0.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+	 * @example
+	 *
+	 * _.isLength(3);
+	 * // => true
+	 *
+	 * _.isLength(Number.MIN_VALUE);
+	 * // => false
+	 *
+	 * _.isLength(Infinity);
+	 * // => false
+	 *
+	 * _.isLength('3');
+	 * // => false
+	 */
+	function isLength(value) {
+	  return typeof value == 'number' &&
+	    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+	}
+
+	/**
+	 * Checks if `value` is the
+	 * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+	 * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 0.1.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+	 * @example
+	 *
+	 * _.isObject({});
+	 * // => true
+	 *
+	 * _.isObject([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObject(_.noop);
+	 * // => true
+	 *
+	 * _.isObject(null);
+	 * // => false
+	 */
+	function isObject(value) {
+	  var type = typeof value;
+	  return !!value && (type == 'object' || type == 'function');
+	}
+
+	/**
+	 * Checks if `value` is object-like. A value is object-like if it's not `null`
+	 * and has a `typeof` result of "object".
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 4.0.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+	 * @example
+	 *
+	 * _.isObjectLike({});
+	 * // => true
+	 *
+	 * _.isObjectLike([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObjectLike(_.noop);
+	 * // => false
+	 *
+	 * _.isObjectLike(null);
+	 * // => false
+	 */
+	function isObjectLike(value) {
+	  return !!value && typeof value == 'object';
+	}
+
+	module.exports = isArguments;
+
+
+/***/ },
+/* 222 */
+/***/ function(module, exports) {
+
+	/**
+	 * lodash 3.0.4 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+
+	/** `Object#toString` result references. */
+	var arrayTag = '[object Array]',
+	    funcTag = '[object Function]';
+
+	/** Used to detect host constructors (Safari > 5). */
+	var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+	/**
+	 * Checks if `value` is object-like.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+	 */
+	function isObjectLike(value) {
+	  return !!value && typeof value == 'object';
+	}
+
+	/** Used for native method references. */
+	var objectProto = Object.prototype;
+
+	/** Used to resolve the decompiled source of functions. */
+	var fnToString = Function.prototype.toString;
+
+	/** Used to check objects for own properties. */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+
+	/**
+	 * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+	 * of values.
+	 */
+	var objToString = objectProto.toString;
+
+	/** Used to detect if a method is native. */
+	var reIsNative = RegExp('^' +
+	  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
+	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+	);
+
+	/* Native method references for those with the same name as other `lodash` methods. */
+	var nativeIsArray = getNative(Array, 'isArray');
+
+	/**
+	 * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
+	 * of an array-like value.
+	 */
+	var MAX_SAFE_INTEGER = 9007199254740991;
+
+	/**
+	 * Gets the native function at `key` of `object`.
+	 *
+	 * @private
+	 * @param {Object} object The object to query.
+	 * @param {string} key The key of the method to get.
+	 * @returns {*} Returns the function if it's native, else `undefined`.
+	 */
+	function getNative(object, key) {
+	  var value = object == null ? undefined : object[key];
+	  return isNative(value) ? value : undefined;
+	}
+
+	/**
+	 * Checks if `value` is a valid array-like length.
+	 *
+	 * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+	 */
+	function isLength(value) {
+	  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+	}
+
+	/**
+	 * Checks if `value` is classified as an `Array` object.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	 * @example
+	 *
+	 * _.isArray([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isArray(function() { return arguments; }());
+	 * // => false
+	 */
+	var isArray = nativeIsArray || function(value) {
+	  return isObjectLike(value) && isLength(value.length) && objToString.call(value) == arrayTag;
+	};
+
+	/**
+	 * Checks if `value` is classified as a `Function` object.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	 * @example
+	 *
+	 * _.isFunction(_);
+	 * // => true
+	 *
+	 * _.isFunction(/abc/);
+	 * // => false
+	 */
+	function isFunction(value) {
+	  // The use of `Object#toString` avoids issues with the `typeof` operator
+	  // in older versions of Chrome and Safari which return 'function' for regexes
+	  // and Safari 8 equivalents which return 'object' for typed array constructors.
+	  return isObject(value) && objToString.call(value) == funcTag;
+	}
+
+	/**
+	 * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+	 * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+	 * @example
+	 *
+	 * _.isObject({});
+	 * // => true
+	 *
+	 * _.isObject([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObject(1);
+	 * // => false
+	 */
+	function isObject(value) {
+	  // Avoid a V8 JIT bug in Chrome 19-20.
+	  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+	  var type = typeof value;
+	  return !!value && (type == 'object' || type == 'function');
+	}
+
+	/**
+	 * Checks if `value` is a native function.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
+	 * @example
+	 *
+	 * _.isNative(Array.prototype.push);
+	 * // => true
+	 *
+	 * _.isNative(_);
+	 * // => false
+	 */
+	function isNative(value) {
+	  if (value == null) {
+	    return false;
+	  }
+	  if (isFunction(value)) {
+	    return reIsNative.test(fnToString.call(value));
+	  }
+	  return isObjectLike(value) && reIsHostCtor.test(value);
+	}
+
+	module.exports = isArray;
+
+
+/***/ },
+/* 223 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * lodash 3.1.1 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+	var bindCallback = __webpack_require__(224),
+	    isIterateeCall = __webpack_require__(225),
+	    restParam = __webpack_require__(226);
+
+	/**
+	 * Creates a function that assigns properties of source object(s) to a given
+	 * destination object.
+	 *
+	 * **Note:** This function is used to create `_.assign`, `_.defaults`, and `_.merge`.
+	 *
+	 * @private
+	 * @param {Function} assigner The function to assign values.
+	 * @returns {Function} Returns the new assigner function.
+	 */
+	function createAssigner(assigner) {
+	  return restParam(function(object, sources) {
+	    var index = -1,
+	        length = object == null ? 0 : sources.length,
+	        customizer = length > 2 ? sources[length - 2] : undefined,
+	        guard = length > 2 ? sources[2] : undefined,
+	        thisArg = length > 1 ? sources[length - 1] : undefined;
+
+	    if (typeof customizer == 'function') {
+	      customizer = bindCallback(customizer, thisArg, 5);
+	      length -= 2;
+	    } else {
+	      customizer = typeof thisArg == 'function' ? thisArg : undefined;
+	      length -= (customizer ? 1 : 0);
+	    }
+	    if (guard && isIterateeCall(sources[0], sources[1], guard)) {
+	      customizer = length < 3 ? undefined : customizer;
+	      length = 1;
+	    }
+	    while (++index < length) {
+	      var source = sources[index];
+	      if (source) {
+	        assigner(object, source, customizer);
+	      }
+	    }
+	    return object;
+	  });
+	}
+
+	module.exports = createAssigner;
+
+
+/***/ },
+/* 224 */
+/***/ function(module, exports) {
+
+	/**
+	 * lodash 3.0.1 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+
+	/**
+	 * A specialized version of `baseCallback` which only supports `this` binding
+	 * and specifying the number of arguments to provide to `func`.
+	 *
+	 * @private
+	 * @param {Function} func The function to bind.
+	 * @param {*} thisArg The `this` binding of `func`.
+	 * @param {number} [argCount] The number of arguments to provide to `func`.
+	 * @returns {Function} Returns the callback.
+	 */
+	function bindCallback(func, thisArg, argCount) {
+	  if (typeof func != 'function') {
+	    return identity;
+	  }
+	  if (thisArg === undefined) {
+	    return func;
+	  }
+	  switch (argCount) {
+	    case 1: return function(value) {
+	      return func.call(thisArg, value);
+	    };
+	    case 3: return function(value, index, collection) {
+	      return func.call(thisArg, value, index, collection);
+	    };
+	    case 4: return function(accumulator, value, index, collection) {
+	      return func.call(thisArg, accumulator, value, index, collection);
+	    };
+	    case 5: return function(value, other, key, object, source) {
+	      return func.call(thisArg, value, other, key, object, source);
+	    };
+	  }
+	  return function() {
+	    return func.apply(thisArg, arguments);
+	  };
+	}
+
+	/**
+	 * This method returns the first argument provided to it.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Utility
+	 * @param {*} value Any value.
+	 * @returns {*} Returns `value`.
+	 * @example
+	 *
+	 * var object = { 'user': 'fred' };
+	 *
+	 * _.identity(object) === object;
+	 * // => true
+	 */
+	function identity(value) {
+	  return value;
+	}
+
+	module.exports = bindCallback;
+
+
+/***/ },
+/* 225 */
+/***/ function(module, exports) {
+
+	/**
+	 * lodash 3.0.9 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+
+	/** Used to detect unsigned integer values. */
+	var reIsUint = /^\d+$/;
+
+	/**
+	 * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
+	 * of an array-like value.
+	 */
+	var MAX_SAFE_INTEGER = 9007199254740991;
+
+	/**
+	 * The base implementation of `_.property` without support for deep paths.
+	 *
+	 * @private
+	 * @param {string} key The key of the property to get.
+	 * @returns {Function} Returns the new function.
+	 */
+	function baseProperty(key) {
+	  return function(object) {
+	    return object == null ? undefined : object[key];
+	  };
+	}
+
+	/**
+	 * Gets the "length" property value of `object`.
+	 *
+	 * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
+	 * that affects Safari on at least iOS 8.1-8.3 ARM64.
+	 *
+	 * @private
+	 * @param {Object} object The object to query.
+	 * @returns {*} Returns the "length" value.
+	 */
+	var getLength = baseProperty('length');
+
+	/**
+	 * Checks if `value` is array-like.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+	 */
+	function isArrayLike(value) {
+	  return value != null && isLength(getLength(value));
+	}
+
+	/**
+	 * Checks if `value` is a valid array-like index.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+	 * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+	 */
+	function isIndex(value, length) {
+	  value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
+	  length = length == null ? MAX_SAFE_INTEGER : length;
+	  return value > -1 && value % 1 == 0 && value < length;
+	}
+
+	/**
+	 * Checks if the provided arguments are from an iteratee call.
+	 *
+	 * @private
+	 * @param {*} value The potential iteratee value argument.
+	 * @param {*} index The potential iteratee index or key argument.
+	 * @param {*} object The potential iteratee object argument.
+	 * @returns {boolean} Returns `true` if the arguments are from an iteratee call, else `false`.
+	 */
+	function isIterateeCall(value, index, object) {
+	  if (!isObject(object)) {
+	    return false;
+	  }
+	  var type = typeof index;
+	  if (type == 'number'
+	      ? (isArrayLike(object) && isIndex(index, object.length))
+	      : (type == 'string' && index in object)) {
+	    var other = object[index];
+	    return value === value ? (value === other) : (other !== other);
+	  }
+	  return false;
+	}
+
+	/**
+	 * Checks if `value` is a valid array-like length.
+	 *
+	 * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+	 */
+	function isLength(value) {
+	  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+	}
+
+	/**
+	 * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+	 * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+	 * @example
+	 *
+	 * _.isObject({});
+	 * // => true
+	 *
+	 * _.isObject([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObject(1);
+	 * // => false
+	 */
+	function isObject(value) {
+	  // Avoid a V8 JIT bug in Chrome 19-20.
+	  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+	  var type = typeof value;
+	  return !!value && (type == 'object' || type == 'function');
+	}
+
+	module.exports = isIterateeCall;
+
+
+/***/ },
+/* 226 */
+/***/ function(module, exports) {
+
+	/**
+	 * lodash 3.6.1 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modern modularize exports="npm" -o ./`
+	 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+
+	/** Used as the `TypeError` message for "Functions" methods. */
+	var FUNC_ERROR_TEXT = 'Expected a function';
+
+	/* Native method references for those with the same name as other `lodash` methods. */
+	var nativeMax = Math.max;
+
+	/**
+	 * Creates a function that invokes `func` with the `this` binding of the
+	 * created function and arguments from `start` and beyond provided as an array.
+	 *
+	 * **Note:** This method is based on the [rest parameter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters).
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Function
+	 * @param {Function} func The function to apply a rest parameter to.
+	 * @param {number} [start=func.length-1] The start position of the rest parameter.
+	 * @returns {Function} Returns the new function.
+	 * @example
+	 *
+	 * var say = _.restParam(function(what, names) {
+	 *   return what + ' ' + _.initial(names).join(', ') +
+	 *     (_.size(names) > 1 ? ', & ' : '') + _.last(names);
+	 * });
+	 *
+	 * say('hello', 'fred', 'barney', 'pebbles');
+	 * // => 'hello fred, barney, & pebbles'
+	 */
+	function restParam(func, start) {
+	  if (typeof func != 'function') {
+	    throw new TypeError(FUNC_ERROR_TEXT);
+	  }
+	  start = nativeMax(start === undefined ? (func.length - 1) : (+start || 0), 0);
+	  return function() {
+	    var args = arguments,
+	        index = -1,
+	        length = nativeMax(args.length - start, 0),
+	        rest = Array(length);
+
+	    while (++index < length) {
+	      rest[index] = args[start + index];
+	    }
+	    switch (start) {
+	      case 0: return func.call(this, rest);
+	      case 1: return func.call(this, args[0], rest);
+	      case 2: return func.call(this, args[0], args[1], rest);
+	    }
+	    var otherArgs = Array(start + 1);
+	    index = -1;
+	    while (++index < start) {
+	      otherArgs[index] = args[index];
+	    }
+	    otherArgs[start] = rest;
+	    return func.apply(this, otherArgs);
+	  };
+	}
+
+	module.exports = restParam;
+
+
+/***/ },
+/* 227 */
+/***/ function(module, exports) {
+
+	var _element = typeof document !== 'undefined' ? document.body : null;
+
+	function setElement(element) {
+	  if (typeof element === 'string') {
+	    var el = document.querySelectorAll(element);
+	    element = 'length' in el ? el[0] : el;
+	  }
+	  _element = element || _element;
+	  return _element;
+	}
+
+	function hide(appElement) {
+	  validateElement(appElement);
+	  (appElement || _element).setAttribute('aria-hidden', 'true');
+	}
+
+	function show(appElement) {
+	  validateElement(appElement);
+	  (appElement || _element).removeAttribute('aria-hidden');
+	}
+
+	function toggle(shouldHide, appElement) {
+	  if (shouldHide)
+	    hide(appElement);
+	  else
+	    show(appElement);
+	}
+
+	function validateElement(appElement) {
+	  if (!appElement && !_element)
+	    throw new Error('react-modal: You must set an element with `Modal.setAppElement(el)` to make this accessible');
+	}
+
+	function resetForTesting() {
+	  _element = document.body;
+	}
+
+	exports.toggle = toggle;
+	exports.setElement = setElement;
+	exports.show = show;
+	exports.hide = hide;
+	exports.resetForTesting = resetForTesting;
+
+
+/***/ },
+/* 228 */
+/***/ function(module, exports) {
+
+	module.exports = function(opts) {
+	  return new ElementClass(opts)
+	}
+
+	function indexOf(arr, prop) {
+	  if (arr.indexOf) return arr.indexOf(prop)
+	  for (var i = 0, len = arr.length; i < len; i++)
+	    if (arr[i] === prop) return i
+	  return -1
+	}
+
+	function ElementClass(opts) {
+	  if (!(this instanceof ElementClass)) return new ElementClass(opts)
+	  var self = this
+	  if (!opts) opts = {}
+
+	  // similar doing instanceof HTMLElement but works in IE8
+	  if (opts.nodeType) opts = {el: opts}
+
+	  this.opts = opts
+	  this.el = opts.el || document.body
+	  if (typeof this.el !== 'object') this.el = document.querySelector(this.el)
+	}
+
+	ElementClass.prototype.add = function(className) {
+	  var el = this.el
+	  if (!el) return
+	  if (el.className === "") return el.className = className
+	  var classes = el.className.split(' ')
+	  if (indexOf(classes, className) > -1) return classes
+	  classes.push(className)
+	  el.className = classes.join(' ')
+	  return classes
+	}
+
+	ElementClass.prototype.remove = function(className) {
+	  var el = this.el
+	  if (!el) return
+	  if (el.className === "") return
+	  var classes = el.className.split(' ')
+	  var idx = indexOf(classes, className)
+	  if (idx > -1) classes.splice(idx, 1)
+	  el.className = classes.join(' ')
+	  return classes
+	}
+
+	ElementClass.prototype.has = function(className) {
+	  var el = this.el
+	  if (!el) return
+	  var classes = el.className.split(' ')
+	  return indexOf(classes, className) > -1
+	}
+
+	ElementClass.prototype.toggle = function(className) {
+	  var el = this.el
+	  if (!el) return
+	  if (this.has(className)) this.remove(className)
+	  else this.add(className)
+	}
+
+
+/***/ },
+/* 229 */
 /***/ function(module, exports) {
 
 	'use strict';
 
 	var inlineStyles = {
+
+	    modalDialogStyle: {
+	        overlay: {
+	            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+	        },
+	        content: {
+	            border: '1px solid darkgray',
+	            borderRadius: '6px',
+	            backgroundColor: '#fafafa',
+	            boxShadow: 'inset 0px 0px 10px 0px lightgrey',
+	            WebkitBoxShadow: 'inset 0px 0px 10px 0px lightgrey',
+	            MozBoxShadow: 'inset 0px 0px 10px 0px lightgrey',
+	            OBoxShadow: 'inset 0px 0px 10px 0px lightgrey',
+	            top: '50%',
+	            left: '50%',
+	            right: 'auto',
+	            bottom: 'auto',
+	            marginRight: '-50%',
+	            transform: 'translate(-50%, -50%)'
+	        }
+	    },
+
+	    dialogButtonStyle: {
+	        color: '#1C1C1C',
+	        height: '30px',
+	        width: '90px',
+	        boxSizing: 'border-box',
+	        opacity: '0.85',
+	        fontFamily: 'Verdana',
+	        fontSize: '15px',
+	        borderRadius: '6px',
+	        border: '1px solid lightgrey',
+	        backgroundColor: '#fafafa',
+	        boxShadow: 'inset 0px 0px 5px 0px lightgrey',
+	        WebkitBoxShadow: 'inset 0px 0px 5px 0px lightgrey',
+	        MozBoxShadow: 'inset 0px 0px 5px 0px lightgrey',
+	        OBoxShadow: 'inset 0px 0px 5px 0px lightgrey',
+	        margin: '0 15px 0 0'
+	    },
+
+	    dialogForbiddenButtonStyle: {
+	        color: '#D5D5D5',
+	        height: '30px',
+	        width: '90px',
+	        boxSizing: 'border-box',
+	        opacity: '0.85',
+	        fontFamily: 'Verdana',
+	        fontSize: '15px',
+	        borderRadius: '6px',
+	        border: '1px solid lightgrey',
+	        backgroundColor: '#fafafa',
+	        boxShadow: 'inset 0px 0px 5px 0px lightgrey',
+	        WebkitBoxShadow: 'inset 0px 0px 5px 0px lightgrey',
+	        MozBoxShadow: 'inset 0px 0px 5px 0px lightgrey',
+	        OBoxShadow: 'inset 0px 0px 5px 0px lightgrey',
+	        margin: '0 15px 0 0'
+	    },
+
+	    dialogButtonStyleHover: {
+	        color: '#1C1C1C',
+	        height: '30px',
+	        width: '90px',
+	        boxSizing: 'border-box',
+	        opacity: '1',
+	        fontFamily: 'Verdana',
+	        fontSize: '15px',
+	        borderRadius: '6px',
+	        border: '1px solid lightgrey',
+	        backgroundColor: 'white',
+	        boxShadow: '0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey',
+	        WebkitBoxShadow: '0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey',
+	        MozBoxShadow: '0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey',
+	        OBoxShadow: '0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey',
+	        margin: '0 15px 0 0'
+	    },
 
 	    getInputStyle: function getInputStyle(isInputValid) {
 	        if (isInputValid) {
@@ -34204,7 +36343,672 @@
 	module.exports = inlineStyles;
 
 /***/ },
-/* 212 */
+/* 230 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var styles = __webpack_require__(229);
+
+	// ----------------------
+
+	var DialogButtonsPane = React.createClass({
+	    displayName: "DialogButtonsPane",
+
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            submitButtonHover: false,
+	            cancelButtonHover: false
+	        };
+	    },
+
+	    submit: function submit() {
+	        if (this.props.submitAllowed) {
+	            this.props.submitAction();
+	        }
+	    },
+
+	    getSubmitStyle: function getSubmitStyle() {
+	        if (this.props.submitAllowed) {
+	            if (this.state.submitButtonHover) {
+	                return styles.dialogButtonStyleHover;
+	            } else {
+	                return styles.dialogButtonStyle;
+	            }
+	        } else {
+	            return styles.dialogForbiddenButtonStyle;
+	        }
+	    },
+
+	    getCancelStyle: function getCancelStyle() {
+	        if (this.state.cancelButtonHover) {
+	            return styles.dialogButtonStyleHover;
+	        } else {
+	            return styles.dialogButtonStyle;
+	        }
+	    },
+
+	    submitButtonToggle: function submitButtonToggle() {
+	        this.setState({
+	            submitButtonHover: !this.state.submitButtonHover
+	        });
+	    },
+
+	    cancelButtonToggle: function cancelButtonToggle() {
+	        this.setState({
+	            cancelButtonHover: !this.state.cancelButtonHover
+	        });
+	    },
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "dialog-button-pane" },
+	            React.createElement(
+	                "button",
+	                {
+	                    type: "button",
+	                    style: this.getSubmitStyle(),
+	                    onClick: this.submit,
+	                    onMouseEnter: this.submitButtonToggle,
+	                    onMouseLeave: this.submitButtonToggle },
+	                this.props.submitText
+	            ),
+	            React.createElement(
+	                "button",
+	                {
+	                    type: "button",
+	                    style: this.getCancelStyle(),
+	                    onClick: this.props.cancelAction,
+	                    onMouseEnter: this.cancelButtonToggle,
+	                    onMouseLeave: this.cancelButtonToggle },
+	                "Cancel"
+	            ),
+	            React.createElement("br", null)
+	        );
+	    }
+	});
+
+	module.exports = DialogButtonsPane;
+
+/***/ },
+/* 231 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var $ = __webpack_require__(199);
+
+	var storage = __webpack_require__(201);
+	var resources = __webpack_require__(200);
+
+	// --------------------------------
+
+	function ajaxLog(message) {
+	    console.log("[APP] [AJAX CALL] [POST DIRECTORY] " + message);
+	}
+
+	function createNewDirectory(userId, placement, dirName, callbacks) {
+	    callbacks.onStart();
+	    ajaxLog("starts with userId:" + userId + ", place:" + placement + ", dir:" + dirName);
+	    var payload = {
+	        "payload": dirName
+	    };
+	    $.ajax({
+	        url: resources.directories.postNew.url(userId, placement),
+	        method: resources.directories.postNew.method,
+	        data: JSON.stringify(payload),
+	        dataType: "json",
+	        contentType: "application/json; charset=utf-8",
+	        cache: false,
+	        beforeSend: function beforeSend(xhr) {
+	            xhr.setRequestHeader('Authentication', 'Bearer ' + storage.getJwt());
+	        },
+	        statusCode: {
+	            200: function _(data, statusText, xhr) {
+	                ajaxLog("new dir: " + dirName + " created.");
+	                callbacks.onSuccess(placement, dirName);
+	            },
+	            400: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("bad request : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onFail(JSON.parse(xhr.responseText).message);
+	            },
+	            401: function _(xhr, statusText, errorThrown) {
+	                callbacks.onUnauthenticated();
+	            },
+	            404: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("resource not found.");
+	                callbacks.onFail("Resource not found.");
+	            },
+	            500: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("server error.");
+	                callbacks.onServerError(JSON.parse(xhr.responseText).message);
+	            }
+	        }
+	    });
+	}
+
+	module.exports = createNewDirectory;
+
+/***/ },
+/* 232 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var connect = __webpack_require__(163).connect;
+
+	var MainPageContent = __webpack_require__(233);
+
+	// -------------------------------
+
+	function mapStateToProps(state) {}
+
+	var MainPageContentContainer = connect(mapStateToProps)(MainPageContent);
+
+	module.exports = MainPageContentContainer;
+
+/***/ },
+/* 233 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var WebPanel = __webpack_require__(234);
+
+	// ---------------
+
+	var MainPageContent = React.createClass({
+	    displayName: "MainPageContent",
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "main-page-content" },
+	            React.createElement(WebPanel, { dirs: this.props.dirs })
+	        );
+	    }
+	});
+
+	module.exports = MainPageContent;
+
+/***/ },
+/* 234 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var Directory = __webpack_require__(235);
+
+	// --------------------
+
+	var WebPanel = React.createClass({
+	    displayName: "WebPanel",
+
+	    render: function render() {
+	        var self = this;
+	        var renderedDirs = this.props.dirs.map(function (dir) {
+	            return React.createElement(Directory, {
+	                dir: dir,
+	                key: dir.name });
+	        });
+	        return React.createElement(
+	            "div",
+	            { className: "web-panel" },
+	            renderedDirs
+	        );
+	    }
+	});
+
+	module.exports = WebPanel;
+
+/***/ },
+/* 235 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var Page = __webpack_require__(236);
+
+	// ------------------
+
+	var Directory = React.createClass({
+	    displayName: "Directory",
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "directory" },
+	            this.props.dir
+	        );
+	    }
+	});
+
+	module.exports = Directory;
+
+/***/ },
+/* 236 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var Page = React.createClass({
+	    displayName: "Page",
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "page" },
+	            this.props.name
+	        );
+	    }
+	});
+
+	module.exports = Page;
+
+/***/ },
+/* 237 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var $ = __webpack_require__(199);
+
+	var storage = __webpack_require__(201);
+	var resources = __webpack_require__(200);
+
+	// --------------------------------
+
+	function ajaxLog(message) {
+	    console.log("[APP] [AJAX CALL] [GET DIRECTORIES] " + message);
+	}
+
+	function getDirectories(userId, placement, callbacks) {
+	    callbacks.onStart();
+	    ajaxLog("starts with userId:" + userId + ", place:" + placement);
+	    $.ajax({
+	        url: resources.directories.getAllInPlace.url(userId, placement),
+	        method: resources.directories.getAllInPlace.method,
+	        dataType: 'json',
+	        cache: false,
+	        beforeSend: function beforeSend(xhr) {
+	            xhr.setRequestHeader('Authentication', 'Bearer ' + storage.getJwt());
+	        },
+	        statusCode: {
+	            200: function _(data, statusText, xhr) {
+	                ajaxLog(placement + " get...");
+	                callbacks.onSuccess(data);
+	            },
+	            400: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("bad request : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onFail(JSON.parse(xhr.responseText).message);
+	            },
+	            401: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("not authorized : " + errorThrown);
+	                callbacks.onUnauthenticated();
+	            },
+	            404: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("resource not found : " + errorThrown);
+	                callbacks.onFail("Resource not found.");
+	            },
+	            500: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("internal server error : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onServerError(JSON.parse(xhr.responseText).message);
+	            }
+	        }
+	    });
+	}
+
+	module.exports = getDirectories;
+
+/***/ },
+/* 238 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var connect = __webpack_require__(163).connect;
+
+	var actionDispatchers = __webpack_require__(196);
+	var LandingPage = __webpack_require__(239);
+
+	function mapStateToProps(state) {
+	    return {
+	        goToLogin: actionDispatchers.app.dispatchGoToLoginAction,
+	        goToRegistration: actionDispatchers.app.dispatchGoToRegisterAction
+	    };
+	}
+
+	var LandingPageContainer = connect(mapStateToProps)(LandingPage);
+
+	module.exports = LandingPageContainer;
+
+/***/ },
+/* 239 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var LandingPage = React.createClass({
+	    displayName: "LandingPage",
+
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "landing-page" },
+	            React.createElement(
+	                "button",
+	                { type: "button",
+	                    className: "go-tologin-button-on-landing-page",
+	                    onClick: this.props.goToLogin },
+	                "Login"
+	            ),
+	            React.createElement(
+	                "button",
+	                { type: "button",
+	                    className: "go-to-registration-button-on-landing-page",
+	                    onClick: this.props.goToRegistration },
+	                "Registration"
+	            ),
+	            React.createElement("br", null),
+	            "Landing page."
+	        );
+	    }
+	});
+
+	module.exports = LandingPage;
+
+/***/ },
+/* 240 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var connect = __webpack_require__(163).connect;
+
+	var storage = __webpack_require__(201);
+	var LoginPage = __webpack_require__(241);
+	var actionDispatchers = __webpack_require__(196);
+	var loginAjaxCall = __webpack_require__(247);
+	var validateNickNameAjaxCall = __webpack_require__(248);
+	var validatePasswordAjaxCall = __webpack_require__(249);
+
+	// ----------------------
+
+	var passwordValidationDelay;
+	var nickNameValidationDelay;
+
+	function beginDelayedPasswordValidation(newPassword) {
+	    var passwordAjaxValidationCallbacks = {
+	        onStart: actionDispatchers.login.dispatchPasswordValidationBeginsAction,
+	        onValid: function onValid() {
+	            actionDispatchers.login.dispatchPasswordValidAction();
+	            actionDispatchers.login.dispatchAssessIfLoginAllowedAction();
+	        },
+	        onInvalid: actionDispatchers.login.dispatchPasswordInvalidAction
+	    };
+	    validatePasswordAjaxCall(newPassword, passwordAjaxValidationCallbacks);
+	}
+
+	function beginDelayedNickNameValidation(newNickName) {
+	    var nickNameAjaxValidationCallbacks = {
+	        onStart: actionDispatchers.login.dispatchNickNameValidationBeginsAction,
+	        onValid: function onValid() {
+	            actionDispatchers.login.dispatchNickNameValidAction();
+	            actionDispatchers.login.dispatchAssessIfLoginAllowedAction();
+	        },
+	        onInvalid: actionDispatchers.login.dispatchNickNameInvalidAction
+	    };
+	    validateNickNameAjaxCall(newNickName, nickNameAjaxValidationCallbacks);
+	}
+
+	function passwordChanged(newPassword) {
+	    window.clearTimeout(passwordValidationDelay);
+	    actionDispatchers.login.dispatchPasswordChangedAction(newPassword);
+	    passwordValidationDelay = window.setTimeout(beginDelayedPasswordValidation, 700, newPassword);
+	}
+
+	function nickNameChanged(newNickName) {
+	    window.clearTimeout(nickNameValidationDelay);
+	    actionDispatchers.login.dispatchNickNameChangedAction(newNickName);
+	    nickNameValidationDelay = window.setTimeout(beginDelayedNickNameValidation, 700, newNickName);
+	}
+
+	function goToRegistration() {
+	    actionDispatchers.app.dispatchGoToRegisterAction();
+	}
+
+	function _tryToLogin(loginData) {
+	    var loginAjaxCallbacks = {
+	        onCallStart: actionDispatchers.login.dispatchLoginAttemptBegins,
+	        onCallSuccess: function onCallSuccess(jwtString) {
+	            actionDispatchers.login.dispatchLoginSuccessAction(storage.saveAndParseJwt(jwtString));
+	        },
+	        onUnauthorized: actionDispatchers.login.dispatchLoginFailedAction,
+	        onBadRequest: actionDispatchers.login.dispatchLoginFailedAction
+	    };
+	    loginAjaxCall(loginData, loginAjaxCallbacks);
+	}
+
+	function mapStateToProps(state) {
+	    return {
+	        nickName: state.loginPage.nickName,
+	        nickNameValid: state.loginPage.nickNameValid,
+	        nickNameInvalidMessage: state.loginPage.nickNameInvalidMessage,
+	        nickNameValidationInProgress: state.loginPage.nickNameValidationInProgress,
+
+	        password: state.loginPage.password,
+	        passwordValid: state.loginPage.passwordValid,
+	        passwordInvalidMessage: state.loginPage.passwordInvalidMessage,
+	        passwordValidationInProgress: state.loginPage.passwordValidationInProgress,
+
+	        loginFailureMessage: state.loginPage.loginFailureMessage,
+
+	        loginAllowed: state.loginPage.loginAllowed,
+
+	        goToLanding: actionDispatchers.app.dispatchGoToLandingPageAction,
+	        goToRegistration: goToRegistration,
+	        tryToLogin: function tryToLogin() {
+	            if (state.loginPage.loginAllowed) {
+	                var loginData = {
+	                    "nickName": state.loginPage.nickName,
+	                    "password": state.loginPage.password
+	                };
+	                _tryToLogin(loginData);
+	            }
+	        },
+	        nickNameChanged: nickNameChanged,
+	        passwordChanged: passwordChanged
+	    };
+	}
+
+	var LoginPageContainer = connect(mapStateToProps)(LoginPage);
+
+	module.exports = LoginPageContainer;
+
+/***/ },
+/* 241 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var LoginForm = __webpack_require__(242);
+	var FormFailureMessage = __webpack_require__(246);
+
+	var LoginPage = React.createClass({
+	    displayName: "LoginPage",
+
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "login-page" },
+	            "Login page",
+	            React.createElement(
+	                "button",
+	                {
+	                    type: "button",
+	                    className: "go-to-registration-button-on-login",
+	                    onClick: this.props.goToRegistration },
+	                "Registration"
+	            ),
+	            React.createElement(
+	                "button",
+	                {
+	                    type: "button",
+	                    className: "go-to-landing-button-on-login",
+	                    onClick: this.props.goToLanding },
+	                "Back"
+	            ),
+	            React.createElement("br", null),
+	            React.createElement(LoginForm, {
+	                nickName: this.props.nickName,
+	                nickNameValid: this.props.nickNameValid,
+	                nickNameInvalidMessage: this.props.nickNameInvalidMessage,
+	                nickNameValidationInProgress: this.props.nickNameValidationInProgress,
+
+	                password: this.props.password,
+	                passwordValid: this.props.passwordValid,
+	                passwordInvalidMessage: this.props.passwordInvalidMessage,
+	                passwordValidationInProgress: this.props.passwordValidationInProgress,
+
+	                loginAllowed: this.props.loginAllowed,
+	                loginAction: this.props.tryToLogin,
+	                nickNameChanged: this.props.nickNameChanged,
+	                passwordChanged: this.props.passwordChanged }),
+	            React.createElement(FormFailureMessage, {
+	                message: this.props.loginFailureMessage })
+	        );
+	    }
+	});
+
+	module.exports = LoginPage;
+
+/***/ },
+/* 242 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+
+	var inlineStyles = __webpack_require__(229);
+	var AcceptedSign = __webpack_require__(243);
+	var FormFieldInvalidMessage = __webpack_require__(244);
+	var Spinner = __webpack_require__(245);
+
+	var LoginForm = React.createClass({
+	    displayName: 'LoginForm',
+
+
+	    nickNameInputChanged: function nickNameInputChanged(event) {
+	        this.props.nickNameChanged(event.target.value);
+	    },
+
+	    passwordInputChanged: function passwordInputChanged(event) {
+	        this.props.passwordChanged(event.target.value);
+	    },
+
+	    getLoginButtonStyle: function getLoginButtonStyle() {
+	        if (this.props.loginAllowed) {
+	            return inlineStyles.loginButtonActiveStyle;
+	        } else {
+	            return inlineStyles.loginButtonInactiveStyle;
+	        }
+	    },
+
+	    getNickNameInputStyle: function getNickNameInputStyle() {
+	        return inlineStyles.getInputStyle(this.props.nickNameValid);
+	    },
+
+	    getPasswordInputStyle: function getPasswordInputStyle() {
+	        return inlineStyles.getInputStyle(this.props.passwordValid);
+	    },
+
+	    isNickNameAccepted: function isNickNameAccepted() {
+	        return this.props.nickNameValid && this.props.nickName != "" && !this.props.nickNameValidationInProgress;
+	    },
+
+	    isPasswordAccepted: function isPasswordAccepted() {
+	        return this.props.passwordValid && this.props.password != "" && !this.props.passwordValidationInProgress;
+	    },
+
+	    render: function render() {
+	        var loginButtonStyle = this.getLoginButtonStyle();
+	        var nickNameInputStyle = this.getNickNameInputStyle();
+	        var passwordInputStyle = this.getPasswordInputStyle();
+	        return React.createElement(
+	            'div',
+	            { className: 'login-form' },
+	            React.createElement(
+	                'form',
+	                null,
+	                React.createElement(
+	                    'fieldset',
+	                    null,
+	                    React.createElement(
+	                        'label',
+	                        { className: 'login-form-label' },
+	                        'Nickname:'
+	                    ),
+	                    React.createElement('br', null),
+	                    React.createElement('input', { type: 'text',
+	                        className: 'login-form-input',
+	                        placeholder: 'nick_name',
+	                        style: nickNameInputStyle,
+	                        value: this.props.nickName,
+	                        onChange: this.nickNameInputChanged }),
+	                    React.createElement(AcceptedSign, { accepted: this.isNickNameAccepted() }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.nickNameInvalidMessage }),
+	                    React.createElement('br', null),
+	                    React.createElement(
+	                        'label',
+	                        { className: 'login-form-label' },
+	                        'Password:'
+	                    ),
+	                    React.createElement('br', null),
+	                    React.createElement('input', { type: 'password',
+	                        className: 'login-form-input',
+	                        style: passwordInputStyle,
+	                        value: this.props.password,
+	                        onChange: this.passwordInputChanged }),
+	                    React.createElement(AcceptedSign, { accepted: this.isPasswordAccepted() }),
+	                    React.createElement(FormFieldInvalidMessage, { message: this.props.passwordInvalidMessage }),
+	                    React.createElement('br', null)
+	                )
+	            ),
+	            React.createElement(
+	                'button',
+	                { type: 'button',
+	                    className: 'login-button',
+	                    style: loginButtonStyle,
+	                    onClick: this.props.loginAction },
+	                'Login'
+	            )
+	        );
+	    }
+	});
+
+	module.exports = LoginForm;
+
+/***/ },
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -34234,7 +37038,7 @@
 	module.exports = AcceptedSign;
 
 /***/ },
-/* 213 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -34264,7 +37068,7 @@
 	module.exports = FormFieldInvalidMessage;
 
 /***/ },
-/* 214 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -34294,7 +37098,7 @@
 	module.exports = Spinner;
 
 /***/ },
-/* 215 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -34320,7 +37124,7 @@
 	module.exports = FormFailureMessage;
 
 /***/ },
-/* 216 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -34352,7 +37156,7 @@
 	            },
 	            401: function _(xhr, statusText, errorThrown) {
 	                ajaxLog("fail, unauthorized with : " + JSON.parse(xhr.responseText).message);
-	                callbacks.onUnauthorized(JSON.parse(xhr.responseText).message);
+	                callbacks.onUnauthenticated(JSON.parse(xhr.responseText).message);
 	            },
 	            400: function _(xhr, statusText, errorThrown) {
 	                ajaxLog("fail, bad request with : " + JSON.parse(xhr.responseText).message);
@@ -34365,7 +37169,7 @@
 	module.exports = tryToLogin;
 
 /***/ },
-/* 217 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -34408,7 +37212,7 @@
 	module.exports = validateNickName;
 
 /***/ },
-/* 218 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -34451,17 +37255,19 @@
 	module.exports = validatePassword;
 
 /***/ },
-/* 219 */
+/* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var connect = __webpack_require__(163).connect;
 
-	var ErrorPage = __webpack_require__(220);
+	var ErrorPage = __webpack_require__(251);
 
 	function mapStateToProps(state) {
-	    return {};
+	    return {
+	        message: state.errorPage.message
+	    };
 	}
 
 	var ErrorPageContainer = connect(mapStateToProps)(ErrorPage);
@@ -34469,7 +37275,7 @@
 	module.exports = ErrorPageContainer;
 
 /***/ },
-/* 220 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -34484,7 +37290,16 @@
 	        return React.createElement(
 	            'div',
 	            null,
-	            'Error page.'
+	            React.createElement(
+	                'h1',
+	                null,
+	                'Error occured :('
+	            ),
+	            React.createElement('br', null),
+	            '____________________',
+	            React.createElement('br', null),
+	            React.createElement('br', null),
+	            this.props.message
 	        );
 	    }
 	});
@@ -34492,7 +37307,7 @@
 	module.exports = ErrorPage;
 
 /***/ },
-/* 221 */
+/* 252 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -34500,13 +37315,13 @@
 	var connect = __webpack_require__(163).connect;
 
 	var storage = __webpack_require__(201);
-	var RegistrationPage = __webpack_require__(222);
+	var RegistrationPage = __webpack_require__(253);
 	var actionDispatchers = __webpack_require__(196);
-	var registrationAjaxCall = __webpack_require__(224);
-	var validateNickNameAjaxCall = __webpack_require__(217);
-	var validateNameAjaxCall = __webpack_require__(225);
-	var validateEmailAjaxCall = __webpack_require__(226);
-	var validatePasswordAjaxCall = __webpack_require__(218);
+	var registrationAjaxCall = __webpack_require__(255);
+	var validateNickNameAjaxCall = __webpack_require__(256);
+	var validateNameAjaxCall = __webpack_require__(257);
+	var validateEmailAjaxCall = __webpack_require__(258);
+	var validatePasswordAjaxCall = __webpack_require__(249);
 
 	//---------------------
 
@@ -34718,15 +37533,15 @@
 	module.exports = RegistrationPageContainer;
 
 /***/ },
-/* 222 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var React = __webpack_require__(1);
 
-	var RegistrationForm = __webpack_require__(223);
-	var FormFailureMessage = __webpack_require__(215);
+	var RegistrationForm = __webpack_require__(254);
+	var FormFailureMessage = __webpack_require__(246);
 
 	var RegistrationPage = React.createClass({
 	    displayName: "RegistrationPage",
@@ -34800,16 +37615,16 @@
 	module.exports = RegistrationPage;
 
 /***/ },
-/* 223 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(1);
 
-	var inlineStyles = __webpack_require__(211);
-	var AcceptedSign = __webpack_require__(212);
-	var FormFieldInvalidMessage = __webpack_require__(213);
+	var inlineStyles = __webpack_require__(229);
+	var AcceptedSign = __webpack_require__(243);
+	var FormFieldInvalidMessage = __webpack_require__(244);
 
 	// -------------------------
 
@@ -35015,7 +37830,7 @@
 	module.exports = RegistrationForm;
 
 /***/ },
-/* 224 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -35052,7 +37867,7 @@
 	            },
 	            401: function _(xhr, statusText, errorThrown) {
 	                ajaxLog("fail, unauthorized with : " + JSON.parse(xhr.responseText).message);
-	                callbacks.onUnauthorized(JSON.parse(xhr.responseText).message);
+	                callbacks.onUnauthenticated(JSON.parse(xhr.responseText).message);
 	            }
 	        }
 	    });
@@ -35061,7 +37876,54 @@
 	module.exports = registerCall;
 
 /***/ },
-/* 225 */
+/* 256 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var $ = __webpack_require__(199);
+
+	var resources = __webpack_require__(200);
+
+	// --------------------------------
+
+	function ajaxLog(message) {
+	    console.log("[APP] [AJAX CALL] [NICK-FREE VALIDATION] " + message);
+	}
+
+	function validateNickName(newNickName, callbacks) {
+	    callbacks.onStart();
+	    ajaxLog("starts...");
+	    console.log(newNickName);
+	    var payload = { "payload": newNickName };
+	    $.ajax({
+	        url: resources.validation.freeNickNames.url,
+	        method: resources.validation.freeNickNames.method,
+	        dataType: "json",
+	        contentType: "application/json; charset=utf-8",
+	        data: JSON.stringify(payload),
+	        cache: false,
+	        statusCode: {
+	            200: function _() {
+	                ajaxLog("valid.");
+	                callbacks.onValid();
+	            },
+	            302: function _() {
+	                ajaxLog("nickName is not free.");
+	                callbacks.onInvalid("this nick is not free.");
+	            },
+	            400: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("invalid : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onInvalid(JSON.parse(xhr.responseText).message);
+	            }
+	        }
+	    });
+	}
+
+	module.exports = validateNickName;
+
+/***/ },
+/* 257 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -35104,7 +37966,7 @@
 	module.exports = validateName;
 
 /***/ },
-/* 226 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";

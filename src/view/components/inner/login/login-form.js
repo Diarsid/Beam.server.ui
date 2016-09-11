@@ -5,7 +5,7 @@ var inlineStyles =
 var AcceptedSign =
     require("./../common/accepted-sign.js");
 var FormFieldInvalidMessage =
-    require("./../common/form-field-invalid-message.js");
+    require("./../common/form-field-invalid-inline-message.js");
 var Spinner =
     require("./../common/spinner.js");
 

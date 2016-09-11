@@ -34,6 +34,11 @@ var actionDispatchers = {
         dispatchLogoutAction : function () {
             dispatchLog("logout.");
             dispatch(actionCreators.app.logoutAction());
+        },
+
+        dispatchGoToErrorAction : function (message) {
+            dispatchLog("Error occurs : " + message);
+            dispatch(actionCreators.app.goToErrorAction(message));
         }
     },
 
@@ -303,6 +308,24 @@ var actionDispatchers = {
             dispatchLoadingFailedAction : function (message) {
                 dispatchLog("bookmarks loading fails: " + message);
                 dispatch(actionCreators.main.bookmarks.loadingFailed(message));
+            }
+        },
+
+        directory : {
+
+            dispatchCreationStartAction() {
+                dispatchLog("directory creation start...");
+                dispatch(actionCreators.main.directory.creationStartAction());
+            },
+
+            directoryCreationSuccess(placement, dirName) {
+                dispatchLog("directory created : " + placement + "::" + dirName);
+                dispatch(actionCreators.main.directory.creationSuccessAction(placement, dirName));
+            },
+
+            dispatchCreationFailAction(message) {
+                dispatchLog("directory creation fails : " + message);
+                dispatch(actionCreators.main.directory.creationFailAction(message));
             }
         }
     }

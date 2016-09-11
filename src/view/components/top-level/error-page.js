@@ -5,7 +5,12 @@ var ErrorPage = React.createClass({
     render: function () {
         return (
             <div>
-                Error page.
+                <h1>Error occured :(</h1>
+                <br/>
+                ____________________
+                <br/>
+                <br/>
+                {this.props.message}
             </div>
         );
     }

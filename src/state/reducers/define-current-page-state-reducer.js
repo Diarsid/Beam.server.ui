@@ -34,9 +34,10 @@ function defineCurrentPageState(currentPageState = appPages.landing, action) {
         case actionTypes.logout :
             currentPageLog("logout");
             return appPages.landing;
+        case actionTypes.goToError :
+            return appPages.error;
 
         default :
-            currentPageLog("default: " + currentPageState);
             return currentPageState;
     }
 }
