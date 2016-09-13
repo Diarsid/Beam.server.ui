@@ -27,7 +27,6 @@ var jwtValidationHttpResponseCallbacks = {
         actionDispatchers.app.dispatchGoToRegisterAction();
     },
     onJwtExpired : function () {
-        storage.deleteJwt();
         actionDispatchers.app.dispatchGoToLoginAction();
     }
 };

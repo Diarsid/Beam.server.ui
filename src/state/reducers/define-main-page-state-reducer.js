@@ -6,6 +6,14 @@ var mainPageViews = {
     bookmarks : "bookmarks"
 };
 
+function toggleView(currentView) {
+    if ( currentView === mainPageViews.webPanel ) {
+        return mainPageViews.bookmarks;
+    } else {
+        return mainPageViews.webPanel;
+    }
+}
+
 var mainPageInitialState = {
 
     currentView : mainPageViews.webPanel,
@@ -24,6 +32,9 @@ function defineMainPageState(mainPageState = mainPageInitialState, action) {
     switch (action.type) {
 
         case actionTypes.appStarts :
+            return mainPageInitialState;
+
+        case actionTypes.logout :
             return mainPageInitialState;
 
         // data loading progress
@@ -59,6 +70,15 @@ function defineMainPageState(mainPageState = mainPageInitialState, action) {
                 bookmarksLoading : false,
                 bookmarksDirs : action.dirs
             });
+
+        // toggle views
+        case actionTypes.toggleMainPageContentView :
+            return Object.assign({}, mainPageState, {
+                currentView : toggleView(mainPageState.currentView)
+            });
+
+        case actionTypes.directoryCreationSuccess :
+            return Object.assign({}, mainPageState);
 
         default :
             return mainPageState;

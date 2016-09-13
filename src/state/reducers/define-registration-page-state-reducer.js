@@ -46,6 +46,9 @@ function defineRegistrationPageState(regPageState = initialRegPageState, action)
         case actionTypes.appStarts :
             return initialRegPageState;
 
+        case actionTypes.logout :
+            return initialRegPageState;
+
         // actions to process nick name input field
         case actionTypes.regNickNameChanged :
             return Object.assign({}, regPageState, {nickName : action.newNickName} );

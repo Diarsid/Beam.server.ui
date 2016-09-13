@@ -22240,7 +22240,9 @@
 
 	    directoryCreationStart: "DIR_CREATION_START",
 	    directoryCreationSuccess: "DIR_CREATION_SUCCESS",
-	    directoryCreationFail: "DIR_CREATION_FAIL"
+	    directoryCreationFail: "DIR_CREATION_FAIL",
+
+	    toggleMainPageContentView: "TOGGLE_MAIN_PAGE_CONTENT"
 	};
 
 	module.exports = actionTypes;
@@ -22650,6 +22652,14 @@
 	    bookmarks: "bookmarks"
 	};
 
+	function toggleView(currentView) {
+	    if (currentView === mainPageViews.webPanel) {
+	        return mainPageViews.bookmarks;
+	    } else {
+	        return mainPageViews.webPanel;
+	    }
+	}
+
 	var mainPageInitialState = {
 
 	    currentView: mainPageViews.webPanel,
@@ -22706,6 +22716,15 @@
 	                bookmarksLoading: false,
 	                bookmarksDirs: action.dirs
 	            });
+
+	        // toggle views
+	        case actionTypes.toggleMainPageContentView:
+	            return Object.assign({}, mainPageState, {
+	                currentView: toggleView(mainPageState.currentView)
+	            });
+
+	        case actionTypes.directoryCreationSuccess:
+	            return Object.assign({}, mainPageState);
 
 	        default:
 	            return mainPageState;
@@ -23025,6 +23044,12 @@
 	    },
 
 	    main: {
+
+	        dispatchToggleMainPageContentViewAction: function dispatchToggleMainPageContentViewAction() {
+	            dispatchLog("toggle main page content view.");
+	            dispatch(actionCreators.main.toggleMainPageContentViewAction());
+	        },
+
 	        webPanel: {
 
 	            dispatchLoadingBeginsAction: function dispatchLoadingBeginsAction() {
@@ -23124,6 +23149,12 @@
 	    },
 
 	    main: {
+
+	        toggleMainPageContentViewAction: function toggleMainPageContentViewAction() {
+	            return {
+	                type: actionTypes.toggleMainPageContentView
+	            };
+	        },
 
 	        webPanel: {
 
@@ -33744,7 +33775,18 @@
 	            badRequest: 400
 	        },
 
-	        webObjects: {}
+	        webObjects: {
+
+	            names: {
+	                url: serverRootUrl + "/validation/webobjects/names",
+	                method: "POST"
+	            },
+
+	            urls: {
+	                url: serverRootUrl + "/validation/webobjects/urls",
+	                method: "POST"
+	            }
+	        }
 	    },
 
 	    login: {
@@ -33890,10 +33932,10 @@
 	var appPages = __webpack_require__(188);
 
 	var MainPageContainer = __webpack_require__(204);
-	var LandingPageContainer = __webpack_require__(238);
-	var LoginPageContainer = __webpack_require__(240);
-	var ErrorPageContainer = __webpack_require__(250);
-	var RegistrationPageContainer = __webpack_require__(252);
+	var LandingPageContainer = __webpack_require__(241);
+	var LoginPageContainer = __webpack_require__(243);
+	var ErrorPageContainer = __webpack_require__(253);
+	var RegistrationPageContainer = __webpack_require__(255);
 
 	// ----------------------
 
@@ -33976,7 +34018,7 @@
 	var storage = __webpack_require__(201);
 	var actionDispatchers = __webpack_require__(196);
 
-	var getDirectoriesAjaxCall = __webpack_require__(237);
+	var getDirectoriesAjaxCall = __webpack_require__(240);
 
 	// ----------------------
 
@@ -34007,8 +34049,19 @@
 	    getDirectoriesAjaxCall(userId, "bookmarks", callbacks);
 	}
 
+	function getOtherView(currentView) {
+	    if (currentView === "bookmarks") {
+	        return "WebPanel";
+	    } else {
+	        return "Bookmarks";
+	    }
+	}
+
 	function mapStateToProps(state) {
 	    return {
+
+	        toggleMainPageContentView: actionDispatchers.main.dispatchToggleMainPageContentViewAction,
+	        otherView: getOtherView(state.main.currentView),
 
 	        loadInitialData: function loadInitialData() {
 	            loadWebPanel(state.user.id);
@@ -34031,7 +34084,7 @@
 	var React = __webpack_require__(1);
 
 	var MainPageBarContainer = __webpack_require__(206);
-	var MainPageContentContainer = __webpack_require__(232);
+	var MainPageContentContainer = __webpack_require__(234);
 
 	// -------------------
 
@@ -34052,7 +34105,10 @@
 	                null,
 	                "Main page."
 	            ),
-	            React.createElement(MainPageBarContainer, { logout: this.props.logout }),
+	            React.createElement(MainPageBarContainer, {
+	                logout: this.props.logout,
+	                toggleContentView: this.props.toggleMainPageContentView,
+	                otherView: this.props.otherView }),
 	            React.createElement(MainPageContentContainer, null)
 	        );
 	    }
@@ -34070,7 +34126,7 @@
 
 	var MainPageBar = __webpack_require__(207);
 	var actionDispatchers = __webpack_require__(196);
-	var createDirAjaxCall = __webpack_require__(231);
+	var createDirAjaxCall = __webpack_require__(233);
 
 	function _createDirectory(userId, currentView, newDirName) {
 	    var callbacks = {
@@ -34117,10 +34173,19 @@
 	            { className: "main-page-bar" },
 	            React.createElement(
 	                "button",
-	                { type: "button",
+	                {
+	                    type: "button",
 	                    className: "logout-button-on-main-page",
 	                    onClick: this.props.logout },
 	                "Logout"
+	            ),
+	            React.createElement(
+	                "button",
+	                {
+	                    type: "button",
+	                    className: "toggle-main-page-content-view-button",
+	                    onClick: this.props.toggleContentView },
+	                this.props.otherView
 	            ),
 	            React.createElement(CreateDirController, { create: this.props.createDirectory }),
 	            "Main page bar."
@@ -34141,32 +34206,68 @@
 
 	var styles = __webpack_require__(229);
 	var DialogButtonsPane = __webpack_require__(230);
+	var FormFieldInvalidUnderlineMessage = __webpack_require__(231);
+	var validateDirectoryName = __webpack_require__(232);
+
+	// -----------------------
+
+	var initialControllerState = {
+	    open: false,
+	    newName: "",
+	    newNameValid: false,
+	    newNameInvalidMessage: ""
+	};
 
 	var CreateDirController = React.createClass({
 	    displayName: 'CreateDirController',
 
 
-	    getInitialState: function getInitialState() {
-	        return {
-	            open: false,
-	            newName: "",
-	            newNameValid: false
-	        };
+	    dirNameValidationCallbacks: {
+	        onStart: function onStart() {
+	            this.setState({
+	                newNameValid: false,
+	                newNameInvalidMessage: ""
+	            });
+	        },
+	        onValid: function onValid() {
+	            this.setState({
+	                newNameValid: true,
+	                newNameInvalidMessage: ""
+	            });
+	        },
+	        onInvalid: function onInvalid(message) {
+	            this.setState({
+	                newNameValid: false,
+	                newNameInvalidMessage: message
+	            });
+	        }
 	    },
 
-	    openCreateDirModal: function openCreateDirModal() {
+	    getInitialState: function getInitialState() {
+	        return Object.assign({}, initialControllerState);
+	    },
+
+	    open: function open() {
 	        this.setState({
 	            open: true
 	        });
 	    },
 
 	    inputChanged: function inputChanged(e) {
-	        e.target.value;
+	        this.setState({
+	            open: e.target.value
+	        });
+	        validateDirectoryName(e.target.value, this.dirNameValidationCallbacks);
 	    },
 
-	    submitDirCreation: function submitDirCreation() {},
+	    submitDirCreation: function submitDirCreation() {
+	        this.props.create(this.state.newName);
+	        this.setState(Object.assign({}, initialControllerState));
+	    },
 
-	    cancelDirCreation: function cancelDirCreation() {},
+	    cancelDirCreation: function cancelDirCreation() {
+	        this.setState(Object.assign({}, initialControllerState));
+	    },
 
 	    render: function render() {
 	        return React.createElement(
@@ -34176,7 +34277,7 @@
 	                'button',
 	                { type: 'button',
 	                    className: 'create-directory-button-on-main-page',
-	                    onClick: this.openCreateDirModal },
+	                    onClick: this.open },
 	                'Create dir'
 	            ),
 	            React.createElement(
@@ -34196,9 +34297,11 @@
 	                    id: 'new-dir-name',
 	                    placeholder: 'name...',
 	                    className: 'form-input',
-	                    style: styles.getInputStyle(this.state.nameValid),
+	                    style: styles.getInputStyle(this.state.newNameValid),
 	                    value: this.state.newName,
 	                    onChange: this.inputChanged }),
+	                React.createElement(FormFieldInvalidUnderlineMessage, {
+	                    message: this.state.newNameInvalidMessage }),
 	                React.createElement('br', null),
 	                React.createElement(DialogButtonsPane, {
 	                    submitAllowed: this.state.newNameValid,
@@ -36440,6 +36543,79 @@
 
 	"use strict";
 
+	var React = __webpack_require__(1);
+
+	var FormFieldInvalidUnderlineMessage = React.createClass({
+	    displayName: "FormFieldInvalidUnderlineMessage",
+
+	    render: function render() {
+	        if (this.props.message != "") {
+	            return React.createElement(
+	                "div",
+	                { className: "form-field-invalid-underline-message" },
+	                React.createElement(
+	                    "b",
+	                    null,
+	                    this.props.message
+	                )
+	            );
+	        } else {
+	            return null;
+	        }
+	    }
+	});
+
+	module.exports = FormFieldInvalidUnderlineMessage;
+
+/***/ },
+/* 232 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var $ = __webpack_require__(199);
+
+	var resources = __webpack_require__(200);
+
+	// --------------------------------
+
+	function ajaxLog(message) {
+	    console.log("[APP] [AJAX CALL] [WEB-OBJECT NAME VALIDATION] " + message);
+	}
+
+	function validateWebObjectName(name, callbacks) {
+	    callbacks.onStart();
+	    ajaxLog("starts...");
+	    console.log(name);
+	    var payload = { "payload": name };
+	    $.ajax({
+	        url: resources.validation.webObjects.url,
+	        method: resources.validation.webObjects.method,
+	        data: JSON.stringify(payload),
+	        dataType: "json",
+	        contentType: "application/json; charset=utf-8",
+	        cache: false,
+	        statusCode: {
+	            200: function _() {
+	                ajaxLog("valid.");
+	                callbacks.onValid();
+	            },
+	            400: function _(xhr, statusText, errorThrown) {
+	                ajaxLog("invalid : " + JSON.parse(xhr.responseText).message);
+	                callbacks.onInvalid(JSON.parse(xhr.responseText).message);
+	            }
+	        }
+	    });
+	}
+
+	module.exports = validateWebObjectName;
+
+/***/ },
+/* 233 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
 	var $ = __webpack_require__(199);
 
 	var storage = __webpack_require__(201);
@@ -36494,32 +36670,46 @@
 	module.exports = createNewDirectory;
 
 /***/ },
-/* 232 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var connect = __webpack_require__(163).connect;
 
-	var MainPageContent = __webpack_require__(233);
+	var MainPageContent = __webpack_require__(235);
 
 	// -------------------------------
 
-	function mapStateToProps(state) {}
+	function mapStateToProps(state) {
+	    return {
+	        currentView: state.mainPage.currentView,
+
+	        webPanelLoading: state.mainPage.webPanelLoading,
+	        bookmarksLoading: state.mainPage.bookmarksLoading,
+
+	        webPanelLoadingFailedMessage: state.mainPage.webPanelLoadingFailedMessage,
+	        bookmarksLoadingFailedMessage: state.mainPage.bookmarksLoadingFailedMessage,
+
+	        webPanelDirs: state.mainPage.webPanelDirs,
+	        bookmarksDirs: state.mainPage.bookmarksDirs
+	    };
+	}
 
 	var MainPageContentContainer = connect(mapStateToProps)(MainPageContent);
 
 	module.exports = MainPageContentContainer;
 
 /***/ },
-/* 233 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var React = __webpack_require__(1);
 
-	var WebPanel = __webpack_require__(234);
+	var WebPanel = __webpack_require__(236);
+	var Bookmarks = __webpack_require__(239);
 
 	// ---------------
 
@@ -36530,7 +36720,10 @@
 	        return React.createElement(
 	            "div",
 	            { className: "main-page-content" },
-	            React.createElement(WebPanel, { dirs: this.props.dirs })
+	            React.createElement(WebPanel, {
+	                dirs: this.props.webPanelDirs }),
+	            React.createElement(Bookmarks, {
+	                dirs: this.props.bookmarksDirs })
 	        );
 	    }
 	});
@@ -36538,14 +36731,14 @@
 	module.exports = MainPageContent;
 
 /***/ },
-/* 234 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var React = __webpack_require__(1);
 
-	var Directory = __webpack_require__(235);
+	var Directory = __webpack_require__(237);
 
 	// --------------------
 
@@ -36570,14 +36763,14 @@
 	module.exports = WebPanel;
 
 /***/ },
-/* 235 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var React = __webpack_require__(1);
 
-	var Page = __webpack_require__(236);
+	var Page = __webpack_require__(238);
 
 	// ------------------
 
@@ -36596,7 +36789,7 @@
 	module.exports = Directory;
 
 /***/ },
-/* 236 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -36618,7 +36811,29 @@
 	module.exports = Page;
 
 /***/ },
-/* 237 */
+/* 239 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var Bookmarks = React.createClass({
+	    displayName: "Bookmarks",
+
+	    render: function render() {
+	        return React.createElement(
+	            "div",
+	            { className: "" },
+	            "Bookmarks..."
+	        );
+	    }
+	});
+
+	module.exports = Bookmarks;
+
+/***/ },
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -36673,7 +36888,7 @@
 	module.exports = getDirectories;
 
 /***/ },
-/* 238 */
+/* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -36681,7 +36896,7 @@
 	var connect = __webpack_require__(163).connect;
 
 	var actionDispatchers = __webpack_require__(196);
-	var LandingPage = __webpack_require__(239);
+	var LandingPage = __webpack_require__(242);
 
 	function mapStateToProps(state) {
 	    return {
@@ -36695,7 +36910,7 @@
 	module.exports = LandingPageContainer;
 
 /***/ },
-/* 239 */
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -36733,7 +36948,7 @@
 	module.exports = LandingPage;
 
 /***/ },
-/* 240 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -36741,11 +36956,11 @@
 	var connect = __webpack_require__(163).connect;
 
 	var storage = __webpack_require__(201);
-	var LoginPage = __webpack_require__(241);
+	var LoginPage = __webpack_require__(244);
 	var actionDispatchers = __webpack_require__(196);
-	var loginAjaxCall = __webpack_require__(247);
-	var validateNickNameAjaxCall = __webpack_require__(248);
-	var validatePasswordAjaxCall = __webpack_require__(249);
+	var loginAjaxCall = __webpack_require__(250);
+	var validateNickNameAjaxCall = __webpack_require__(251);
+	var validatePasswordAjaxCall = __webpack_require__(252);
 
 	// ----------------------
 
@@ -36841,15 +37056,15 @@
 	module.exports = LoginPageContainer;
 
 /***/ },
-/* 241 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var React = __webpack_require__(1);
 
-	var LoginForm = __webpack_require__(242);
-	var FormFailureMessage = __webpack_require__(246);
+	var LoginForm = __webpack_require__(245);
+	var FormFailureMessage = __webpack_require__(249);
 
 	var LoginPage = React.createClass({
 	    displayName: "LoginPage",
@@ -36901,7 +37116,7 @@
 	module.exports = LoginPage;
 
 /***/ },
-/* 242 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36909,9 +37124,9 @@
 	var React = __webpack_require__(1);
 
 	var inlineStyles = __webpack_require__(229);
-	var AcceptedSign = __webpack_require__(243);
-	var FormFieldInvalidMessage = __webpack_require__(244);
-	var Spinner = __webpack_require__(245);
+	var AcceptedSign = __webpack_require__(246);
+	var FormFieldInvalidMessage = __webpack_require__(247);
+	var Spinner = __webpack_require__(248);
 
 	var LoginForm = React.createClass({
 	    displayName: 'LoginForm',
@@ -37008,7 +37223,7 @@
 	module.exports = LoginForm;
 
 /***/ },
-/* 243 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37038,21 +37253,21 @@
 	module.exports = AcceptedSign;
 
 /***/ },
-/* 244 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var React = __webpack_require__(1);
 
-	var FormFieldInvalidMessage = React.createClass({
-	    displayName: "FormFieldInvalidMessage",
+	var FormFieldInvalidInlineMessage = React.createClass({
+	    displayName: "FormFieldInvalidInlineMessage",
 
 	    render: function render() {
 	        if (this.props.message != "") {
 	            return React.createElement(
 	                "span",
-	                { className: "form-field-invalid-message" },
+	                { className: "form-field-invalid-inline-message" },
 	                React.createElement(
 	                    "b",
 	                    null,
@@ -37065,10 +37280,10 @@
 	    }
 	});
 
-	module.exports = FormFieldInvalidMessage;
+	module.exports = FormFieldInvalidInlineMessage;
 
 /***/ },
-/* 245 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37098,7 +37313,7 @@
 	module.exports = Spinner;
 
 /***/ },
-/* 246 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37124,7 +37339,7 @@
 	module.exports = FormFailureMessage;
 
 /***/ },
-/* 247 */
+/* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37169,7 +37384,7 @@
 	module.exports = tryToLogin;
 
 /***/ },
-/* 248 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37212,7 +37427,7 @@
 	module.exports = validateNickName;
 
 /***/ },
-/* 249 */
+/* 252 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37255,14 +37470,14 @@
 	module.exports = validatePassword;
 
 /***/ },
-/* 250 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var connect = __webpack_require__(163).connect;
 
-	var ErrorPage = __webpack_require__(251);
+	var ErrorPage = __webpack_require__(254);
 
 	function mapStateToProps(state) {
 	    return {
@@ -37275,7 +37490,7 @@
 	module.exports = ErrorPageContainer;
 
 /***/ },
-/* 251 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37307,7 +37522,7 @@
 	module.exports = ErrorPage;
 
 /***/ },
-/* 252 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37315,13 +37530,13 @@
 	var connect = __webpack_require__(163).connect;
 
 	var storage = __webpack_require__(201);
-	var RegistrationPage = __webpack_require__(253);
+	var RegistrationPage = __webpack_require__(256);
 	var actionDispatchers = __webpack_require__(196);
-	var registrationAjaxCall = __webpack_require__(255);
-	var validateNickNameAjaxCall = __webpack_require__(256);
-	var validateNameAjaxCall = __webpack_require__(257);
-	var validateEmailAjaxCall = __webpack_require__(258);
-	var validatePasswordAjaxCall = __webpack_require__(249);
+	var registrationAjaxCall = __webpack_require__(258);
+	var validateNickNameAjaxCall = __webpack_require__(259);
+	var validateNameAjaxCall = __webpack_require__(260);
+	var validateEmailAjaxCall = __webpack_require__(261);
+	var validatePasswordAjaxCall = __webpack_require__(252);
 
 	//---------------------
 
@@ -37533,15 +37748,15 @@
 	module.exports = RegistrationPageContainer;
 
 /***/ },
-/* 253 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var React = __webpack_require__(1);
 
-	var RegistrationForm = __webpack_require__(254);
-	var FormFailureMessage = __webpack_require__(246);
+	var RegistrationForm = __webpack_require__(257);
+	var FormFailureMessage = __webpack_require__(249);
 
 	var RegistrationPage = React.createClass({
 	    displayName: "RegistrationPage",
@@ -37615,7 +37830,7 @@
 	module.exports = RegistrationPage;
 
 /***/ },
-/* 254 */
+/* 257 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37623,8 +37838,8 @@
 	var React = __webpack_require__(1);
 
 	var inlineStyles = __webpack_require__(229);
-	var AcceptedSign = __webpack_require__(243);
-	var FormFieldInvalidMessage = __webpack_require__(244);
+	var AcceptedSign = __webpack_require__(246);
+	var FormFieldInvalidMessage = __webpack_require__(247);
 
 	// -------------------------
 
@@ -37830,7 +38045,7 @@
 	module.exports = RegistrationForm;
 
 /***/ },
-/* 255 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37876,7 +38091,7 @@
 	module.exports = registerCall;
 
 /***/ },
-/* 256 */
+/* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37923,7 +38138,7 @@
 	module.exports = validateNickName;
 
 /***/ },
-/* 257 */
+/* 260 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37966,7 +38181,7 @@
 	module.exports = validateName;
 
 /***/ },
-/* 258 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";

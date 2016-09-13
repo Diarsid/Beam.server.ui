@@ -274,6 +274,12 @@ var actionDispatchers = {
     },
 
     main : {
+
+        dispatchToggleMainPageContentViewAction : function () {
+            dispatchLog("toggle main page content view.");
+            dispatch(actionCreators.main.toggleMainPageContentViewAction());
+        },
+
         webPanel : {
 
             dispatchLoadingBeginsAction : function () {

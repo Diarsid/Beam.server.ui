@@ -25,6 +25,9 @@ function defineLoginPageState(loginPageState = initialLoginPageState, action) {
         case actionTypes.appStarts :
             return initialLoginPageState;
 
+        case actionTypes.logout :
+            return initialLoginPageState;
+
         // actions to process nick name input field
         case actionTypes.loginNickNameChanged :
             return Object.assign({}, loginPageState, {nickName : action.newNickName} );

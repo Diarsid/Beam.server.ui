@@ -17,7 +17,7 @@ var MainPage = React.createClass({
         return (
             <div className="main-page">
                 <span>Main page.</span>
-                <MainPageBarContainer logout={this.props.logout} />
+                <MainPageBarContainer />
                 <MainPageContentContainer />
             </div>
         );

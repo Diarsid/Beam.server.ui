@@ -1,15 +1,18 @@
 var actionTypes =
     require("./../actions/action-types.js");
 
-var errorPageInitialState = {
+var initialErrorPageState = {
     message: ""
 };
 
-function defineErrorPageState(errorPageState = errorPageInitialState, action) {
+function defineErrorPageState(errorPageState = initialErrorPageState, action) {
     switch (action.type) {
 
         case actionTypes.appStarts :
-            return errorPageInitialState;
+            return initialErrorPageState;
+
+        case actionTypes.logout :
+            return initialErrorPageState;
 
         case actionTypes.goToError :
             return Object.assign({}, errorPageState, {

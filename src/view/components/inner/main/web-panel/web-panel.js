@@ -7,11 +7,10 @@ var Directory =
 
 var WebPanel = React.createClass({
     render : function () {
-        var self = this;
         var renderedDirs = this.props.dirs.map(function (dir) {
             return (
                 <Directory
-                    dir={dir}
+                    dir={dir.name}
                     key={dir.name} />
             );
         });

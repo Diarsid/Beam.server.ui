@@ -36,6 +36,12 @@ var actionCreators = {
 
     main : {
 
+        toggleMainPageContentViewAction : function () {
+            return {
+                type : actionTypes.toggleMainPageContentView
+            }
+        },
+
         webPanel : {
 
             loadingBegins : function () {

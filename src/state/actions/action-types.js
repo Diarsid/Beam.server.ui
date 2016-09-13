@@ -75,7 +75,9 @@ var actionTypes = {
 
     directoryCreationStart : "DIR_CREATION_START",
     directoryCreationSuccess : "DIR_CREATION_SUCCESS",
-    directoryCreationFail : "DIR_CREATION_FAIL"
+    directoryCreationFail : "DIR_CREATION_FAIL",
+
+    toggleMainPageContentView : "TOGGLE_MAIN_PAGE_CONTENT"
 };
 
 module.exports = actionTypes;

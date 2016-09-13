@@ -12,6 +12,8 @@ var validateDirectoryName =
 
 // -----------------------
 
+var nameValidationDelay;
+
 var initialControllerState = {
     open : false,
     newName : "",
@@ -21,25 +23,25 @@ var initialControllerState = {
 
 var CreateDirController = React.createClass({
 
-    dirNameValidationCallbacks : {
-        onStart : function () {
-            this.setState({
-                newNameValid : false,
-                newNameInvalidMessage : ""
-            });
-        },
-        onValid : function () {
-            this.setState({
-                newNameValid : true,
-                newNameInvalidMessage : ""
-            });
-        },
-        onInvalid : function (message) {
-            this.setState({
-                newNameValid : false,
-                newNameInvalidMessage : message
-            });
-        }
+    setNameValidationState : function (isValid, validMessage) {
+        this.setState({
+            newNameValid : isValid,
+            newNameInvalidMessage : validMessage
+        });
+    },
+
+    dirNameValidationCallbacks : function (self) {
+        return {
+            onStart : function () {
+                self.setNameValidationState(false, "");
+            },
+            onValid : function () {
+                self.setNameValidationState(true, "");
+            },
+            onInvalid : function (message) {
+                self.setNameValidationState(false, message);
+            }
+        };
     },
 
     getInitialState : function () {
@@ -54,9 +56,11 @@ var CreateDirController = React.createClass({
 
     inputChanged: function ( e ) {
         this.setState({
-            open : e.target.value
+            newName : e.target.value
         });
-        validateDirectoryName(e.target.value, this.dirNameValidationCallbacks);
+        window.clearTimeout(nameValidationDelay);
+        nameValidationDelay = window.setTimeout(
+            validateDirectoryName, 900, e.target.value, this.dirNameValidationCallbacks(this));
     },
 
     submitDirCreation : function () {

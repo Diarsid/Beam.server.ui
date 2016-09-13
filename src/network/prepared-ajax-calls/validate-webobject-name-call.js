@@ -16,8 +16,8 @@ function validateWebObjectName(name, callbacks) {
     console.log(name);
     var payload = {"payload" : name };
     $.ajax({
-        url : resources.validation.webObjects.url,
-        method : resources.validation.webObjects.method,
+        url : resources.validation.webObjects.names.url,
+        method : resources.validation.webObjects.names.method,
         data: JSON.stringify(payload),
         dataType: "json",
         contentType: "application/json; charset=utf-8",
