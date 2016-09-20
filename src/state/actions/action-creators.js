@@ -42,6 +42,30 @@ var actionCreators = {
             }
         },
 
+        directoriesReorderedAction : function (place, newImtblDirs) {
+            return {
+                type : actionTypes.directoriesReordered,
+                place : place,
+                dirs : newImtblDirs
+            }
+        },
+
+        pagesReorderedAction : function (place, newImtblDirs) {
+            return {
+                type : actionTypes.pagesReordered,
+                place : place,
+                dirs : newImtblDirs
+            }
+        },
+
+        directoryCreatedAction : function (currentView, newDirName) {
+            return {
+                type : actionTypes.directoryCreated,
+                place : currentView,
+                name : newDirName
+            }
+        },
+
         webPanel : {
 
             loadingBegins : function () {
@@ -89,24 +113,75 @@ var actionCreators = {
 
         directory : {
 
-            creationStartAction() {
+            creationStartAction : function () {
                 return {
-                    type : actionTypes.directoryCreationStart
+                    type : actionTypes.directoryCreationAjaxStart
                 }
             },
 
-            creationSuccessAction(placement, dirName) {
+            creationSuccessAction : function (placement, dirName) {
                 return {
-                    type : actionTypes.directoryCreationSuccess,
-                    placement : placement,
+                    type : actionTypes.directoryCreationAjaxSuccess,
+                    place : placement,
                     dirName : dirName
                 }
             },
 
-            creationFailAction(message) {
+            creationFailAction : function (message) {
                 return {
-                    type : actionTypes.directoryCreationFail,
+                    type : actionTypes.directoryCreationAjaxFail,
                     message : message
+                }
+            },
+
+            renamedAction : function (place, dirs) {
+                return {
+                    type : actionTypes.directoryRenamed,
+                    place : place,
+                    dirs : dirs
+                }
+            },
+
+            removedAction : function (place, dirs) {
+                return {
+                    type : actionTypes.directoryRemoved,
+                    place : place,
+                    dirs : dirs
+                }
+            }
+        },
+
+        page : {
+
+            createdAction : function (place, dirs) {
+                return {
+                    type : actionTypes.pageCreated,
+                    place : place,
+                    dirs : dirs
+                }
+            },
+
+            renamedAction : function (place, dirs) {
+                return {
+                    type : actionTypes.pageRenamed,
+                    place : place,
+                    dirs : dirs
+                }
+            },
+
+            urlChangedAction : function (place, dirs) {
+                return {
+                    type : actionTypes.pageUrlChanged,
+                    place : place,
+                    dirs : dirs
+                }
+            },
+
+            deletedAction : function (place, dirs) {
+                return {
+                    type : actionTypes.pageDeleted,
+                    place : place,
+                    dirs : dirs
                 }
             }
         }

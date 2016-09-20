@@ -22238,9 +22238,9 @@
 	    bookmarksLoaded: "BOOKMARKS_LOADED",
 	    bookmarksLoadingFailed: "BOOKMARKS_LOADING_FAILED",
 
-	    directoryCreationStart: "DIR_CREATION_START",
-	    directoryCreationSuccess: "DIR_CREATION_SUCCESS",
-	    directoryCreationFail: "DIR_CREATION_FAIL",
+	    directoryCreationAjaxStart: "DIR_CREATION_START",
+	    directoryCreationAjaxSuccess: "DIR_CREATION_SUCCESS",
+	    directoryCreationAjaxFail: "DIR_CREATION_FAIL",
 
 	    toggleMainPageContentView: "TOGGLE_MAIN_PAGE_CONTENT"
 	};
@@ -22723,7 +22723,7 @@
 	                currentView: toggleView(mainPageState.currentView)
 	            });
 
-	        case actionTypes.directoryCreationSuccess:
+	        case actionTypes.directoryCreationAjaxSuccess:
 	            return Object.assign({}, mainPageState);
 
 	        default:
@@ -23088,15 +23088,15 @@
 	        },
 
 	        directory: {
-	            dispatchCreationStartAction: function dispatchCreationStartAction() {
+	            dispatchCreationAjaxStartAction: function dispatchCreationStartAction() {
 	                dispatchLog("directory creation start...");
 	                dispatch(actionCreators.main.directory.creationStartAction());
 	            },
-	            directoryCreationSuccess: function directoryCreationSuccess(placement, dirName) {
+	            directoryCreationAjaxSuccess: function directoryCreationSuccess(placement, dirName) {
 	                dispatchLog("directory created : " + placement + "::" + dirName);
 	                dispatch(actionCreators.main.directory.creationSuccessAction(placement, dirName));
 	            },
-	            dispatchCreationFailAction: function dispatchCreationFailAction(message) {
+	            dispatchCreationAjaxFailAction: function dispatchCreationFailAction(message) {
 	                dispatchLog("directory creation fails : " + message);
 	                dispatch(actionCreators.main.directory.creationFailAction(message));
 	            }
@@ -23204,19 +23204,19 @@
 	        directory: {
 	            creationStartAction: function creationStartAction() {
 	                return {
-	                    type: actionTypes.directoryCreationStart
+	                    type: actionTypes.directoryCreationAjaxStart
 	                };
 	            },
 	            creationSuccessAction: function creationSuccessAction(placement, dirName) {
 	                return {
-	                    type: actionTypes.directoryCreationSuccess,
+	                    type: actionTypes.directoryCreationAjaxSuccess,
 	                    placement: placement,
 	                    dirName: dirName
 	                };
 	            },
 	            creationFailAction: function creationFailAction(message) {
 	                return {
-	                    type: actionTypes.directoryCreationFail,
+	                    type: actionTypes.directoryCreationAjaxFail,
 	                    message: message
 	                };
 	            }
@@ -34130,9 +34130,9 @@
 
 	function _createDirectory(userId, currentView, newDirName) {
 	    var callbacks = {
-	        onStart: actionDispatchers.main.directory.dispatchCreationStartAction,
-	        onSuccess: actionDispatchers.main.directory.directoryCreationSuccess,
-	        onFail: actionDispatchers.main.directory.dispatchCreationFailAction,
+	        onStart: actionDispatchers.main.directory.dispatchCreationAjaxStartAction,
+	        onSuccess: actionDispatchers.main.directory.directoryCreationAjaxSuccess,
+	        onFail: actionDispatchers.main.directory.dispatchCreationAjaxFailAction,
 	        onUnauthenticated: actionDispatchers.app.dispatchGoToLoginAction,
 	        onServerError: actionDispatchers.app.dispatchGoToErrorAction
 	    };

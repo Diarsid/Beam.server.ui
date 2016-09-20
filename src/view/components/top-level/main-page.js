@@ -16,7 +16,6 @@ var MainPage = React.createClass({
     render: function () {
         return (
             <div className="main-page">
-                <span>Main page.</span>
                 <MainPageBarContainer />
                 <MainPageContentContainer />
             </div>

@@ -1,0 +1,363 @@
+body {
+    background-image: url("http://localhost:8484/local_accesible/images/wild_paintings.jpg");
+    background-attachment: fixed;
+    padding: 0;
+    margin: 0;
+    height:100%;
+}
+
+div {
+    padding: 0;
+    margin: 0;
+}
+
+br {
+    clear:both;
+}
+
+*:focus {
+    outline: none;
+}
+
+a:link, a:visited, a:hover, a:active {
+    text-decoration: none;
+    color: black;
+}
+
+.directory-bar {
+    box-sizing: border-box;
+    height: 28px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
+    -o-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
+    margin: 0;
+    padding: 3px 3px 3px 3px;
+}
+
+.directory-bar-title {
+    color: #fafafa;
+    opacity: 0.95;
+    font-family: Verdana;
+    font-size: 15px;
+    margin: 0 0 0 30px;
+}
+
+.directory-bar-button {
+    position: relative;
+    top: 0;
+    border-radius: 5px;
+    height: 20px;
+    width: 20px;
+    border: 1px solid lightgrey;
+    box-sizing: border-box;
+    opacity: 0.9;
+    background-color: #fafafa;
+    box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -webkit-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -moz-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -o-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    margin-right: 4px;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.directory-bar-button:hover {
+    opacity: 1;
+    background: white;
+    box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -webkit-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -moz-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -o-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+#directory-bar-create-page-button {
+    background-image: url("./img/create-page-inactive.png");
+}
+#directory-bar-create-page-button:hover {
+    background-image: url("./img/create-page-active.png");
+}
+
+#directory-bar-delete-directory-button {
+    background-image: url("./img/del-inactive.png");
+}
+#directory-bar-delete-directory-button:hover {
+    background-image: url("./img/del-active.png");
+}
+
+#directory-bar-rename-directory-button {
+    background-image: url("./img/edit-page-inactive.png");
+}
+#directory-bar-rename-directory-button:hover {
+    background-image: url("./img/edit-page-active.png");
+}
+
+#page-frame-delete-page-button {
+    background-image: url("./img/del-inactive.png");
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+#page-frame-delete-page-button:hover {
+    background-image: url("./img/del-active.png");
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+
+
+.create-page-modal-dialog-controller,
+.rename-dir-modal-dialog-controller,
+.create-directory-modal-dialog-controller,
+.delete-dir-modal-dialog-controller {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+}
+
+.directory-bar .delete-dir-modal-dialog-controller {
+    float: right;
+}
+
+legend {
+    color: #1C1C1C;
+    font-family: Verdana;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+form.create-page-dialog {
+    margin: 0 0 0 0;
+}
+
+label.form-label {
+    color: #1C1C1C;
+    font-family: Verdana;
+    font-size: 15px;
+}
+
+.form-input {
+    width: 330px;
+    border-radius: 3px;
+    border: 1px solid lightgrey;
+    color: #1C1C1C;
+    font-family: Verdana;
+    font-size: 15px;
+    box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -webkit-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -moz-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -o-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    padding: 4px 0 4px 8px;
+    margin-bottom: 12px;
+    margin-top: 4px;
+}
+
+input[type=text] {
+    color: #1C1C1C;
+    font-family: Verdana;
+    font-size: 15px;
+}
+
+fieldset {
+    display: block;
+    border: none;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+}
+
+.dialog-button-pane {
+    margin: 20px 0 0 0;
+    padding: 0 0 0 0;
+}
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color: lightgrey;
+    font-family: Verdana;
+    font-size: 15px;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: lightgrey;
+    opacity: 1;
+    font-family: Verdana;
+    font-size: 15px;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: lightgrey;
+    opacity: 1;
+    font-family: Verdana;
+    font-size: 15px;
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: lightgrey;
+    font-family: Verdana;
+    font-size: 15px;
+}
+
+.page-frame {
+    opacity: 0.9;
+    box-shadow: inset 0px 0px 10px 0px lightgrey;
+    -webkit-box-shadow: inset 0px 0px 10px 0px lightgrey;
+    -moz-box-shadow: inset 0px 0px 10px 0px lightgrey;
+    -o-box-shadow: inset 0px 0px 10px 0px lightgrey;
+    border: 1px solid darkgray;
+    border-radius: 5px;
+    background-color: #fafafa;
+    height: 120px;
+    width: 120px;
+    float: left;
+    padding: 0;
+    margin: 1vw 1.2vw 1vw 1.2vw;
+}
+
+.page-frame:hover {
+    opacity: 1;
+    box-shadow: 0px 0px 10px 0px lightgrey, inset 0px 0px 5px 0px lightgrey;
+    -webkit-box-shadow: 0px 0px 10px 0px lightgrey, inset 0px 0px 5px 0px lightgrey;
+    -moz-box-shadow: 0px 0px 10px 0px lightgrey, inset 0px 0px 5px 0px lightgrey;
+    -o-box-shadow: 0px 0px 10px 0px lightgrey, inset 0px 0px 5px 0px lightgrey;
+}
+
+.delete-page-button {
+    position: relative;
+    top: -128px;
+    right: -107px;
+    border-radius: 6px;
+    height: 20px;
+    width: 20px;
+    border: 1px solid lightgrey;
+    box-sizing: border-box;
+    opacity: 0.9;
+    background-color: #fafafa;
+    box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -webkit-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -moz-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -o-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    margin: 0 0 0 0;
+}
+
+.delete-page-button:hover {
+    opacity: 1;
+    background: white;
+    box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -webkit-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -moz-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -o-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+}
+
+.page-image-frame {
+    box-sizing: border-box;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    height: 90px;
+    width: 120px;
+    padding: 5px;
+}
+
+.page-image {
+    border-radius: 3px;
+    height: 80px;
+    width: 110px;
+}
+
+.page-title {
+    margin: 0;
+    border-top: 1px solid lightgrey;
+    height: 30px;
+    width: 120px;
+}
+
+.title-text {
+    color: #1C1C1C;
+    font-family: Verdana;
+    font-size: 15px;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    box-sizing: border-box;
+    padding-top: 0.2em;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.directory {
+    background-color: rgba(0, 0, 0, 0.3);
+    margin: 1vw 2vw 1vw 2vw;
+    border-radius: 10px;
+}
+
+ul.directory-content {
+    list-style-type: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.directory-content-wrapper {
+    padding-left: 4%;
+    padding-right: 4%;
+}
+
+.web-panel-content {
+    margin: 0;
+    padding: 0;
+}
+
+.web-panel {
+    position: relative;
+    left: 40px;
+    width: calc(100% - 40px);
+    margin: 0 0 0 0;
+    padding: 0;
+}
+
+.bar {
+    position: fixed;
+    top: -2vh;
+    width: 40px;
+    height: 105vh;
+    margin: 0 0 0 0;
+    padding: 0;
+    box-shadow: 0px 0px 30px 10px black inset;
+    -webkit-box-shadow: 0px 0px 30px 10px black inset;
+    -moz-box-shadow: 0px 0px 30px 10px black inset;
+    -o-box-shadow: 0px 0px 30px 10px black inset;
+}
+
+.bar-panel {
+    position: relative;
+    top: 10vh;
+    width: 40px;
+    margin: 0;
+    padding: 0;
+}
+
+.create-directory-bar-button {
+    border: none;
+    width: 40px;
+    height: 40px;
+    background-color: black;
+    opacity: 0.7;
+}
+
+.create-directory-bar-button:hover {
+    box-shadow: 0px 0px 30px 10px darkslateblue inset;
+    -webkit-box-shadow: 0px 0px 30px 10px darkslateblue inset;
+    -moz-box-shadow: 0px 0px 30px 10px darkslateblue inset;
+    -o-box-shadow: 0px 0px 30px 10px darkslateblue inset;
+}

@@ -6,8 +6,7 @@ var Bookmarks = React.createClass({
             display: "none"
         };
         return (
-            <div
-                className="bookmarks"
+            <div className="bookmarks"
                 style={style}>
                 Bookmarks...
             </div>

@@ -18,12 +18,13 @@ function performLogout() {
 
 function createDirectory(userId, currentView, newDirName) {
     var callbacks = {
-        onStart : actionDispatchers.main.directory.dispatchCreationStartAction,
-        onSuccess : actionDispatchers.main.directory.directoryCreationSuccess,
-        onFail : actionDispatchers.main.directory.dispatchCreationFailAction,
+        onStart : actionDispatchers.main.directory.dispatchCreationAjaxStartAction,
+        onSuccess : actionDispatchers.main.directory.dispatchCreationAjaxSuccessAction,
+        onFail : actionDispatchers.main.directory.dispatchCreationAjaxFailAction,
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onServerError : actionDispatchers.app.dispatchGoToErrorAction
     };
+    actionDispatchers.main.dispatchDirectoryCreatedAction(currentView, newDirName);
     createDirAjaxCall(userId, currentView, newDirName, callbacks);
 }
 

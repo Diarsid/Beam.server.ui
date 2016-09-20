@@ -16,7 +16,6 @@ var LandingPage = React.createClass({
                     Registration
                 </button>
                 <br/>
-                Landing page.
             </div>
         );
     }

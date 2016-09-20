@@ -1,4 +1,4 @@
-var $ = require('jquery');
+var $ = require("jquery");
 
 var storage =
     require("./../../state/store/app-local-storage.js");
@@ -7,20 +7,19 @@ var resources =
 
 // --------------------------------
 
-function ajaxLog(property, message) {
-    console.log("[APP] [AJAX CALL] [EDIT DIR : " + property +"] " + message);
+function ajaxLog(message) {
+    console.log("[APP] [AJAX CALL] [CREATE PAGE] " + message);
 }
 
-function editDirectoryProp(userId, placement, dirName, propertyToEdit, newProperty, callbacks) {
+function createPage(userId, placement, dirName, newPage, callbacks) {
     callbacks.onStart();
-    ajaxLog(propertyToEdit, "change to -> " + newProperty);
-    var payload = {
-        "payload" : newProperty
-    };
+    ajaxLog("page creation : ");
+    ajaxLog(" - name : " + newPage.name);
+    ajaxLog(" - url  : " + newPage.url);
     $.ajax({
-        url : resources.directories.single.editProp.url(userId, placement, dirName, propertyToEdit),
-        method : resources.directories.single.editProp.method,
-        data: JSON.stringify(payload),
+        url : resources.pages.postNew.url(userId, placement, dirName),
+        method : resources.pages.postNew.method,
+        data: JSON.stringify(newPage),
         dataType: "json",
         contentType: "application/json; charset=utf-8",
         cache: false,
@@ -29,26 +28,26 @@ function editDirectoryProp(userId, placement, dirName, propertyToEdit, newProper
         },
         statusCode : {
             200 : function (data, statusText, xhr ) {
-                ajaxLog(propertyToEdit, "dir: " + dirName + " prop changed to:" + newProperty);
+                ajaxLog("page created");
                 callbacks.onSuccess();
             },
             400 : function ( xhr, statusText, errorThrown ) {
-                ajaxLog(propertyToEdit, "bad request : " + JSON.parse(xhr.responseText).message);
+                ajaxLog("bad request : " + JSON.parse(xhr.responseText).message);
                 callbacks.onFail(JSON.parse(xhr.responseText).message);
             },
             401 : function ( xhr, statusText, errorThrown ) {
                 callbacks.onUnauthenticated();
             },
             404 : function ( xhr, statusText, errorThrown ) {
-                ajaxLog(propertyToEdit, "resource not found.");
+                ajaxLog("resource not found.");
                 callbacks.onFail("Resource not found.");
             },
             500 : function ( xhr, statusText, errorThrown ) {
-                ajaxLog(propertyToEdit, "server error.");
+                ajaxLog("server error.");
                 callbacks.onServerError(JSON.parse(xhr.responseText).message);
             }
         }
     });
 }
 
-module.exports = editDirectoryProp;
+module.exports = createPage;

@@ -1,7 +1,7 @@
 var React = require('react');
 
 var CreateDirController =
-    require("./create-dir-controller.js");
+    require("./modal-button-controller-create-dir.js");
 
 // -----------------------
 
@@ -12,18 +12,16 @@ var MainPageBar = React.createClass({
             <div className="main-page-bar">
                 <button
                     type="button"
-                    className="logout-button-on-main-page"
+                    className="logout-button-on-main-page main-page-bar-button"
                     onClick={this.props.logout}>
-                    Logout
                 </button>
                 <button
                     type="button"
-                    className="toggle-main-page-content-view-button"
+                    className="toggle-main-page-content-view-button main-page-bar-button"
                     onClick={this.props.toggleContentView} >
                     {this.props.otherView}
                 </button>
                 <CreateDirController create={this.props.createDirectory} />
-                Main page bar.
             </div>
         );
     }

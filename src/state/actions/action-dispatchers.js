@@ -280,6 +280,21 @@ var actionDispatchers = {
             dispatch(actionCreators.main.toggleMainPageContentViewAction());
         },
 
+        dispatchDirectoriesReorderedAction : function (place, newImtblDirs) {
+            dispatchLog("directories reordered!");
+            dispatch(actionCreators.main.directoriesReorderedAction(place, newImtblDirs));
+        },
+
+        dispatchPagesReorderedAction : function (place, newImtblDirs) {
+            dispatchLog("pages reordered.");
+            dispatch(actionCreators.main.pagesReorderedAction(place, newImtblDirs));
+        },
+
+        dispatchDirectoryCreatedAction : function (currentView, newDirName) {
+            dispatchLog("directory " + newDirName + " create action.");
+            dispatch(actionCreators.main.directoryCreatedAction(currentView, newDirName));
+        },
+
         webPanel : {
 
             dispatchLoadingBeginsAction : function () {
@@ -319,19 +334,53 @@ var actionDispatchers = {
 
         directory : {
 
-            dispatchCreationStartAction() {
+            dispatchCreationAjaxStartAction() {
                 dispatchLog("directory creation start...");
                 dispatch(actionCreators.main.directory.creationStartAction());
             },
 
-            directoryCreationSuccess(placement, dirName) {
+            dispatchCreationAjaxSuccessAction(placement, dirName) {
                 dispatchLog("directory created : " + placement + "::" + dirName);
                 dispatch(actionCreators.main.directory.creationSuccessAction(placement, dirName));
             },
 
-            dispatchCreationFailAction(message) {
+            dispatchCreationAjaxFailAction(message) {
                 dispatchLog("directory creation fails : " + message);
                 dispatch(actionCreators.main.directory.creationFailAction(message));
+            },
+
+            dispatchRenamedAction(place, dirs) {
+                dispatchLog(place + " dir renamed.");
+                dispatch(actionCreators.main.directory.renamedAction(place, dirs));
+            },
+
+            dispatchRemovedAction(place, dirs) {
+                dispatchLog("dir removed from " + place);
+                dispatch(actionCreators.main.directory.removedAction(place, dirs));
+            }
+
+        },
+
+        page : {
+
+            dispatchCreatedAction(place, dirs) {
+                dispatchLog("page created.");
+                dispatch(actionCreators.main.page.createdAction(place, dirs));
+            },
+
+            dispatchRenamedAction(place, dirs) {
+                dispatchLog("page renamed.");
+                dispatch(actionCreators.main.page.renamedAction(place, dirs));
+            },
+
+            dispatchDeletedAction(place, dirs) {
+                dispatchLog("page removed.");
+                dispatch(actionCreators.main.page.deletedAction(place, dirs));
+            },
+
+            dispatchUrlChangedAction(place, dirs) {
+                dispatchLog("page url changed.");
+                dispatch(actionCreators.main.page.urlChangedAction(place, dirs));
             }
         }
     }

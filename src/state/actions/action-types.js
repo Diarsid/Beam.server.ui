@@ -73,11 +73,22 @@ var actionTypes = {
     bookmarksLoaded : "BOOKMARKS_LOADED",
     bookmarksLoadingFailed : "BOOKMARKS_LOADING_FAILED",
 
-    directoryCreationStart : "DIR_CREATION_START",
-    directoryCreationSuccess : "DIR_CREATION_SUCCESS",
-    directoryCreationFail : "DIR_CREATION_FAIL",
+    directoryCreationAjaxStart : "DIR_CREATION_START",
+    directoryCreationAjaxSuccess : "DIR_CREATION_SUCCESS",
+    directoryCreationAjaxFail : "DIR_CREATION_FAIL",
+    directoryCreated : "DIR_CREATED",
+    directoryRenamed : "DIR_RENAMED",
+    directoryRemoved : "DIR_REMOVED",
 
-    toggleMainPageContentView : "TOGGLE_MAIN_PAGE_CONTENT"
+    pageCreated : "PAGE_CREATED",
+    pageRenamed : "PAGE_RENAMED",
+    pageUrlChanged : "PAGE_URL_CHANGED",
+    pageDeleted : "PAGE_DELETED",
+
+    toggleMainPageContentView : "TOGGLE_MAIN_PAGE_CONTENT",
+
+    directoriesReordered : "DIRECTORIES_REORDERED",
+    pagesReordered : "PAGES_REORDERED"
 };
 
 module.exports = actionTypes;

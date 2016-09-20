@@ -8,18 +8,18 @@ var resources =
 // --------------------------------
 
 function ajaxLog(property, message) {
-    console.log("[APP] [AJAX CALL] [EDIT DIR : " + property +"] " + message);
+    console.log("[APP] [AJAX CALL] [EDIT PAGE : " + property +"] " + message);
 }
 
-function editDirectoryProp(userId, placement, dirName, propertyToEdit, newProperty, callbacks) {
+function editPageProp(userId, place, dirName, pageName, propertyToEdit, newProperty, callbacks) {
     callbacks.onStart();
     ajaxLog(propertyToEdit, "change to -> " + newProperty);
     var payload = {
         "payload" : newProperty
     };
     $.ajax({
-        url : resources.directories.single.editProp.url(userId, placement, dirName, propertyToEdit),
-        method : resources.directories.single.editProp.method,
+        url : resources.pages.single.editProp.url(userId, place, dirName, pageName, propertyToEdit),
+        method : resources.pages.single.editProp.method,
         data: JSON.stringify(payload),
         dataType: "json",
         contentType: "application/json; charset=utf-8",
@@ -29,7 +29,7 @@ function editDirectoryProp(userId, placement, dirName, propertyToEdit, newProper
         },
         statusCode : {
             200 : function (data, statusText, xhr ) {
-                ajaxLog(propertyToEdit, "dir: " + dirName + " prop changed to:" + newProperty);
+                ajaxLog(propertyToEdit, "page: " + pageName + " prop changed to:" + newProperty);
                 callbacks.onSuccess();
             },
             400 : function ( xhr, statusText, errorThrown ) {
@@ -51,4 +51,4 @@ function editDirectoryProp(userId, placement, dirName, propertyToEdit, newProper
     });
 }
 
-module.exports = editDirectoryProp;
+module.exports = editPageProp;

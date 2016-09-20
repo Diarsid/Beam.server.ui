@@ -21,6 +21,18 @@ var urls = {
 
     singleDirectoryProp : function (userId, placement, name, prop) {
         return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + name + "/" + prop;
+    },
+
+    pages : function(userId, placement, dirName) {
+        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + dirName + "/pages";
+    },
+
+    singlePage : function(userId, placement, dirName, pageName) {
+        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + dirName + "/pages/" + pageName;
+    },
+
+    singlePageProp : function(userId, placement, dirName, pageName, prop) {
+        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + dirName + "/pages/" + pageName + "/" + prop;
     }
 };
 
@@ -102,6 +114,37 @@ var resources = {
         success: 200,
         unauthorized: 401,
         badRequest: 400
+    },
+
+    pages : {
+
+        getAllInDirectory : {
+            url : urls.pages,
+            method : "GET"
+        },
+
+        postNew : {
+            url : urls.pages,
+            method : "POST"
+        },
+
+        single : {
+
+            editProp : {
+                url : urls.singlePageProp,
+                method : "PUT"
+            },
+
+            getPage : {
+                url : urls.singlePage,
+                method : "GET"
+            },
+
+            delete : {
+                url : urls.singlePage,
+                method : "DELETE"
+            }
+        }
     },
 
     directories : {

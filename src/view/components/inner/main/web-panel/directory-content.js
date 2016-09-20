@@ -1,12 +1,25 @@
 var React = require('react');
 
-var DirectoryContent = React.createClass({
-    render : function () {
-        return (
-            <div className="directory-content">
+var DirectoryContentList =
+    require("./directory-content-list.js");
 
-            </div>
-        );
+var DirectoryContent = React.createClass({
+    render : function() {
+        if ( this.props.pages.size > 0 ) {
+            return (
+                <div className="directory-content">
+                    <DirectoryContentList
+                        pages={this.props.pages}
+                        dirName={this.props.name}
+                        dirOrder={this.props.order}
+                        reorderPages={this.props.reorderPages}
+                    />
+                    <br/>
+                </div>
+            );
+        } else {
+            return null;
+        }
     }
 });
 

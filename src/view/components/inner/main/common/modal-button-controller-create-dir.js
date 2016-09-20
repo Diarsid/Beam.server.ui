@@ -5,44 +5,19 @@ var styles =
     require("./../../../../inline-styles/inline-styles.js");
 var DialogButtonsPane =
     require("./dialog-buttons-pane.js");
-var FormFieldInvalidUnderlineMessage =
-    require("./../../common/form-field-invalid-underline-message.js");
+var SelfValidatableFormField =
+    require("./self-validatable-form-field.js");
 var validateDirectoryName =
     require("./../../../../../network/prepared-ajax-calls/validate-webobject-name-call.js");
 
 // -----------------------
 
-var nameValidationDelay;
-
 var initialControllerState = {
     open : false,
-    newName : "",
-    newNameValid : false,
-    newNameInvalidMessage : ""
+    newName : ""
 };
 
 var CreateDirController = React.createClass({
-
-    setNameValidationState : function (isValid, validMessage) {
-        this.setState({
-            newNameValid : isValid,
-            newNameInvalidMessage : validMessage
-        });
-    },
-
-    dirNameValidationCallbacks : function (self) {
-        return {
-            onStart : function () {
-                self.setNameValidationState(false, "");
-            },
-            onValid : function () {
-                self.setNameValidationState(true, "");
-            },
-            onInvalid : function (message) {
-                self.setNameValidationState(false, message);
-            }
-        };
-    },
 
     getInitialState : function () {
         return Object.assign({}, initialControllerState);
@@ -54,13 +29,20 @@ var CreateDirController = React.createClass({
         });
     },
 
-    inputChanged: function ( e ) {
+    isSubmitAllowed : function () {
+        return ( this.state.newName != "" );
+    },
+
+    validNameAvailable : function (name) {
         this.setState({
-            newName : e.target.value
+            newName : name
         });
-        window.clearTimeout(nameValidationDelay);
-        nameValidationDelay = window.setTimeout(
-            validateDirectoryName, 900, e.target.value, this.dirNameValidationCallbacks(this));
+    },
+
+    validNameNotAvailable : function () {
+        this.setState({
+            newName : ""
+        });
     },
 
     submitDirCreation : function () {
@@ -76,9 +58,8 @@ var CreateDirController = React.createClass({
         return (
             <div className="create-dir-controller">
                 <button type="button"
-                        className="create-directory-button-on-main-page"
+                        className="create-directory-button-on-main-page main-page-bar-button"
                         onClick={this.open}>
-                    Create dir
                 </button>
                 <Modal
                     closeTimeoutMS={0}
@@ -89,19 +70,15 @@ var CreateDirController = React.createClass({
                     <label className="form-label">Create new directory: </label>
                     <br/>
 
-                    <input type="text"
-                        id="new-dir-name"
+                    <SelfValidatableFormField
+                        valueAvailableCallback={this.validNameAvailable}
+                        valueUnavailableCallback={this.validNameNotAvailable}
                         placeholder="name..."
-                        className="form-input"
-                        style={styles.getInputStyle(this.state.newNameValid)}
-                        value={this.state.newName}
-                        onChange={this.inputChanged}/>
-                    <FormFieldInvalidUnderlineMessage
-                        message={this.state.newNameInvalidMessage} />
-                    <br/>
+                        validation={validateDirectoryName}
+                    />
 
                     <DialogButtonsPane
-                        submitAllowed={this.state.newNameValid}
+                        submitAllowed={this.isSubmitAllowed()}
                         submitText="Create"
                         submitAction={this.submitDirCreation}
                         cancelAction={this.cancelDirCreation}

@@ -22,9 +22,21 @@ var MainPageContent = React.createClass({
         return (
             <div className="main-page-content">
                 <WebPanel
-                    dirs={this.props.webPanelDirs} />
+                    dirs={this.props.webPanelDirs}
+                    reorderDirectories={this.props.reorderDirectories}
+                    reorderPages={this.props.reorderPages}
+                    createPageIn={this.props.createPageIn}
+                    deleteDirIn={this.props.deleteDirIn}
+                    renameDirIn={this.props.renameDirIn}
+                />
                 <Bookmarks
-                    dirs={this.props.bookmarksDirs} />
+                    dirs={this.props.bookmarksDirs}
+                    reorderDirectories={this.props.reorderDirectories}
+                    reorderPages={this.props.reorderPages}
+                    createPageIn={this.props.createPageIn}
+                    deleteDirIn={this.props.deleteDirIn}
+                    renameDirIn={this.props.renameDirIn}
+                />
             </div>
         );
     }

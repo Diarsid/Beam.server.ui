@@ -1,22 +1,24 @@
+var Immutable = require("immutable");
+
 var actionTypes =
     require("./../actions/action-types.js");
 
 var mainPageViews = {
-    webPanel : "webPanel",
+    webpanel : "webpanel",
     bookmarks : "bookmarks"
 };
 
 function toggleView(currentView) {
-    if ( currentView === mainPageViews.webPanel ) {
+    if ( currentView === mainPageViews.webpanel ) {
         return mainPageViews.bookmarks;
     } else {
-        return mainPageViews.webPanel;
+        return mainPageViews.webpanel;
     }
 }
 
 var mainPageInitialState = {
 
-    currentView : mainPageViews.webPanel,
+    currentView : mainPageViews.webpanel,
 
     webPanelLoading : false,
     bookmarksLoading : false,
@@ -24,8 +26,8 @@ var mainPageInitialState = {
     webPanelLoadingFailedMessage : "",
     bookmarksLoadingFailedMessage : "",
 
-    webPanelDirs : [],
-    bookmarksDirs : []
+    webPanelDirs : Immutable.fromJS([]),
+    bookmarksDirs : Immutable.fromJS([])
 };
 
 function defineMainPageState(mainPageState = mainPageInitialState, action) {
@@ -63,12 +65,12 @@ function defineMainPageState(mainPageState = mainPageInitialState, action) {
         case actionTypes.webPanelLoaded :
             return Object.assign({}, mainPageState, {
                 webPanelLoading : false,
-                webPanelDirs : action.dirs
+                webPanelDirs : Immutable.fromJS(action.dirs)
             });
         case actionTypes.bookmarksLoaded :
             return Object.assign({}, mainPageState, {
                 bookmarksLoading : false,
-                bookmarksDirs : action.dirs
+                bookmarksDirs : Immutable.fromJS(action.dirs)
             });
 
         // toggle views
@@ -77,8 +79,39 @@ function defineMainPageState(mainPageState = mainPageInitialState, action) {
                 currentView : toggleView(mainPageState.currentView)
             });
 
-        case actionTypes.directoryCreationSuccess :
-            return Object.assign({}, mainPageState);
+        case actionTypes.directoryCreated :
+            if ( action.place == mainPageViews.webpanel ) {
+                return Object.assign({}, mainPageState, {
+                    webPanelDirs : mainPageState.webPanelDirs.push(Immutable.fromJS({
+                        name : action.name,
+                        pages : Immutable.fromJS([])
+                    }))
+                });
+            } else {
+                return Object.assign({}, mainPageState, {
+                    bookmarksDirs : mainPageState.bookmarksDirs.push(Immutable.fromJS({
+                        name : action.name,
+                        pages : Immutable.fromJS([])
+                    }))
+                });
+            }
+        case actionTypes.pageCreated :
+        case actionTypes.pageDeleted :
+        case actionTypes.pageRenamed :
+        case actionTypes.pageUrlChanged :
+        case actionTypes.pagesReordered :
+        case actionTypes.directoryRemoved :
+        case actionTypes.directoryRenamed :
+        case actionTypes.directoriesReordered :
+            if ( action.place == mainPageViews.webpanel ) {
+                return Object.assign({}, mainPageState, {
+                    webPanelDirs : action.dirs
+                });
+            } else {
+                return Object.assign({}, mainPageState, {
+                    bookmarksDirs : action.dirs
+                });
+            }
 
         default :
             return mainPageState;
