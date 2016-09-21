@@ -88,7 +88,6 @@ var CreatePageController = React.createClass({
                     <label className="form-label">
                         Create new page in <b>{this.props.dirName}</b> directory:
                     </label>
-                    <br/>
 
                     <SelfValidatableFormField
                         placeholder="name..."

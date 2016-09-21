@@ -3,7 +3,7 @@ var React = require('react');
 var styles =
     require("./../../../../inline-styles/inline-styles.js");
 var FormFieldInvalidUnderlineMessage =
-    require("./../../common/form-field-invalid-underline-message.js");
+    require("./../../common/form-field-underline-message.js");
 
 // ----------------------
 
@@ -67,7 +67,6 @@ var SelfValidatableFormField = React.createClass({
                        onChange={this.inputChanged}/>
                 <FormFieldInvalidUnderlineMessage
                     message={this.state.valueInvalidMessage} />
-                <br/>
             </div>
         );
     }

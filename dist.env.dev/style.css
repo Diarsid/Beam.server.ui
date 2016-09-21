@@ -27,12 +27,12 @@ a:link, a:visited, a:hover, a:active {
 .directory-bar {
     box-sizing: border-box;
     height: 28px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    background-color: rgba(0, 0, 0, 0.15);
-    box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
-    -webkit-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
-    -moz-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
-    -o-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(30, 30, 30, 0.2);
+    background-color: rgba(30, 30, 30, 0.1);
+    box-shadow: inset 0px 0px 15px 0px rgba(30, 30, 30, 0.4);
+    -webkit-box-shadow: inset 0px 0px 15px 0px rgba(30, 30, 30, 0.4);
+    -moz-box-shadow: inset 0px 0px 15px 0px rgba(30, 30, 30, 0.4);
+    -o-box-shadow: inset 0px 0px 15px 0px rgba(30, 30, 30, 0.4);
     margin: 0;
     padding: 3px 3px 3px 3px;
 }
@@ -138,7 +138,7 @@ form.create-page-dialog {
     margin: 0 0 0 0;
 }
 
-label.form-label {
+.form-label {
     color: #1C1C1C;
     font-family: Verdana;
     font-size: 15px;
@@ -156,14 +156,34 @@ label.form-label {
     -moz-box-shadow: inset 0px 0px 5px 0px lightgrey;
     -o-box-shadow: inset 0px 0px 5px 0px lightgrey;
     padding: 4px 0 4px 8px;
-    margin-bottom: 12px;
-    margin-top: 4px;
+    margin-bottom: 6px;
+    margin-top: 6px;
 }
 
 input[type=text] {
     color: #1C1C1C;
     font-family: Verdana;
     font-size: 15px;
+}
+
+.form-field-underline-message {
+    color: #C98181;
+    font-family: Verdana;
+    font-size: 13px;
+    margin-bottom: 8px;
+    word-wrap: break-word;
+    width: 330px;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+.invalid {
+    margin-bottom: 15px;
+    background-color: #FFF8F6;
+    box-shadow: inset 0px 0px 5px 0px #FFD7CE;
+    -webkit-box-shadow: inset 0px 0px 5px 0px #FFD7CE;
+    -moz-box-shadow: inset 0px 0px 5px 0px #FFD7CE;
+    -o-box-shadow: inset 0px 0px 5px 0px #FFD7CE;
 }
 
 fieldset {
@@ -174,7 +194,7 @@ fieldset {
 }
 
 .dialog-button-pane {
-    margin: 20px 0 0 0;
+    margin: 15px 0 0 0;
     padding: 0 0 0 0;
 }
 
@@ -370,7 +390,7 @@ fieldset {
 }
 
 .directory {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(30, 30, 30, 0.2);
     margin: 1vw 2vw 1vw 2vw;
     border-radius: 10px;
 }
@@ -417,10 +437,11 @@ ul.directory-content-list {
     height: 100vh;
     margin: 0 0 0 0;
     padding: 0;
-    box-shadow: 0px 0px 30px 10px black inset;
-    -webkit-box-shadow: 0px 0px 30px 10px black inset;
-    -moz-box-shadow: 0px 0px 30px 10px black inset;
-    -o-box-shadow: 0px 0px 30px 10px black inset;
+    background: rgba(30, 30, 30, 0.3);
+    box-shadow: 0px 0px 20px 5px rgba(30, 30, 30, 0.5) inset;
+    -webkit-box-shadow: 0px 0px 20px 5px rgba(30, 30, 30, 0.5) inset;
+    -moz-box-shadow: 0px 0px 20px 5px rgba(30, 30, 30, 0.5) inset;
+    -o-box-shadow: 0px 0px 20px 5px rgba(30, 30, 30, 0.5) inset;
 }
 
 .main-page-bar-button {
@@ -470,14 +491,6 @@ ul.directory-content-list {
 }
 .create-directory-button-on-main-page:hover {
     background-image: url("./img/create-page-active.png");
-}
-
-.bar-panel {
-    position: relative;
-    top: 10vh;
-    width: 40px;
-    margin: 0;
-    padding: 0;
 }
 
 .create-directory-bar-button {
