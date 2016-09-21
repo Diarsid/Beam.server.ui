@@ -17,7 +17,9 @@ var MainPage = React.createClass({
         return (
             <div className="main-page">
                 <MainPageBarContainer />
-                <MainPageContentContainer />
+                <MainPageContentContainer
+                    reloadContent={this.props.loadInitialData}
+                />
             </div>
         );
     }

@@ -13,6 +13,10 @@ var DirectoryContent = React.createClass({
                         dirName={this.props.name}
                         dirOrder={this.props.order}
                         reorderPages={this.props.reorderPages}
+
+                        editPageUrl={this.props.editPageUrl}
+                        editPageName={this.props.editPageName}
+                        deletePage={this.props.deletePage}
                     />
                     <br/>
                 </div>

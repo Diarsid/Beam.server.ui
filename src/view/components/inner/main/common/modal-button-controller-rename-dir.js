@@ -1,57 +1,29 @@
 var React = require('react');
-var Modal = require('react-modal');
 
-var styles =
-    require("./../../../../inline-styles/inline-styles.js");
-var DialogButtonsPane =
-    require("./dialog-buttons-pane.js");
-var SelfValidatableFormField =
-    require("./self-validatable-form-field.js");
+var ModalSingleValueDialog =
+    require("./modal-single-value-dialog.js");
 var validateDirectoryName =
     require("./../../../../../network/prepared-ajax-calls/validate-webobject-name-call.js");
 
 // -----------------------
 
-var initialControllerState = {
-    open : false,
-    newName : ""
-};
-
 var RenameDirController = React.createClass({
 
     getInitialState : function () {
-        return Object.assign({}, initialControllerState);
+        return { open : false };
     },
 
     open : function () {
-        this.setState({
-            open : true
-        });
+        this.setState({ open : true });
     },
 
-    isSubmitAllowed : function () {
-        return ( this.state.newName != "" );
-    },
-
-    validNameAvailable : function (name) {
-        this.setState({
-            newName : name
-        });
-    },
-
-    validNameNotAvailable : function () {
-        this.setState({
-            newName : ""
-        });
-    },
-
-    submitDirRename : function () {
-        this.props.renameTo(this.state.newName);
-        this.setState(Object.assign({}, initialControllerState));
+    submitDirRename : function (newName) {
+        this.props.renameTo(newName);
+        this.setState({ open : false });
     },
 
     cancelDirRename : function () {
-        this.setState(Object.assign({}, initialControllerState));
+        this.setState({ open : false });
     },
 
     render: function () {
@@ -59,34 +31,20 @@ var RenameDirController = React.createClass({
             <span className="edit-dir-name-controller">
                 <button
                     type="button"
-                    className="edit-dir-name-button-on-main-page directory-bar-button"
+                    className="edit-dir-name-button-on-directory-bar directory-bar-button"
                     onClick={this.open}>
                 </button>
-                <Modal
-                    closeTimeoutMS={0}
+
+                <ModalSingleValueDialog
                     isOpen={this.state.open}
-                    shouldCloseOnOverlayClick={false}
-                    style={styles.modalDialogStyle} >
-
-                    <label className="form-label">
-                        Rename <b>{this.props.dirName}</b> to:
-                    </label>
-                    <br/>
-
-                    <SelfValidatableFormField
-                        valueAvailableCallback={this.validNameAvailable}
-                        valueUnavailableCallback={this.validNameNotAvailable}
-                        placeholder="name..."
-                        validation={validateDirectoryName}
-                    />
-
-                    <DialogButtonsPane
-                        submitAllowed={this.isSubmitAllowed()}
-                        submitText="Rename"
-                        submitAction={this.submitDirRename}
-                        cancelAction={this.cancelDirRename}
-                    />
-                </Modal>
+                    validation={validateDirectoryName}
+                    placeholder="name..."
+                    submitText="Rename"
+                    submit={this.submitDirRename}
+                    cancel={this.cancelDirRename}
+                >
+                    Rename <b>{this.props.dirName}</b> to:
+                </ModalSingleValueDialog>
             </span>
         );
     }

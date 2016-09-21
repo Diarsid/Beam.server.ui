@@ -1,57 +1,29 @@
 var React = require('react');
-var Modal = require('react-modal');
 
-var styles =
-    require("./../../../../inline-styles/inline-styles.js");
-var DialogButtonsPane =
-    require("./dialog-buttons-pane.js");
-var SelfValidatableFormField =
-    require("./self-validatable-form-field.js");
+var ModalSingleValueDialog =
+    require("./modal-single-value-dialog.js");
 var validateDirectoryName =
     require("./../../../../../network/prepared-ajax-calls/validate-webobject-name-call.js");
 
 // -----------------------
 
-var initialControllerState = {
-    open : false,
-    newName : ""
-};
-
 var CreateDirController = React.createClass({
 
     getInitialState : function () {
-        return Object.assign({}, initialControllerState);
+        return { open : false };
     },
 
     open : function () {
-        this.setState({
-            open : true
-        });
+        this.setState({ open : true });
     },
 
-    isSubmitAllowed : function () {
-        return ( this.state.newName != "" );
-    },
-
-    validNameAvailable : function (name) {
-        this.setState({
-            newName : name
-        });
-    },
-
-    validNameNotAvailable : function () {
-        this.setState({
-            newName : ""
-        });
-    },
-
-    submitDirCreation : function () {
-        this.props.create(this.state.newName);
-        this.setState(Object.assign({}, initialControllerState));
+    submitDirCreation : function (newName) {
+        this.props.create(newName);
+        this.setState({ open : false });
     },
 
     cancelDirCreation : function () {
-        this.setState(Object.assign({}, initialControllerState));
+        this.setState({ open : false });
     },
 
     render: function () {
@@ -61,29 +33,17 @@ var CreateDirController = React.createClass({
                         className="create-directory-button-on-main-page main-page-bar-button"
                         onClick={this.open}>
                 </button>
-                <Modal
-                    closeTimeoutMS={0}
+
+                <ModalSingleValueDialog
                     isOpen={this.state.open}
-                    shouldCloseOnOverlayClick={false}
-                    style={styles.modalDialogStyle} >
-
-                    <label className="form-label">Create new directory: </label>
-                    <br/>
-
-                    <SelfValidatableFormField
-                        valueAvailableCallback={this.validNameAvailable}
-                        valueUnavailableCallback={this.validNameNotAvailable}
-                        placeholder="name..."
-                        validation={validateDirectoryName}
-                    />
-
-                    <DialogButtonsPane
-                        submitAllowed={this.isSubmitAllowed()}
-                        submitText="Create"
-                        submitAction={this.submitDirCreation}
-                        cancelAction={this.cancelDirCreation}
-                    />
-                </Modal>
+                    validation={validateDirectoryName}
+                    placeholder="name..."
+                    submitText="Create"
+                    submit={this.submitDirCreation}
+                    cancel={this.cancelDirCreation}
+                >
+                    Create new directory:
+                </ModalSingleValueDialog>
             </div>
         );
     }

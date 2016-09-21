@@ -52,7 +52,7 @@ var SelfValidatableFormField = React.createClass({
         window.clearTimeout(valueValidationDelay);
         valueValidationDelay = window.setTimeout(
             this.props.validation,
-            900,
+            700,
             e.target.value, this.valueValidationCallbacks(this));
     },
 

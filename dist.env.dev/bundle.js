@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "5e0781a451c02d449d77"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "9ce0a5541844c46b7ec2"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -32314,21 +32314,21 @@
 	var actionTypes = __webpack_require__(288);
 
 	var mainPageViews = {
-	    webPanel: "webPanel",
+	    webpanel: "webpanel",
 	    bookmarks: "bookmarks"
 	};
 
 	function toggleView(currentView) {
-	    if (currentView === mainPageViews.webPanel) {
+	    if (currentView === mainPageViews.webpanel) {
 	        return mainPageViews.bookmarks;
 	    } else {
-	        return mainPageViews.webPanel;
+	        return mainPageViews.webpanel;
 	    }
 	}
 
 	var mainPageInitialState = {
 
-	    currentView: mainPageViews.webPanel,
+	    currentView: mainPageViews.webpanel,
 
 	    webPanelLoading: false,
 	    bookmarksLoading: false,
@@ -32393,7 +32393,7 @@
 	            });
 
 	        case actionTypes.directoryCreated:
-	            if (action.place == "webPanel") {
+	            if (action.place == mainPageViews.webpanel) {
 	                return Object.assign({}, mainPageState, {
 	                    webPanelDirs: mainPageState.webPanelDirs.push(Immutable.fromJS({
 	                        name: action.name,
@@ -32408,18 +32408,22 @@
 	                    }))
 	                });
 	            }
-
+	        case actionTypes.pageCreated:
+	        case actionTypes.pageDeleted:
+	        case actionTypes.pageRenamed:
+	        case actionTypes.pageUrlChanged:
+	        case actionTypes.pagesReordered:
+	        case actionTypes.directoryRemoved:
+	        case actionTypes.directoryRenamed:
 	        case actionTypes.directoriesReordered:
-	            {
-	                if (action.place == "webPanel") {
-	                    return Object.assign({}, mainPageState, {
-	                        webPanelDirs: action.dirs
-	                    });
-	                } else {
-	                    return Object.assign({}, mainPageState, {
-	                        bookmarksDirs: action.dirs
-	                    });
-	                }
+	            if (action.place == mainPageViews.webpanel) {
+	                return Object.assign({}, mainPageState, {
+	                    webPanelDirs: action.dirs
+	                });
+	            } else {
+	                return Object.assign({}, mainPageState, {
+	                    bookmarksDirs: action.dirs
+	                });
 	            }
 
 	        default:
@@ -48313,15 +48317,15 @@
 	    },
 
 	    pages: function pages(userId, placement, dirName) {
-	        return serverRootUrl + "/users/" + userId + "/" + placement + "/" + dirName + "/pages";
+	        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + dirName + "/pages";
 	    },
 
 	    singlePage: function singlePage(userId, placement, dirName, pageName) {
-	        return serverRootUrl + "/users/" + userId + "/" + placement + "/" + dirName + "/pages/" + pageName;
+	        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + dirName + "/pages/" + pageName;
 	    },
 
 	    singlePageProp: function singlePageProp(userId, placement, dirName, pageName, prop) {
-	        return serverRootUrl + "/users/" + userId + "/" + placement + "/" + dirName + "/pages/" + pageName + "/" + prop;
+	        return serverRootUrl + "/users/" + userId + "/" + placement + "/directories/" + dirName + "/pages/" + pageName + "/" + prop;
 	    }
 	};
 
@@ -48586,10 +48590,10 @@
 	var appPages = __webpack_require__(283);
 
 	var MainPageContainer = __webpack_require__(303);
-	var LandingPageContainer = __webpack_require__(355);
-	var LoginPageContainer = __webpack_require__(357);
-	var ErrorPageContainer = __webpack_require__(367);
-	var RegistrationPageContainer = __webpack_require__(369);
+	var LandingPageContainer = __webpack_require__(357);
+	var LoginPageContainer = __webpack_require__(359);
+	var ErrorPageContainer = __webpack_require__(369);
+	var RegistrationPageContainer = __webpack_require__(371);
 
 	// ----------------------
 
@@ -48676,7 +48680,7 @@
 	var MainPage = __webpack_require__(304);
 	var actionDispatchers = __webpack_require__(295);
 
-	var getDirectoriesAjaxCall = __webpack_require__(354);
+	var getDirectoriesAjaxCall = __webpack_require__(356);
 
 	// ----------------------
 
@@ -48745,11 +48749,6 @@
 	        return React.createElement(
 	            "div",
 	            { className: "main-page" },
-	            React.createElement(
-	                "span",
-	                null,
-	                "Main page."
-	            ),
 	            React.createElement(MainPageBarContainer, null),
 	            React.createElement(MainPageContentContainer, null)
 	        );
@@ -48843,24 +48842,19 @@
 	        return React.createElement(
 	            "div",
 	            { className: "main-page-bar" },
+	            React.createElement("button", {
+	                type: "button",
+	                className: "logout-button-on-main-page main-page-bar-button",
+	                onClick: this.props.logout }),
 	            React.createElement(
 	                "button",
 	                {
 	                    type: "button",
-	                    className: "logout-button-on-main-page",
-	                    onClick: this.props.logout },
-	                "Logout"
-	            ),
-	            React.createElement(
-	                "button",
-	                {
-	                    type: "button",
-	                    className: "toggle-main-page-content-view-button",
+	                    className: "toggle-main-page-content-view-button main-page-bar-button",
 	                    onClick: this.props.toggleContentView },
 	                this.props.otherView
 	            ),
-	            React.createElement(CreateDirController, { create: this.props.createDirectory }),
-	            "Main page bar."
+	            React.createElement(CreateDirController, { create: this.props.createDirectory })
 	        );
 	    }
 	});
@@ -48936,13 +48930,9 @@
 	        return React.createElement(
 	            'div',
 	            { className: 'create-dir-controller' },
-	            React.createElement(
-	                'button',
-	                { type: 'button',
-	                    className: 'create-directory-button-on-main-page',
-	                    onClick: this.open },
-	                'Create dir'
-	            ),
+	            React.createElement('button', { type: 'button',
+	                className: 'create-directory-button-on-main-page main-page-bar-button',
+	                onClick: this.open }),
 	            React.createElement(
 	                Modal,
 	                {
@@ -51270,7 +51260,7 @@
 	            value: e.target.value
 	        });
 	        window.clearTimeout(valueValidationDelay);
-	        valueValidationDelay = window.setTimeout(this.props.validation, 900, e.target.value, this.valueValidationCallbacks(this));
+	        valueValidationDelay = window.setTimeout(this.props.validation, 700, e.target.value, this.valueValidationCallbacks(this));
 	    },
 
 	    render: function render() {
@@ -51451,11 +51441,11 @@
 
 	var MainPageContent = __webpack_require__(335);
 	var actionDispatchers = __webpack_require__(295);
-	var editDirectoryPropAjaxCall = __webpack_require__(349);
-	var editPagePropAjaxCall = __webpack_require__(350);
-	var createNewPageAjaxCall = __webpack_require__(351);
-	var deletePageAjaxCall = __webpack_require__(352);
-	var deleteDirectoryAjaxCall = __webpack_require__(353);
+	var editDirectoryPropAjaxCall = __webpack_require__(351);
+	var editPagePropAjaxCall = __webpack_require__(352);
+	var createNewPageAjaxCall = __webpack_require__(353);
+	var deletePageAjaxCall = __webpack_require__(354);
+	var deleteDirectoryAjaxCall = __webpack_require__(355);
 
 	// -------------------------------
 
@@ -51583,16 +51573,6 @@
 	    editPagePropAjaxCall(userId, place, dirName, pageName, "url", newUrl, callbacks);
 	}
 
-	function getPlaceDirsFromState(state, place) {
-	    var dirs;
-	    if (place == "webPanel") {
-	        dirs = state.mainPage.webPanelDirs;
-	    } else {
-	        dirs = state.mainPage.bookmarksDirs;
-	    }
-	    return dirs;
-	}
-
 	function mapStateToProps(state) {
 	    return {
 	        currentView: state.mainPage.currentView,
@@ -51607,40 +51587,72 @@
 	        bookmarksDirs: state.mainPage.bookmarksDirs,
 
 	        reorderDirectories: function reorderDirectories(place, oldOrder, newOrder) {
-	            var dirs = getPlaceDirsFromState(state, place);
+	            var dirs;
+	            if (place == "webpanel") {
+	                dirs = state.mainPage.webPanelDirs;
+	            } else {
+	                dirs = state.mainPage.bookmarksDirs;
+	            }
 	            var movedDir = dirs.get(oldOrder);
 	            contentLog("directories reordering starts...");
 	            contentLog("...reorder dir:" + movedDir.get("name") + " from " + oldOrder + " to " + newOrder);
 	            actionDispatchers.main.dispatchDirectoriesReorderedAction(place, dirs.delete(oldOrder).insert(newOrder, movedDir));
 	            reorderDirectoryAjax(state.user.id, place, movedDir.get("name"), newOrder);
 	        },
+
 	        reorderPages: function reorderPages(place, dirOrder, dirName, pageName, oldOrder, newOrder) {
-	            var dirs = getPlaceDirsFromState(state, place);
+	            var dirs;
+	            if (place == "webpanel") {
+	                dirs = state.mainPage.webPanelDirs;
+	            } else {
+	                dirs = state.mainPage.bookmarksDirs;
+	            }
 	            var dirWithMovedPage = dirs.get(dirOrder);
 	            var movedPage = dirWithMovedPage.get("pages").get(oldOrder);
 	            contentLog("pages reordering starts...");
 	            contentLog("...reorder in dir:" + dirWithMovedPage.get("name") + " page:" + movedPage.get("name") + " from " + oldOrder + " to " + newOrder);
-	            dirWithMovedPage = dirWithMovedPage.set("pages", dirWithMovedPage.get("pages").delete(oldOrder).insert(newOrder, movedPage));
-	            actionDispatchers.main.dispatchPagesReorderedAction(place, dirs.set(dirOrder, dirWithMovedPage));
+	            dirs.deleteIn([dirOrder, "pages", oldOrder]).setIn([]);
+	            actionDispatchers.main.dispatchPagesReorderedAction(place, dirs.set(dirOrder, dirWithMovedPage.set("pages", dirWithMovedPage.get("pages").delete(oldOrder).insert(newOrder, movedPage))));
 	            reorderPagesAjax(state.user.id, place, dirName, pageName, newOrder);
 	        },
+
 	        renameDirIn: function renameDirectory(place, dirOrder, oldDirName, newDirName) {
-	            var dirs = getPlaceDirsFromState(state, place);
+	            var dirs;
+	            if (place == "webpanel") {
+	                dirs = state.mainPage.webPanelDirs;
+	            } else {
+	                dirs = state.mainPage.bookmarksDirs;
+	            }
 	            var renamedDir = dirs.get(dirOrder);
 	            contentLog("directory renaming starts...");
 	            contentLog("...rename " + renamedDir.get("name") + " to " + newDirName);
 	            actionDispatchers.main.directory.dispatchRenamedAction(place, dirs.set(dirOrder, renamedDir.set("name", newDirName)));
 	            renameDirectoryAjax(state.user.id, place, oldDirName, newDirName);
 	        },
+
 	        deleteDirIn: function deleteDirectory(place, dirOrder, name) {
-	            var dirs = getPlaceDirsFromState(state, place);
+	            var dirs;
+	            if (place == "webpanel") {
+	                dirs = state.mainPage.webPanelDirs;
+	            } else {
+	                dirs = state.mainPage.bookmarksDirs;
+	            }
 	            contentLog("directory deletion starts...");
+	            console.log(dirs);
+	            console.log(dirOrder);
+	            console.log(name);
 	            contentLog("...delete dir:" + dirs.get(dirOrder).get("name"));
 	            actionDispatchers.main.directory.dispatchRemovedAction(place, dirs.delete(dirOrder));
 	            deleteDirectoryAjax(state.user.id, place, name);
 	        },
+
 	        createPageIn: function createNewPage(place, dirOrder, dirName, pageName, pageUrl) {
-	            var dirs = getPlaceDirsFromState(state, place);
+	            var dirs;
+	            if (place == "webpanel") {
+	                dirs = state.mainPage.webPanelDirs;
+	            } else {
+	                dirs = state.mainPage.bookmarksDirs;
+	            }
 	            var dirWithNewPage = dirs.get(dirOrder);
 	            var imtblPage = Immutable.fromJS({
 	                name: pageName,
@@ -51652,8 +51664,14 @@
 	            actionDispatchers.main.page.dispatchCreatedAction(place, dirs.set(dirOrder, dirWithNewPage));
 	            createNewPageAjax(state.user.id, place, dirName, pageName, pageUrl);
 	        },
+
 	        renamePageIn: function renamePage(place, dirOrder, dirName, pageOrder, oldPageName, newPageName) {
-	            var dirs = getPlaceDirsFromState(state, place);
+	            var dirs;
+	            if (place == "webpanel") {
+	                dirs = state.mainPage.webPanelDirs;
+	            } else {
+	                dirs = state.mainPage.bookmarksDirs;
+	            }
 	            var dirWithRenamedPage = dirs.get(dirOrder);
 	            var renamedPage = dirWithRenamedPage.get("pages").get(pageOrder);
 	            contentLog("page renaming starts...");
@@ -51661,14 +51679,26 @@
 	            actionDispatchers.main.page.dispatchRenamedAction(place, dirs.setIn([dirOrder, "pages", pageOrder, "name"], newPageName));
 	            renamePageAjax(state.user.id, place, dirName, oldPageName, newPageName);
 	        },
+
 	        deletePageIn: function deletePage(place, dirOrder, dirName, pageOrder, pageName) {
-	            var dirs = getPlaceDirsFromState(state, place);
+	            var dirs;
+	            if (place == "webpanel") {
+	                dirs = state.mainPage.webPanelDirs;
+	            } else {
+	                dirs = state.mainPage.bookmarksDirs;
+	            }
 	            contentLog("page deletion starts...");
 	            actionDispatchers.main.page.dispatchDeletedAction(place, dirs.deleteIn([dirOrder, "pages", pageOrder]));
 	            deletePageAjax(state.user.id, place, dirName, pageName);
 	        },
+
 	        editPageUrlIn: function editPageUrl(place, dirOrder, dirName, pageOrder, pageName, newUrl) {
-	            var dirs = getPlaceDirsFromState(state, place);
+	            var dirs;
+	            if (place == "webpanel") {
+	                dirs = state.mainPage.webPanelDirs;
+	            } else {
+	                dirs = state.mainPage.bookmarksDirs;
+	            }
 	            contentLog("page url editing starts...");
 	            actionDispatchers.main.page.dispatchUrlChangedAction(place, dirs.setIn([dirOrder, "pages", pageOrder, "url"], newUrl));
 	            editPageUrlAjax(state.user.id, place, dirName, pageName, newUrl);
@@ -51696,7 +51726,7 @@
 	__webpack_require__(336);
 
 	var WebPanel = __webpack_require__(337);
-	var Bookmarks = __webpack_require__(348);
+	var Bookmarks = __webpack_require__(350);
 
 	// ---------------
 
@@ -66793,26 +66823,26 @@
 	                var movedDirName = ui.item.find('.directory-bar')[0].textContent;
 	                panelLog("moved (" + ui.item.find('.directory-bar')[0].textContent + ") : from " + ui.item.oldOrder + " to " + ui.item.index());
 	                webPanelNode.sortable('cancel');
-	                self.props.reorderDirectories("webPanel", oldOrder, newOrder);
+	                self.props.reorderDirectories("webpanel", oldOrder, newOrder);
 	            }
 
 	        }).disableSelection();
 	    },
 
-	    deleteDirInWebPanel: function deleteDirInWebPanel(name) {
-	        this.props.deleteDirIn("webPanel", name);
+	    deleteDirInWebPanel: function deleteDirInWebPanel(order, name) {
+	        this.props.deleteDirIn("webpanel", order, name);
 	    },
 
-	    renameDirInWebPanel: function renameDirInWebPanel(oldName, newName) {
-	        this.props.renameDirIn("webPanel", oldName, newName);
+	    renameDirInWebPanel: function renameDirInWebPanel(order, oldName, newName) {
+	        this.props.renameDirIn("webpanel", order, oldName, newName);
 	    },
 
-	    createPageInWebPanel: function createPageInWebPanel(dirName, newPageName, newPageUrl) {
-	        this.props.createPageIn("webPanel", dirName, newPageName, newPageUrl);
+	    createPageInWebPanel: function createPageInWebPanel(order, dirName, newPageName, newPageUrl) {
+	        this.props.createPageIn("webpanel", order, dirName, newPageName, newPageUrl);
 	    },
 
 	    reorderPagesInWebPanel: function reorderPagesInWebPanel(dirOrder, dirName, pageName, oldOrder, newOrder) {
-	        this.props.reorderPages("webPanel", dirOrder, dirName, pageName, oldOrder, newOrder);
+	        this.props.reorderPages("webpanel", dirOrder, dirName, pageName, oldOrder, newOrder);
 	    },
 
 	    render: function render() {
@@ -66855,7 +66885,7 @@
 	var React = __webpack_require__(155);
 
 	var DirectoryBar = __webpack_require__(339);
-	var DirectoryContent = __webpack_require__(344);
+	var DirectoryContent = __webpack_require__(345);
 
 	// ------------------
 
@@ -66864,19 +66894,23 @@
 
 
 	    deleteThisDir: function deleteThisDir() {
-	        this.props.deleteDir(this.props.name);
+	        this.props.deleteDir(this.props.order, this.props.name);
 	    },
 
 	    createPageInThisDir: function createPageInThisDir(name, url) {
-	        this.props.createPage(this.props.name, name, url);
+	        this.props.createPage(this.props.order, this.props.name, name, url);
 	    },
 
 	    renameThisDir: function renameThisDir(newName) {
-	        this.props.renameDir(this.props.name, newName);
+	        this.props.renameDir(this.props.order, this.props.name, newName);
 	    },
 
 	    reorderPagesInThisDir: function reorderPagesInThisDir(pageName, oldOrder, newOrder) {
-	        this.props.reorderPagesInWebPanel(this.props.order, this.props.name, pageName, oldOrder, newOrder);
+	        this.props.reorderPages(this.props.order, this.props.name, pageName, oldOrder, newOrder);
+	    },
+
+	    isEmptyDir: function isEmptyDir() {
+	        return this.props.pages.size == 0;
 	    },
 
 	    render: function render() {
@@ -66884,6 +66918,7 @@
 	            "div",
 	            { className: "directory" },
 	            React.createElement(DirectoryBar, {
+	                isEmptyDir: this.isEmptyDir(),
 	                dirName: this.props.name,
 	                deleteDir: this.deleteThisDir,
 	                createPage: this.createPageInThisDir,
@@ -66917,17 +66952,26 @@
 
 	var CreatePageController = __webpack_require__(340);
 	var DeleteDirController = __webpack_require__(342);
-	var RenameDirController = __webpack_require__(343);
+	var RenameDirController = __webpack_require__(344);
 
 	// -------------------------
 
 	var DirectoryBar = React.createClass({
 	    displayName: "DirectoryBar",
 
+
+	    defineBarClass: function defineBarClass() {
+	        if (this.props.isEmptyDir) {
+	            return "directory-bar directory-bar-empty";
+	        } else {
+	            return "directory-bar directory-bar-nonempty";
+	        }
+	    },
+
 	    render: function render() {
 	        return React.createElement(
 	            "div",
-	            { className: "directory-bar" },
+	            { className: this.defineBarClass() },
 	            React.createElement(
 	                "span",
 	                null,
@@ -66939,7 +66983,11 @@
 	                    dirName: this.props.dirName,
 	                    renameTo: this.props.renameTo
 	                }),
-	                this.props.dirName,
+	                React.createElement(
+	                    "span",
+	                    { className: "directory-bar-title" },
+	                    this.props.dirName
+	                ),
 	                React.createElement(DeleteDirController, {
 	                    dirName: this.props.dirName,
 	                    "delete": this.props.deleteDir
@@ -67034,13 +67082,9 @@
 	        return React.createElement(
 	            'span',
 	            { className: 'create-page-controller' },
-	            React.createElement(
-	                'button',
-	                { type: 'button',
-	                    className: 'create-page-button-on-directory-bar',
-	                    onClick: this.open },
-	                'Create page'
-	            ),
+	            React.createElement('button', { type: 'button',
+	                className: 'create-page-button-on-directory-bar directory-bar-button',
+	                onClick: this.open }),
 	            React.createElement(
 	                Modal,
 	                {
@@ -67145,8 +67189,7 @@
 	var React = __webpack_require__(155);
 	var Modal = __webpack_require__(308);
 
-	var styles = __webpack_require__(328);
-	var DialogButtonsPane = __webpack_require__(329);
+	var ModalDialog = __webpack_require__(343);
 
 	// -----------------------
 
@@ -67177,38 +67220,24 @@
 	        return React.createElement(
 	            'span',
 	            { className: 'delete-dir-controller' },
+	            React.createElement('button', { type: 'button',
+	                className: 'delete-dir-button-on-directory-bar directory-bar-button',
+	                onClick: this.open }),
 	            React.createElement(
-	                'button',
-	                { type: 'button',
-	                    className: 'create-page-button-on-directory-bar',
-	                    onClick: this.open },
-	                'Delete'
-	            ),
-	            React.createElement(
-	                Modal,
+	                ModalDialog,
 	                {
-	                    closeTimeoutMS: 0,
 	                    isOpen: this.state.open,
-	                    shouldCloseOnOverlayClick: false,
-	                    style: styles.modalDialogStyle },
-	                React.createElement(
-	                    'label',
-	                    { className: 'form-label' },
-	                    'Delete ',
-	                    React.createElement(
-	                        'b',
-	                        null,
-	                        this.props.dirName
-	                    ),
-	                    ' directory?'
-	                ),
-	                React.createElement('br', null),
-	                React.createElement(DialogButtonsPane, {
-	                    submitAllowed: true,
 	                    submitText: 'Delete',
 	                    submitAction: this.submitDirDelete,
 	                    cancelAction: this.cancelDirDelete
-	                })
+	                },
+	                'Delete ',
+	                React.createElement(
+	                    'b',
+	                    null,
+	                    this.props.dirName
+	                ),
+	                ' directory?'
 	            )
 	        );
 	    }
@@ -67221,6 +67250,59 @@
 
 /***/ },
 /* 343 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	'use strict';
+
+	var React = __webpack_require__(155);
+	var Modal = __webpack_require__(308);
+
+	var styles = __webpack_require__(328);
+	var DialogButtonsPane = __webpack_require__(329);
+
+	// -----------------------
+
+	var ModalDialog = React.createClass({
+	    displayName: 'ModalDialog',
+
+	    render: function render() {
+	        return React.createElement(
+	            Modal,
+	            null,
+	            'closeTimeoutMS=',
+	            0,
+	            'isOpen=',
+	            this.props.isOpen,
+	            'shouldCloseOnOverlayClick=',
+	            false,
+	            'style=',
+	            styles.modalDialogStyle,
+	            ' >',
+	            React.createElement(
+	                'label',
+	                { className: 'form-label' },
+	                this.props.children
+	            ),
+	            React.createElement('br', null),
+	            React.createElement(DialogButtonsPane, {
+	                submitAllowed: true,
+	                submitText: this.props.submitText,
+	                submitAction: this.props.submitAction,
+	                cancelAction: this.props.cancelAction
+	            })
+	        );
+	    }
+	});
+
+	module.exports = ModalDialog;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(284); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "modal-dialog.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 344 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67285,14 +67367,10 @@
 	        return React.createElement(
 	            'span',
 	            { className: 'edit-dir-name-controller' },
-	            React.createElement(
-	                'button',
-	                {
-	                    type: 'button',
-	                    className: 'edit-dir-name-button-on-main-page',
-	                    onClick: this.open },
-	                'Rename'
-	            ),
+	            React.createElement('button', {
+	                type: 'button',
+	                className: 'edit-dir-name-button-on-main-page directory-bar-button',
+	                onClick: this.open }),
 	            React.createElement(
 	                Modal,
 	                {
@@ -67334,7 +67412,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 344 */
+/* 345 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67343,14 +67421,56 @@
 
 	var React = __webpack_require__(155);
 
-	var PageFrame = __webpack_require__(345);
-
-	function contentLog(message) {
-	    console.log("[APP] [DIRECTORY CONTENT] " + message);
-	}
+	var DirectoryContentList = __webpack_require__(346);
 
 	var DirectoryContent = React.createClass({
 	    displayName: "DirectoryContent",
+
+	    render: function render() {
+	        if (this.props.pages.size > 0) {
+	            return React.createElement(
+	                "div",
+	                { className: "directory-content" },
+	                React.createElement(DirectoryContentList, {
+	                    pages: this.props.pages,
+	                    dirName: this.props.name,
+	                    dirOrder: this.props.order,
+	                    reorderPages: this.props.reorderPages
+	                }),
+	                React.createElement("br", null)
+	            );
+	        } else {
+	            return null;
+	        }
+	    }
+	});
+
+	module.exports = DirectoryContent;
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(284); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "directory-content.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
+
+/***/ },
+/* 346 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+
+	'use strict';
+
+	var React = __webpack_require__(155);
+	var ReactDOM = __webpack_require__(171);
+	var $ = __webpack_require__(298);
+	__webpack_require__(336);
+
+	var PageFrame = __webpack_require__(347);
+
+	function contentLog(message) {
+	    console.log("[APP] [DIRECTORY CONTENT LIST] " + message);
+	}
+
+	var DirectoryContentList = React.createClass({
+	    displayName: 'DirectoryContentList',
 
 
 	    componentDidMount: function componentDidMount() {
@@ -67364,8 +67484,8 @@
 	                ui.item.oldOrder = ui.item.index();
 	            },
 	            update: function update(event, ui) {
-	                var newOrder = ui.item.index() + 1;
-	                var oldOrder = ui.item.oldOrder + 1;
+	                var newOrder = ui.item.index();
+	                var oldOrder = ui.item.oldOrder;
 	                var movedPageName = ui.item.context.textContent;
 	                dirContentNode.sortable('cancel');
 	                self.props.reorderPages(movedPageName, oldOrder, newOrder);
@@ -67378,30 +67498,34 @@
 	        var _this = this;
 
 	        var renderedPages = [];
+	        contentLog("rendering pages...");
 	        this.props.pages.forEach(function (value, number, iterator) {
-	            return renderedPages.push(React.createElement(PageFrame, {
+	            renderedPages.push(React.createElement(PageFrame, {
+	                key: number,
 	                name: value.get("name"),
 	                url: value.get("url"),
 	                order: number,
 	                dirName: _this.props.dirName,
 	                dirOrder: _this.props.dirOrder
 	            }));
+	            contentLog("  " + number + ": " + value.get("name"));
 	        });
+	        contentLog("rendering finished.");
 	        return React.createElement(
-	            "div",
-	            { className: "directory-content" },
+	            'ul',
+	            { className: 'directory-content-list' },
 	            renderedPages
 	        );
 	    }
 	});
 
-	module.exports = DirectoryContent;
+	module.exports = DirectoryContentList;
 
 	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(284); if (makeExportsHot(module, __webpack_require__(155))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "directory-content-list.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 345 */
+/* 347 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67410,15 +67534,15 @@
 
 	var React = __webpack_require__(155);
 
-	var PageImageFrame = __webpack_require__(346);
-	var PageTitle = __webpack_require__(347);
+	var PageImageFrame = __webpack_require__(348);
+	var PageTitle = __webpack_require__(349);
 
 	var PageFrame = React.createClass({
 	    displayName: "PageFrame",
 
 	    render: function render() {
 	        return React.createElement(
-	            "div",
+	            "li",
 	            { className: "page-frame" },
 	            React.createElement(
 	                "a",
@@ -67438,7 +67562,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 346 */
+/* 348 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67465,7 +67589,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 347 */
+/* 349 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67496,7 +67620,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 348 */
+/* 350 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67514,8 +67638,7 @@
 	        };
 	        return React.createElement(
 	            "div",
-	            {
-	                className: "bookmarks",
+	            { className: "bookmarks",
 	                style: style },
 	            "Bookmarks..."
 	        );
@@ -67528,7 +67651,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 349 */
+/* 351 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67592,7 +67715,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 350 */
+/* 352 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67656,14 +67779,14 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 351 */
+/* 353 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 
 	"use strict";
 
-	$ = __webpack_require__(298);
+	var $ = __webpack_require__(298);
 
 	var storage = __webpack_require__(300);
 	var resources = __webpack_require__(299);
@@ -67719,14 +67842,14 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 352 */
+/* 354 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 
 	"use strict";
 
-	$ = __webpack_require__(298);
+	var $ = __webpack_require__(298);
 
 	var storage = __webpack_require__(300);
 	var resources = __webpack_require__(299);
@@ -67778,7 +67901,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 353 */
+/* 355 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67835,7 +67958,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 354 */
+/* 356 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67895,7 +68018,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 355 */
+/* 357 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67905,7 +68028,7 @@
 	var connect = __webpack_require__(257).connect;
 
 	var actionDispatchers = __webpack_require__(295);
-	var LandingPage = __webpack_require__(356);
+	var LandingPage = __webpack_require__(358);
 
 	function mapStateToProps(state) {
 	    return {
@@ -67922,7 +68045,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 356 */
+/* 358 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67953,8 +68076,7 @@
 	                    onClick: this.props.goToRegistration },
 	                "Registration"
 	            ),
-	            React.createElement("br", null),
-	            "Landing page."
+	            React.createElement("br", null)
 	        );
 	    }
 	});
@@ -67965,7 +68087,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 357 */
+/* 359 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -67975,11 +68097,11 @@
 	var connect = __webpack_require__(257).connect;
 
 	var storage = __webpack_require__(300);
-	var LoginPage = __webpack_require__(358);
+	var LoginPage = __webpack_require__(360);
 	var actionDispatchers = __webpack_require__(295);
-	var loginAjaxCall = __webpack_require__(364);
-	var validateNickNameAjaxCall = __webpack_require__(365);
-	var validatePasswordAjaxCall = __webpack_require__(366);
+	var loginAjaxCall = __webpack_require__(366);
+	var validateNickNameAjaxCall = __webpack_require__(367);
+	var validatePasswordAjaxCall = __webpack_require__(368);
 
 	// ----------------------
 
@@ -68078,7 +68200,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 358 */
+/* 360 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68087,8 +68209,8 @@
 
 	var React = __webpack_require__(155);
 
-	var LoginForm = __webpack_require__(359);
-	var FormFailureMessage = __webpack_require__(363);
+	var LoginForm = __webpack_require__(361);
+	var FormFailureMessage = __webpack_require__(365);
 
 	var LoginPage = React.createClass({
 	    displayName: "LoginPage",
@@ -68143,7 +68265,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 359 */
+/* 361 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68153,9 +68275,9 @@
 	var React = __webpack_require__(155);
 
 	var inlineStyles = __webpack_require__(328);
-	var AcceptedSign = __webpack_require__(360);
-	var FormFieldInvalidMessage = __webpack_require__(361);
-	var Spinner = __webpack_require__(362);
+	var AcceptedSign = __webpack_require__(362);
+	var FormFieldInvalidMessage = __webpack_require__(363);
+	var Spinner = __webpack_require__(364);
 
 	var LoginForm = React.createClass({
 	    displayName: 'LoginForm',
@@ -68255,7 +68377,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 360 */
+/* 362 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68290,7 +68412,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 361 */
+/* 363 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68325,7 +68447,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 362 */
+/* 364 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68360,7 +68482,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 363 */
+/* 365 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68391,7 +68513,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 364 */
+/* 366 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68441,7 +68563,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 365 */
+/* 367 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68489,7 +68611,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 366 */
+/* 368 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68537,7 +68659,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 367 */
+/* 369 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68546,7 +68668,7 @@
 
 	var connect = __webpack_require__(257).connect;
 
-	var ErrorPage = __webpack_require__(368);
+	var ErrorPage = __webpack_require__(370);
 
 	function mapStateToProps(state) {
 	    return {
@@ -68562,7 +68684,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 368 */
+/* 370 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68599,7 +68721,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 369 */
+/* 371 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68609,13 +68731,13 @@
 	var connect = __webpack_require__(257).connect;
 
 	var storage = __webpack_require__(300);
-	var RegistrationPage = __webpack_require__(370);
+	var RegistrationPage = __webpack_require__(372);
 	var actionDispatchers = __webpack_require__(295);
-	var registrationAjaxCall = __webpack_require__(372);
-	var validateNickNameAjaxCall = __webpack_require__(373);
-	var validateNameAjaxCall = __webpack_require__(374);
-	var validateEmailAjaxCall = __webpack_require__(375);
-	var validatePasswordAjaxCall = __webpack_require__(366);
+	var registrationAjaxCall = __webpack_require__(374);
+	var validateNickNameAjaxCall = __webpack_require__(375);
+	var validateNameAjaxCall = __webpack_require__(376);
+	var validateEmailAjaxCall = __webpack_require__(377);
+	var validatePasswordAjaxCall = __webpack_require__(368);
 
 	//---------------------
 
@@ -68830,7 +68952,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 370 */
+/* 372 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68839,8 +68961,8 @@
 
 	var React = __webpack_require__(155);
 
-	var RegistrationForm = __webpack_require__(371);
-	var FormFailureMessage = __webpack_require__(363);
+	var RegistrationForm = __webpack_require__(373);
+	var FormFailureMessage = __webpack_require__(365);
 
 	var RegistrationPage = React.createClass({
 	    displayName: "RegistrationPage",
@@ -68917,7 +69039,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 371 */
+/* 373 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -68927,8 +69049,8 @@
 	var React = __webpack_require__(155);
 
 	var inlineStyles = __webpack_require__(328);
-	var AcceptedSign = __webpack_require__(360);
-	var FormFieldInvalidMessage = __webpack_require__(361);
+	var AcceptedSign = __webpack_require__(362);
+	var FormFieldInvalidMessage = __webpack_require__(363);
 
 	// -------------------------
 
@@ -69137,7 +69259,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 372 */
+/* 374 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -69188,7 +69310,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 373 */
+/* 375 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -69240,7 +69362,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 374 */
+/* 376 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -69288,7 +69410,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ },
-/* 375 */
+/* 377 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(77), RootInstanceProvider = __webpack_require__(85), ReactMount = __webpack_require__(87), React = __webpack_require__(155); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {

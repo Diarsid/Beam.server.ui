@@ -53,6 +53,18 @@ var WebPanel = React.createClass({
         this.props.reorderPages("webpanel", dirOrder, dirName, pageName, oldOrder, newOrder);
     },
 
+    editPageUrlInWebPanel : function (dirOrder, dirName, pageOrder, pageName, newUrl) {
+        this.props.editPageUrlIn("webpanel", dirOrder, dirName, pageOrder, pageName, newUrl);
+    },
+
+    editPageNameInWebPanel : function (dirOrder, dirName, pageOrder, oldPageName, newPageName) {
+        this.props.editPageNameIn("webpanel", dirOrder, dirName, pageOrder, oldPageName, newPageName);
+    },
+
+    deletePageInWebPanel : function (dirOrder, dirName, pageOrder, pageName) {
+        this.props.deletePageIn("webpanel", dirOrder, dirName, pageOrder, pageName);
+    },
+
     render : function () {
         var renderedDirs = [];
         this.props.dirs.forEach((value, number, iterator) =>
@@ -62,10 +74,15 @@ var WebPanel = React.createClass({
                     pages={value.get("pages")}
                     order={number}
                     key={number}
+
                     deleteDir={this.deleteDirInWebPanel}
                     renameDir={this.renameDirInWebPanel}
                     createPage={this.createPageInWebPanel}
                     reorderPages={this.reorderPagesInWebPanel}
+
+                    editPageUrl={this.editPageUrlInWebPanel}
+                    editPageName={this.editPageNameInWebPanel}
+                    deletePage={this.deletePageInWebPanel}
                 />)
         );
         return (

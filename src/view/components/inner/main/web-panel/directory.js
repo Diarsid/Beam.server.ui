@@ -30,6 +30,18 @@ var Directory = React.createClass({
         return ( this.props.pages.size == 0 );
     },
 
+    editPageUrlInThisDir : function (pageOrder, pageName, newUrl) {
+        this.props.editPageUrl(this.props.order, this.props.name, pageOrder, pageName, newUrl);
+    },
+
+    editPageNameInThisDir : function (pageOrder, oldPageName, newPageName) {
+        this.props.editPageName(this.props.order, this.props.name, pageOrder, oldPageName, newPageName);
+    },
+
+    deletePageInThisDir : function (pageOrder, pageName) {
+        this.props.deletePage(this.props.order, this.props.name, pageOrder, pageName);
+    },
+
     render : function () {
         return (
             <div className="directory">
@@ -45,7 +57,12 @@ var Directory = React.createClass({
                     pages={this.props.pages}
                     dirName={this.props.name}
                     dirOrder={this.props.order}
+
                     reorderPages={this.reorderPagesInThisDir}
+
+                    editPageUrl={this.editPageUrlInThisDir}
+                    editPageName={this.editPageNameInThisDir}
+                    deletePage={this.deletePageInThisDir}
                 />
             </div>
         );

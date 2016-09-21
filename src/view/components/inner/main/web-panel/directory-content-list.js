@@ -45,6 +45,9 @@ var DirectoryContentList = React.createClass({
                     order={number}
                     dirName={this.props.dirName}
                     dirOrder={this.props.dirOrder}
+                    editPageUrl={this.props.editPageUrl}
+                    editPageName={this.props.editPageName}
+                    deletePage={this.props.deletePage}
                 />
             );
             contentLog("  " + number + ": " + value.get("name"));

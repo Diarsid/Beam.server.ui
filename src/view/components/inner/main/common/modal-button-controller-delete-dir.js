@@ -1,10 +1,7 @@
 var React = require('react');
-var Modal = require('react-modal');
 
-var styles =
-    require("./../../../../inline-styles/inline-styles.js");
-var DialogButtonsPane =
-    require("./dialog-buttons-pane.js");
+var ModalDialog =
+    require("./modal-dialog.js");
 
 // -----------------------
 
@@ -36,24 +33,14 @@ var DeleteDirController = React.createClass({
                         className="delete-dir-button-on-directory-bar directory-bar-button"
                         onClick={this.open}>
                 </button>
-                <Modal
-                    closeTimeoutMS={0}
+                <ModalDialog
                     isOpen={this.state.open}
-                    shouldCloseOnOverlayClick={false}
-                    style={styles.modalDialogStyle} >
-
-                    <label className="form-label">
-                        Delete <b>{this.props.dirName}</b> directory?
-                    </label>
-                    <br/>
-
-                    <DialogButtonsPane
-                        submitAllowed={true}
-                        submitText="Delete"
-                        submitAction={this.submitDirDelete}
-                        cancelAction={this.cancelDirDelete}
-                    />
-                </Modal>
+                    submitText="Delete"
+                    submitAction={this.submitDirDelete}
+                    cancelAction={this.cancelDirDelete}
+                >
+                    Delete <b>{this.props.dirName}</b> directory?
+                </ModalDialog>
             </span>
         );
     }

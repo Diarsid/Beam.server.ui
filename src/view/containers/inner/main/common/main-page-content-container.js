@@ -22,11 +22,14 @@ function contentLog(message) {
     console.log("[APP] [MAIN CONTENT] " + message);
 }
 
+var reloadMainPageContent;
+
 function reorderDirectoryAjax(userId, place, dirName, newOrder) {
     var callbacks = {
         onStart : function() {},
         onSuccess : function() {
             contentLog("...success");
+            reloadMainPageContent();
         },
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onFail : function(message) {
@@ -42,6 +45,7 @@ function reorderPagesAjax(userId, place, dirName, pageName, newOrder) {
         onStart : function() {},
         onSuccess : function() {
             contentLog("...success");
+            reloadMainPageContent();
         },
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onFail : function(message) {
@@ -57,6 +61,7 @@ function deleteDirectoryAjax(userId, place, name) {
         onStart : function() {},
         onSuccess : function() {
             contentLog("...success");
+            reloadMainPageContent();
         },
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onFail : function(message) {
@@ -72,6 +77,7 @@ function createNewPageAjax(userId, place, dirName, pageName, pageUrl) {
         onStart : function() {},
         onSuccess : function() {
             contentLog("...success");
+            reloadMainPageContent();
         },
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onFail : function(message) {
@@ -88,6 +94,7 @@ function renameDirectoryAjax(userId, place, oldDirName, newDirName) {
         onStart : function() {},
         onSuccess : function() {
             contentLog("...success");
+            reloadMainPageContent();
         },
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onFail : function(message) {
@@ -103,6 +110,7 @@ function renamePageAjax(userId, place, dirName, oldPageName, newPageName) {
         onStart : function() {},
         onSuccess : function() {
             contentLog("...success");
+            reloadMainPageContent();
         },
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onFail : function(message) {
@@ -118,6 +126,7 @@ function deletePageAjax(userId, place, dirName, pageName) {
         onStart : function() {},
         onSuccess : function() {
             contentLog("...success");
+            reloadMainPageContent();
         },
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onFail : function(message) {
@@ -133,6 +142,7 @@ function editPageUrlAjax(userId, place, dirName, pageName, newUrl) {
         onStart : function() {},
         onSuccess : function() {
             contentLog("...success");
+            reloadMainPageContent();
         },
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onFail : function(message) {
@@ -143,7 +153,11 @@ function editPageUrlAjax(userId, place, dirName, pageName, newUrl) {
     editPagePropAjaxCall(userId, place, dirName, pageName, "url", newUrl, callbacks);
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, ownProps) {
+    reloadMainPageContent = function () {
+        contentLog("reloading content...");
+        ownProps.reloadContent();
+    };
     return {
         currentView : state.mainPage.currentView,
 
