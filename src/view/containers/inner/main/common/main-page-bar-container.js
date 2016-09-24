@@ -11,15 +11,24 @@ var createDirAjaxCall =
 
 // ----------------------
 
+function barLog(message) {
+    console.log("[APP] [MAIN BAR] " + message);
+}
+
 function performLogout() {
     actionDispatchers.app.dispatchLogoutAction();
     storage.deleteJwt();
 }
 
+var reloadMainPageContent;
+
 function createDirectory(userId, currentView, newDirName) {
     var callbacks = {
         onStart : actionDispatchers.main.directory.dispatchCreationAjaxStartAction,
-        onSuccess : actionDispatchers.main.directory.dispatchCreationAjaxSuccessAction,
+        onSuccess : function (placement, dirName) {
+            actionDispatchers.main.directory.dispatchCreationAjaxSuccessAction(placement, dirName);
+            reloadMainPageContent();
+        },
         onFail : actionDispatchers.main.directory.dispatchCreationAjaxFailAction,
         onUnauthenticated : actionDispatchers.app.dispatchGoToLoginAction,
         onServerError : actionDispatchers.app.dispatchGoToErrorAction
@@ -36,7 +45,11 @@ function getOtherView(currentView) {
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, ownProps) {
+    reloadMainPageContent = function () {
+        barLog("reloading content...");
+        ownProps.reloadContent();
+    };
     return {
         toggleContentView : actionDispatchers.main.dispatchToggleMainPageContentViewAction,
         otherView : getOtherView(state.mainPage.currentView),

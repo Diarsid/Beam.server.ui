@@ -27,16 +27,30 @@ a:link, a:visited, a:hover, a:active {
 .directory-bar {
     box-sizing: border-box;
     height: 28px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.15);
-    box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
-    -webkit-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
-    -moz-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
-    -o-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(30, 30, 30, 0.2);
+    background-color: rgba(30, 30, 30, 0.1);
+    box-shadow: inset 0px 0px 15px 0px rgba(30, 30, 30, 0.4);
+    -webkit-box-shadow: inset 0px 0px 15px 0px rgba(30, 30, 30, 0.4);
+    -moz-box-shadow: inset 0px 0px 15px 0px rgba(30, 30, 30, 0.4);
+    -o-box-shadow: inset 0px 0px 15px 0px rgba(30, 30, 30, 0.4);
     margin: 0;
     padding: 3px 3px 3px 3px;
+}
+
+.directory-bar-empty {
+    border-radius: 10px;
+}
+
+.directory-bar-nonempty {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+@-moz-document url-prefix() {
+    .directory-bar-title {
+        position: relative;
+        top: 1px;
+    }
 }
 
 .directory-bar-title {
@@ -48,6 +62,7 @@ a:link, a:visited, a:hover, a:active {
 }
 
 .directory-bar-button {
+    float: left;
     position: relative;
     top: 0;
     border-radius: 5px;
@@ -68,6 +83,13 @@ a:link, a:visited, a:hover, a:active {
     background-size: cover;
 }
 
+@-moz-document url-prefix() {
+    .create-page-button-on-directory-bar,
+    .edit-dir-name-button-on-directory-bar {
+        position: relative;
+    }
+}
+
 .directory-bar-button:hover {
     opacity: 1;
     background: white;
@@ -81,57 +103,28 @@ a:link, a:visited, a:hover, a:active {
     background-size: cover;
 }
 
-#directory-bar-create-page-button {
+.create-page-button-on-directory-bar {
     background-image: url("./img/create-page-inactive.png");
 }
-#directory-bar-create-page-button:hover {
+.create-page-button-on-directory-bar:hover {
     background-image: url("./img/create-page-active.png");
 }
 
-#directory-bar-delete-directory-button {
+.delete-dir-button-on-directory-bar {
+    float: right;
+    position: relative;
+    right: -2px;
     background-image: url("./img/del-inactive.png");
 }
-#directory-bar-delete-directory-button:hover {
+.delete-dir-button-on-directory-bar:hover {
     background-image: url("./img/del-active.png");
 }
 
-#directory-bar-rename-directory-button {
+.edit-dir-name-button-on-directory-bar {
     background-image: url("./img/edit-page-inactive.png");
 }
-#directory-bar-rename-directory-button:hover {
+.edit-dir-name-button-on-directory-bar:hover {
     background-image: url("./img/edit-page-active.png");
-}
-
-#page-frame-delete-page-button {
-    background-image: url("./img/del-inactive.png");
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-}
-#page-frame-delete-page-button:hover {
-    background-image: url("./img/del-active.png");
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-}
-
-
-
-.create-page-modal-dialog-controller,
-.rename-dir-modal-dialog-controller,
-.create-directory-modal-dialog-controller,
-.delete-dir-modal-dialog-controller {
-    position: relative;
-    top: 0px;
-    left: 0px;
-    margin: 0 0 0 0;
-    padding: 0 0 0 0;
-}
-
-.directory-bar .delete-dir-modal-dialog-controller {
-    float: right;
 }
 
 legend {
@@ -145,7 +138,7 @@ form.create-page-dialog {
     margin: 0 0 0 0;
 }
 
-label.form-label {
+.form-label {
     color: #1C1C1C;
     font-family: Verdana;
     font-size: 15px;
@@ -163,14 +156,34 @@ label.form-label {
     -moz-box-shadow: inset 0px 0px 5px 0px lightgrey;
     -o-box-shadow: inset 0px 0px 5px 0px lightgrey;
     padding: 4px 0 4px 8px;
-    margin-bottom: 12px;
-    margin-top: 4px;
+    margin-bottom: 6px;
+    margin-top: 6px;
 }
 
 input[type=text] {
     color: #1C1C1C;
     font-family: Verdana;
     font-size: 15px;
+}
+
+.form-field-underline-message {
+    color: #C98181;
+    font-family: Verdana;
+    font-size: 13px;
+    margin-bottom: 8px;
+    word-wrap: break-word;
+    width: 330px;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+.invalid {
+    margin-bottom: 15px;
+    background-color: #FFF8F6;
+    box-shadow: inset 0px 0px 5px 0px #FFD7CE;
+    -webkit-box-shadow: inset 0px 0px 5px 0px #FFD7CE;
+    -moz-box-shadow: inset 0px 0px 5px 0px #FFD7CE;
+    -o-box-shadow: inset 0px 0px 5px 0px #FFD7CE;
 }
 
 fieldset {
@@ -181,7 +194,7 @@ fieldset {
 }
 
 .dialog-button-pane {
-    margin: 20px 0 0 0;
+    margin: 15px 0 0 0;
     padding: 0 0 0 0;
 }
 
@@ -232,31 +245,112 @@ fieldset {
     -o-box-shadow: 0px 0px 10px 0px lightgrey, inset 0px 0px 5px 0px lightgrey;
 }
 
-.delete-page-button {
+.page-menu-trigger {
     position: relative;
     top: -128px;
-    right: -107px;
+    left: -8px;
     border-radius: 6px;
     height: 20px;
     width: 20px;
     border: 1px solid lightgrey;
     box-sizing: border-box;
     opacity: 0.9;
+    background-image: url("./img/page-menu-inactive.png");
     background-color: #fafafa;
     box-shadow: inset 0px 0px 5px 0px lightgrey;
     -webkit-box-shadow: inset 0px 0px 5px 0px lightgrey;
     -moz-box-shadow: inset 0px 0px 5px 0px lightgrey;
     -o-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
     margin: 0 0 0 0;
+    z-index: auto;
 }
 
-.delete-page-button:hover {
+.page-menu-trigger-hover {
     opacity: 1;
     background: white;
+    background-image: url("./img/page-menu-active.png");
     box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
     -webkit-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
     -moz-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
     -o-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    z-index: 2;
+}
+
+.page-menu-trigger:hover {
+    opacity: 1;
+    background: white;
+    background-image: url("./img/page-menu-active.png");
+    box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -webkit-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -moz-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -o-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    z-index: 2;
+}
+
+.page-menu {
+    position: relative;
+    top: -148px;
+    left: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border: 1px solid lightgrey;
+    box-sizing: border-box;
+    background-color: rgba(250, 250, 250, 0.9);
+    box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -webkit-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -moz-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -o-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    margin: 0;
+    padding: 3px;
+    z-index: 1.9;
+}
+
+.page-menu-item {
+    margin: 3px;
+    padding: 0 0 0 0;
+}
+
+.page-menu-item:hover {
+    background: rgba(255, 255, 255, 1.0);
+    border-radius: 6px;
+    box-shadow: 0px 0px 13px 5px white;
+    -webkit-box-shadow: 0px 0px 13px 5px white;
+    -moz-box-shadow: 0px 0px 13px 5px white;
+    -o-box-shadow: 0px 0px 13px 5px white;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.page-menu-item-icon {
+    position: relative;
+    top: 2px;
+}
+
+.page-menu-item-text {
+    position: relative;
+    top: -3px;
+    color: #1C1C1C;
+    font-family: Verdana;
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding-left: 6px;
 }
 
 .page-image-frame {
@@ -296,21 +390,31 @@ fieldset {
 }
 
 .directory {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(30, 30, 30, 0.2);
     margin: 1vw 2vw 1vw 2vw;
     border-radius: 10px;
 }
 
-ul.directory-content {
+ul.directory-content-list {
     list-style-type: none;
     width: 100%;
     margin: 0;
     padding: 0;
 }
 
-.directory-content-wrapper {
+.directory-content {
     padding-left: 4%;
     padding-right: 4%;
+}
+
+.web-panel {
+    position: absolute;
+    width: 100%;
+}
+
+.bookmarks {
+    position: absolute;
+    width: 100%;
 }
 
 .web-panel-content {
@@ -318,7 +422,7 @@ ul.directory-content {
     padding: 0;
 }
 
-.web-panel {
+.main-page-content {
     position: relative;
     left: 40px;
     width: calc(100% - 40px);
@@ -326,25 +430,67 @@ ul.directory-content {
     padding: 0;
 }
 
-.bar {
+.main-page-bar {
     position: fixed;
-    top: -2vh;
+    top: 0vh;
     width: 40px;
-    height: 105vh;
+    height: 100vh;
     margin: 0 0 0 0;
     padding: 0;
-    box-shadow: 0px 0px 30px 10px black inset;
-    -webkit-box-shadow: 0px 0px 30px 10px black inset;
-    -moz-box-shadow: 0px 0px 30px 10px black inset;
-    -o-box-shadow: 0px 0px 30px 10px black inset;
+    background: rgba(30, 30, 30, 0.3);
+    box-shadow: 0px 0px 20px 5px rgba(30, 30, 30, 0.5) inset;
+    -webkit-box-shadow: 0px 0px 20px 5px rgba(30, 30, 30, 0.5) inset;
+    -moz-box-shadow: 0px 0px 20px 5px rgba(30, 30, 30, 0.5) inset;
+    -o-box-shadow: 0px 0px 20px 5px rgba(30, 30, 30, 0.5) inset;
 }
 
-.bar-panel {
+.main-page-bar-button {
     position: relative;
-    top: 10vh;
-    width: 40px;
-    margin: 0;
-    padding: 0;
+    top: 0;
+    border-radius: 7px;
+    height: 25px;
+    width: 25px;
+    border: 1px solid lightgrey;
+    box-sizing: border-box;
+    opacity: 0.9;
+    background-color: #fafafa;
+    box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -webkit-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -moz-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    -o-box-shadow: inset 0px 0px 5px 0px lightgrey;
+    margin-top: 7px;
+    margin-left: 7px;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.main-page-bar-button:hover {
+    opacity: 1;
+    background: white;
+    box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -webkit-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -moz-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -o-box-shadow: 0px 0px 10px 0px white, inset 0px 0px 3px 0px lightgrey;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.logout-button-on-main-page {
+    background-image: url("./img/logout-inactive.png");
+}
+.logout-button-on-main-page:hover {
+    background-image: url("./img/logout-active.png");
+}
+
+.create-directory-button-on-main-page {
+    background-image: url("./img/create-page-inactive.png");
+}
+.create-directory-button-on-main-page:hover {
+    background-image: url("./img/create-page-active.png");
 }
 
 .create-directory-bar-button {
