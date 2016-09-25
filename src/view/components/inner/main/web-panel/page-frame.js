@@ -34,6 +34,7 @@ var PageFrame = React.createClass({
                     <PageTitle text={this.props.name} />
                 </a>
                 <PageMenuContainer
+                    dirName={this.props.dirName}
                     pageName={this.props.name}
                     pageOrder={this.props.order}
                     ref={(component) => this.menuContainer = component}

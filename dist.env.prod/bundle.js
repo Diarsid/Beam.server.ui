@@ -39063,7 +39063,9 @@
 	        return React.createElement(
 	            "div",
 	            { className: "main-page" },
-	            React.createElement(MainPageBarContainer, null),
+	            React.createElement(MainPageBarContainer, {
+	                reloadContent: this.props.loadInitialData
+	            }),
 	            React.createElement(MainPageContentContainer, {
 	                reloadContent: this.props.loadInitialData
 	            })
@@ -39088,15 +39090,24 @@
 
 	// ----------------------
 
+	function barLog(message) {
+	    console.log("[APP] [MAIN BAR] " + message);
+	}
+
 	function performLogout() {
 	    actionDispatchers.app.dispatchLogoutAction();
 	    storage.deleteJwt();
 	}
 
+	var reloadMainPageContent;
+
 	function _createDirectory(userId, currentView, newDirName) {
 	    var callbacks = {
 	        onStart: actionDispatchers.main.directory.dispatchCreationAjaxStartAction,
-	        onSuccess: actionDispatchers.main.directory.dispatchCreationAjaxSuccessAction,
+	        onSuccess: function onSuccess(placement, dirName) {
+	            actionDispatchers.main.directory.dispatchCreationAjaxSuccessAction(placement, dirName);
+	            reloadMainPageContent();
+	        },
 	        onFail: actionDispatchers.main.directory.dispatchCreationAjaxFailAction,
 	        onUnauthenticated: actionDispatchers.app.dispatchGoToLoginAction,
 	        onServerError: actionDispatchers.app.dispatchGoToErrorAction
@@ -39113,7 +39124,11 @@
 	    }
 	}
 
-	function mapStateToProps(state) {
+	function mapStateToProps(state, ownProps) {
+	    reloadMainPageContent = function reloadMainPageContent() {
+	        barLog("reloading content...");
+	        ownProps.reloadContent();
+	    };
 	    return {
 	        toggleContentView: actionDispatchers.main.dispatchToggleMainPageContentViewAction,
 	        otherView: getOtherView(state.mainPage.currentView),
@@ -57752,7 +57767,7 @@
 	                { className: "directory-content" },
 	                React.createElement(DirectoryContentList, {
 	                    pages: this.props.pages,
-	                    dirName: this.props.name,
+	                    dirName: this.props.dirName,
 	                    dirOrder: this.props.order,
 	                    reorderPages: this.props.reorderPages,
 
@@ -57888,6 +57903,7 @@
 	                React.createElement(PageTitle, { text: this.props.name })
 	            ),
 	            React.createElement(PageMenuContainer, {
+	                dirName: this.props.dirName,
 	                pageName: this.props.name,
 	                pageOrder: this.props.order,
 	                ref: function ref(component) {
@@ -58088,7 +58104,13 @@
 	                    null,
 	                    this.props.pageName
 	                ),
-	                " page?"
+	                " page from ",
+	                React.createElement(
+	                    "b",
+	                    null,
+	                    this.props.dirName
+	                ),
+	                " ?"
 	            )
 	        );
 	    }

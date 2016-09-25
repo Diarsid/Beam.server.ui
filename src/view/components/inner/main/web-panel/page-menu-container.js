@@ -105,7 +105,7 @@ var PageMenuContainer = React.createClass({
                     submitAction={this.submitDelete}
                     cancelAction={this.cancelDelete}
                 >
-                    Delete <b>{this.props.pageName}</b> page?
+                    Delete <b>{this.props.pageName}</b> page from <b>{this.props.dirName}</b> ?
                 </ModalDialog>
 
             </div>

@@ -10,7 +10,7 @@ var DirectoryContent = React.createClass({
                 <div className="directory-content">
                     <DirectoryContentList
                         pages={this.props.pages}
-                        dirName={this.props.name}
+                        dirName={this.props.dirName}
                         dirOrder={this.props.order}
                         reorderPages={this.props.reorderPages}
 
