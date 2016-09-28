@@ -1,3 +1,6 @@
+
+// -----------------------
+
 var jwtKey = "beam.server.ui.jwt";
 
 function decodeJwtClaims(jwt) {
@@ -27,6 +30,11 @@ var storage = {
     deleteJwt : function () {
         console.log('[APP] [JWT] deleted.');
         localStorage.removeItem(jwtKey);
+    },
+
+    saveJwt : function (jwtString) {
+        console.log('[APP] [JWT] stored: ' + jwtString);
+        localStorage.setItem(jwtKey, jwtString);
     },
 
     saveAndParseJwt : function (jwtString) {

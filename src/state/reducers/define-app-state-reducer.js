@@ -12,7 +12,10 @@ var defineMainPageState =
     require("./define-main-page-state-reducer.js");
 var defineErrorPageState =
     require("./define-error-page-state-reducer.js");
+var actionsGlobalInterceptor =
+    require("./../actions-interceptors/global-interceptor.js");
 
+// -------------------------
 
 var appInitialState = {
     user : {},
@@ -24,7 +27,7 @@ var appInitialState = {
 };
 
 function defineAppState (appState = appInitialState, action ) {
-
+    actionsGlobalInterceptor.intercept(action);
     return {
         user : defineUserState(appState.user, action),
         currentPage : defineCurrentPageState(appState.currentPage, action),

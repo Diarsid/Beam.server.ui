@@ -16,6 +16,11 @@ var actionDispatchers = {
             dispatch(actionCreators.app.appStartsAction());
         },
 
+        dispatchGoToMainAction : function () {
+            dispatchLog("go to main.");
+            dispatch(actionCreators.app.goToMainAction());
+        },
+
         dispatchGoToLandingPageAction : function () {
             dispatchLog("go to landing.");
             dispatch(actionCreators.app.goToLandingPageAction());
@@ -23,12 +28,12 @@ var actionDispatchers = {
 
         dispatchGoToLoginAction : function () {
             dispatchLog("go to login.");
-            dispatch(actionCreators.initialAuthCheck.goToLoginAction());
+            dispatch(actionCreators.app.goToLoginAction());
         },
 
         dispatchGoToRegisterAction : function () {
             dispatchLog("go to register.");
-            dispatch(actionCreators.initialAuthCheck.goToRegisterAction());
+            dispatch(actionCreators.app.goToRegisterAction());
         },
 
         dispatchLogoutAction : function () {

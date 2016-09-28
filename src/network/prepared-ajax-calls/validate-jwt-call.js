@@ -25,12 +25,8 @@ function validateJwt ( jwtString, callbacks ) {
                 ajaxLog("valid, parse user info and proceed.");
                 callbacks.onJwtValid();
             },
-            302: function () {
-                ajaxLog("valid, but expired, force to login.");
-                callbacks.onJwtExpired();
-            },
             401: function () {
-                ajaxLog("invalid, force to register.");
+                ajaxLog("invalid, force to login.");
                 callbacks.onJwtInvalid();
             }
         }

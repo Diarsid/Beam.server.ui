@@ -15,18 +15,24 @@ var RootPageContainer =
 
 // --------------------------------------------
 
+function mainLog(message) {
+    console.log('[APP] [MAIN] ' + message);
+}
+
 var jwtValidationHttpResponseCallbacks = {
     onStart : function () {
         actionDispatchers.initialAuthCheck.dispatchStoredUserInfoValidationBeginsAction();
     },
     onJwtValid : function () {
+        actionDispatchers.app.dispatchGoToMainAction();
         actionDispatchers.initialAuthCheck.dispatchStoredUserInfoValidAction(storage.parseUserFromJwt());
     },
     onJwtInvalid : function () {
         storage.deleteJwt();
-        actionDispatchers.app.dispatchGoToRegisterAction();
+        actionDispatchers.app.dispatchGoToLoginAction();
     },
     onJwtExpired : function () {
+        storage.deleteJwt();
         actionDispatchers.app.dispatchGoToLoginAction();
     }
 };
@@ -37,8 +43,8 @@ function initialAppUserInfoProcessing() {
     } else {
         actionDispatchers.app.dispatchGoToLandingPageAction();
     }
-
 }
+
 function renderView() {
     ReactDOM.render(
         <Provider store={appStore} >
@@ -49,7 +55,7 @@ function renderView() {
 }
 
 function startApp() {
-    console.log('[APP] [MAIN] start app...');
+    mainLog("start app...");
     actionDispatchers.app.dispatchAppStartsAction();
     initialAppUserInfoProcessing();
     renderView();

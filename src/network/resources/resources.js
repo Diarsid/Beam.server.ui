@@ -47,6 +47,11 @@ var resources = {
         unauthorized: 401
     },
 
+    jwtRefresh : {
+        url : serverRootUrl + "/auth/refresh",
+        method : "POST"
+    },
+
     validation : {
 
         jwt : {

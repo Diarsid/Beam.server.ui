@@ -9,9 +9,19 @@ var actionCreators = {
     app : {
 
         appStartsAction : function () {
-            return {
-                type : actionTypes.appStarts
-            }
+            return { type : actionTypes.appStarts }
+        },
+
+        goToMainAction : function () {
+            return { type : actionTypes.goToMain }
+        },
+
+        goToLoginAction : function () {
+            return { type : actionTypes.goToLogin }
+        },
+
+        goToRegisterAction : function () {
+            return { type : actionTypes.goToRegister }
         },
 
         goToLandingPageAction : function () {
@@ -27,10 +37,8 @@ var actionCreators = {
         },
 
         goToErrorAction : function (message) {
-            return {
-                type : actionTypes.goToError,
-                message : message
-            }
+            return { type : actionTypes.goToError,
+                     message : message }
         }
     },
 
@@ -188,20 +196,6 @@ var actionCreators = {
     },
 
     initialAuthCheck : {
-
-        goToLoginAction : function () {
-            creatorLog("force to login.");
-            return {
-                type : actionTypes.goToLogin
-            }
-        },
-
-        goToRegisterAction : function () {
-            creatorLog("force to register.");
-            return {
-                type : actionTypes.goToRegister
-            }
-        },
 
         storedUserInfoValidationBeginsAction : function () {
             creatorLog("stored user info validation... ");
