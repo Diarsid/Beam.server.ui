@@ -1,4 +1,6 @@
 var webpack = require('webpack');
+var DashboardPlugin = require('webpack-dashboard/plugin');
+var CircularDependencyPlugin = require("circular-dependency-plugin");
 
 module.exports = {
     entry: [
@@ -24,6 +26,13 @@ module.exports = {
         hot: true
     },
     plugins: [
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin(),
+        new CircularDependencyPlugin({
+            // exclude detection of files based on a RegExp
+            exclude: /node_modules/,
+            // add errors to webpack instead of warnings
+            failOnError: true
+        }),
+        new DashboardPlugin()
     ]
 };

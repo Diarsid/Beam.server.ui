@@ -1,13 +1,7 @@
-function obtainServerRootUrl() {
-    var rootUrl = window.location.href;
-    if ( rootUrl.endsWith("/") ) {
-        rootUrl = rootUrl.substring(0, rootUrl.length-1);
-    }
-    console.log('[APP] [RESOURCES] root url: ' + rootUrl);
-    return rootUrl;
-}
+var rootDetector =
+    require("./../../global-util/root-detector.js");
 
-var serverRootUrl = obtainServerRootUrl() + "/services";
+var serverRootUrl = rootDetector.fullRoot + "/services";
 
 var urls = {
 

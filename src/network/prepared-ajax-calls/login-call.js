@@ -1,10 +1,12 @@
 var $ =
     require('jquery');
 
+/* custom modules */
+
 var resources =
     require("./../resources/resources.js");
 
-// --------------------------------
+/* module code */
 
 function ajaxLog(message) {
     console.log("[APP] [AJAX CALL] [LOGIN] " + message);

@@ -1,6 +1,4 @@
 
-// -----------------------
-
 var jwtKey = "beam.server.ui.jwt";
 
 function decodeJwtClaims(jwt) {

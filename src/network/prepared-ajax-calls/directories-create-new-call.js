@@ -30,7 +30,7 @@ function createNewDirectory(userId, placement, dirName, callbacks) {
         statusCode: {
             200 : function (data, statusText, xhr ) {
                 ajaxLog("new dir: " + dirName + " created.");
-                callbacks.onSuccess(placement, dirName);
+                callbacks.onSuccess(userId, placement, dirName);
             },
             400 : function ( xhr, statusText, errorThrown ) {
                 ajaxLog("bad request : " + JSON.parse(xhr.responseText).message);

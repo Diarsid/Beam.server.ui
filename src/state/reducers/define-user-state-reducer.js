@@ -12,21 +12,11 @@ function defineUserState(userState = userInitialState, action) {
 
         case actionTypes.appStarts :
             return userInitialState;
-
-        case actionTypes.goToLogin :
-            return userInitialState;
-        case actionTypes.goToRegister :
-            return userInitialState;
-        case actionTypes.storedUserInfoValid :
-            return action.userInfo;
-
-        case actionTypes.loginSuccess :
-            return action.userInfo;
-        case actionTypes.regSuccess :
-            return action.userInfo;
-
         case actionTypes.logout :
             return userInitialState;
+
+        case actionTypes.userInfoDelivered :
+            return action.userInfo;
 
         default :
             return userState;

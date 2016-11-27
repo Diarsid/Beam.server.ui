@@ -26,7 +26,11 @@ function validateJwt ( jwtString, callbacks ) {
                 callbacks.onJwtValid();
             },
             401: function () {
-                ajaxLog("invalid, force to login.");
+                ajaxLog("expired.");
+                callbacks.onJwtExpired();
+            },
+            403: function () {
+                ajaxLog("invalid.");
                 callbacks.onJwtInvalid();
             }
         }

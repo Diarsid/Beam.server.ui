@@ -2,7 +2,7 @@ var webpack = require('webpack');
 var CircularDependencyPlugin = require("circular-dependency-plugin");
 
 module.exports = {
-    entry: "./src/main.js",
+    entry: "./src/main-page-cmpnts.js",
     output : {
         path: "./dist.env.prod",
         filename: "bundle.js"
