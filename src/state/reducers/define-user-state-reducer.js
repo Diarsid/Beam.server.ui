@@ -11,7 +11,6 @@ function defineUserState(userState = userInitialState, action) {
     switch ( action.type ) {
 
         case actionTypes.appStarts :
-            return userInitialState;
         case actionTypes.logout :
             return userInitialState;
 

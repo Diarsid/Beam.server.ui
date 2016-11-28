@@ -9,15 +9,14 @@ function defineErrorPageState(errorPageState = initialErrorPageState, action) {
     switch (action.type) {
 
         case actionTypes.appStarts :
-            return initialErrorPageState;
-
         case actionTypes.logout :
             return initialErrorPageState;
 
-        case actionTypes.goToError :
+        case actionTypes.globalError :
             return Object.assign({}, errorPageState, {
                 message : action.message
             });
+
         default :
             return errorPageState;
     }

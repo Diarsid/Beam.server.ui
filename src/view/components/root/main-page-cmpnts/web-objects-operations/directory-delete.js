@@ -27,7 +27,10 @@ function deleteDirectory (userId, place, dirOrder, name) {
             loadAllDirectories(userId, place);
         },
         onUnauthenticated : () => navigateTo(routes.loginRoute),
-        onServerError : () => navigateTo(routes.errorRoute)
+        onServerError : (message) => {
+            dispatch(actions.globalErrorAction(message));
+            navigateTo(routes.errorRoute);
+        }
     });
 }
 

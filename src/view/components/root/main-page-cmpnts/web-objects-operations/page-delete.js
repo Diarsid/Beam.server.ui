@@ -27,7 +27,10 @@ function pageDelete(userId, place, dirOrder, dirName, pageOrder, pageName) {
             loadAllDirectories(userId, place);
         },
         onUnauthenticated : () => navigateTo(routes.loginRoute),
-        onServerError : () => navigateTo(routes.errorRoute)
+        onServerError : (message) => {
+            dispatch(actions.globalErrorAction(message));
+            navigateTo(routes.errorRoute);
+        }
     });
 }
 

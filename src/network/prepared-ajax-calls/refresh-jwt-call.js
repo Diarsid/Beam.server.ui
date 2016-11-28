@@ -1,11 +1,13 @@
 var $ = require('jquery');
 
+/* custom modules */
+
 var storage =
     require("./../../state/store/app-local-storage.js");
 var resources =
     require("./../resources/resources.js");
 
-// ----------------------
+/* module code */
 
 function ajaxLog(message) {
     console.log("[APP] [AJAX CALL] [JWT REFRESH] " + message);
@@ -29,7 +31,13 @@ function refreshJwtCall(callbacks) {
                 callbacks.onUnauthenticated();
             },
             404 : function ( xhr, statusText, errorThrown ) {
-                callbacks.onFail("Resource not found.");
+                callbacks.onFail(
+                    "Authentication resource (" +
+                    resources.jwtRefresh.url +
+                    ") not found.");
+            },
+            500 : function ( xhr, statusText, errorThrown ) {
+                callbacks.onFail("Server is not responding.");
             }
         }
     });

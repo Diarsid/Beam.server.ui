@@ -26,7 +26,10 @@ var bookmarksCallbacks = {
     onSuccess : (data) => dispatch(actions.bookmarksLoadedAction(data)),
     onFail : (message) => dispatch(actions.bookmarksLoadingFailedAction(message)),
     onUnauthenticated : () => navigateTo(routes.loginRoute),
-    onServerError : () => navigateTo(routes.errorRoute)
+    onServerError : (message) => {
+        dispatch(actions.globalErrorAction(message));
+        navigateTo(routes.errorRoute);
+    }
 };
 
 function getAllDirectories (userId, place) {

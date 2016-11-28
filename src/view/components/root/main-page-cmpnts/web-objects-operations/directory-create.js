@@ -32,7 +32,10 @@ function createDirectory (userId, place, newDirName) {
             loadAllDirectories(userId, place);
         },
         onUnauthenticated : () => navigateTo(routes.loginRoute),
-        onServerError : () => navigateTo(routes.errorRoute)
+        onServerError : (message) => {
+            dispatch(actions.globalErrorAction(message));
+            navigateTo(routes.errorRoute);
+        }
     });
 }
 

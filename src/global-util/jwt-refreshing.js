@@ -1,9 +1,19 @@
+/* custom modules */
+
+var actions =
+    require("./../state/actions/actions.js");
+var dispatch =
+    require("./../state/store/app-store.js").dispatch;
+var routes =
+    require("./router-navigation.js").routes;
+var navigateTo =
+    require("./router-navigation.js").navigateTo;
 var ajaxJwtRefresh =
     require("./../network/prepared-ajax-calls/refresh-jwt-call.js");
 var storage =
     require("./../state/store/app-local-storage.js");
 
-// --------------------------
+/* module code */
 
 function jwtRefreshLog(message) {
     console.log("[APP] [JWT REFRESH] " + message);
@@ -23,24 +33,36 @@ function getCurrentTime() {
 }
 
 var jwtRefreshSchedule;
-var refreshInterval = 1000 * 60 * 17;
+var refreshInterval = 1000 * 60 * 2;
 
 var jwtRefreshCallbacks = {
     onSuccess : function (jwt) {
-        storage.saveJwt(jwt);
+        dispatch(
+            actions.acceptUserInfoAction(
+                storage.saveAndParseJwt(jwt)));
         jwtRefreshLog("...refreshed.");
     },
     onUnauthenticated : function () {
         jwtRefreshLog("...refreshing failed: jwt is rejected.");
+        storage.deleteJwt();
+        cancelScheduledConstantJwtRefreshing();
+        dispatch(actions.logoutAction());
+        navigateTo(routes.loginRoute);
     },
     onFail : function (errorMessage) {
         jwtRefreshLog("...fail: " + errorMessage);
+        dispatch(actions.globalErrorAction(message));
+        navigateTo(routes.errorRoute);
     }
 };
 
 function refresh() {
-    jwtRefreshLog(getCurrentTime() + " refreshing...");
-    ajaxJwtRefresh(jwtRefreshCallbacks);
+    if ( storage.hasJwt() ) {
+        jwtRefreshLog(getCurrentTime() + " refreshing...");
+        ajaxJwtRefresh(jwtRefreshCallbacks);
+    } else {
+        cancelScheduledConstantJwtRefreshing();
+    }
 }
 
 function scheduleConstantJwtRefreshing() {

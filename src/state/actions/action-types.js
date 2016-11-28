@@ -19,6 +19,7 @@ var actionTypes = {
     regFailed : "REGISTR_FAILED",
 
     logout : "LOGOUT",
+    globalError : "GLOBAL_ERROR",
 
     webPanelLoaded : "WEB_PANEL_LOADED",
     webPanelLoadingFailed : "WEB_PANEL_LOADING_FAILED",

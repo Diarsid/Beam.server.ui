@@ -42,6 +42,8 @@ var routes =
     require("./global-util/router-navigation.js").routes;
 var navigateTo =
     require("./global-util/router-navigation.js").navigateTo;
+var globalStateListener =
+    require("./state/store/global-state-listener.js");
 
 /* module code */
 
@@ -67,6 +69,12 @@ var jwtValidationCallbacks = {
         navigateTo(routes.loginRoute);
     }
 };
+
+function connectGlobalListenerToState() {
+    var globalStateSubscription = appStore.subscribe(() => {
+        globalStateListener(appStore.getState());
+    });
+}
 
 function initialAppUserInfoProcessing() {
     if ( storage.hasJwt() ) {
@@ -117,6 +125,7 @@ function renderView() {
 function startApp() {
     mainLog("start app...");
     dispatch(actions.appStartsAction());
+    connectGlobalListenerToState();
     renderView();
     initialAppUserInfoProcessing();
 }

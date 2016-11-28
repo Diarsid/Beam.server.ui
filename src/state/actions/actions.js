@@ -226,6 +226,13 @@ var actionCreators = {
             dirOrder : dirOrder,
             pageOrder : pageOrder
         }
+    },
+
+    globalErrorAction : function (message) {
+        return {
+            type : actionTypes.globalError,
+            message : message
+        }
     }
 };
 

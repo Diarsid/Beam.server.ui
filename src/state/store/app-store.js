@@ -1,6 +1,13 @@
-var createStore = require('redux').createStore;
+var createStore =
+    require('redux').createStore;
 
-var defineAppState = require("./../reducers/define-app-state.js");
+/* custom modules */
+
+var defineAppState =
+    require("./../reducers/define-app-state.js");
+
+/* module code */
+
 var store = createStore(defineAppState);
 
 module.exports = store;
