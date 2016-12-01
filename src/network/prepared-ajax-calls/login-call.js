@@ -28,8 +28,8 @@ function tryToLogin (loginData, callbacks) {
                 callbacks.onCallSuccess(xhr.getResponseHeader("jwt"));
             },
             401 : function ( xhr, statusText, errorThrown ) {
-                ajaxLog("fail, unauthorized with : " + (JSON.parse(xhr.responseText)).message);
-                callbacks.onUnauthenticated((JSON.parse(xhr.responseText)).message);
+                ajaxLog("unauthorized: wrong login or password.");
+                callbacks.onUnauthenticated("Wrong login or password.");
             },
             400 : function ( xhr, statusText, errorThrown ) {
                 ajaxLog("fail, bad request with : " + (JSON.parse(xhr.responseText)).message);
