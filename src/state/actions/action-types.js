@@ -8,6 +8,7 @@ var actionTypes = {
     loginPasswordStateChanged : "LOGIN_PASSWORD_CHANGED",
     loginClear : "LOGIN_CLEAR",
     loginFailed : "LOGIN_FAILED",
+    autologinFailed : "AUTOLOGIN_FAILED",
 
     regNickNameChanged : "REGISTR_NICK_NAME_CHANGED",
     regNameChanged : "REGISTR_NAME_CHANGED",

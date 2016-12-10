@@ -16,12 +16,17 @@ var actionCreators = {
         return { type : actionTypes.logout }
     },
 
-    acceptUserInfoAction : function (userInfo ) {
+    loggedInAction : function (userInfo ) {
         creatorLog("stored user info valid: " + userInfo);
         return {
             type : actionTypes.userInfoDelivered,
             userInfo : userInfo
         }
+    },
+
+    autologinFailedAction : function () {
+        creatorLog("autologin failed action.");
+        return { type : actionTypes.autologinFailed }
     },
 
     loginClearAction : function() {

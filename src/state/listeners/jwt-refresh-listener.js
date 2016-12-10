@@ -1,7 +1,7 @@
 /* custom modules */
 
 var jwtRefreshing =
-    require("./../../../global-util/jwt-refreshing.js");
+    require("./../../global-util/jwt-refreshing.js");
 
 /* module code */
 
@@ -9,20 +9,20 @@ function userInfoLog(message) {
     console.log("[STATE LISTENER] [USER INFO] " + message);
 }
 
-var previousUserInfo = "";
+var previousUserStatus = "unknown";
 
 function listenToUserInfoChanges(state) {
-    var currentInfo = state.user.id + state.user.nickName + state.user.role;
+    var currentUserStatus = state.user.status;
 
-    if ( currentInfo != "" && previousUserInfo == "" ) {
+    if ( currentUserStatus == "logged in" && previousUserStatus != "logged in" ) {
         userInfoLog("user logged in.");
         jwtRefreshing.scheduleRefreshing();
-    } else if ( currentInfo == "" && previousUserInfo != "" ) {
+    } else if ( currentUserStatus != "logged in" && previousUserStatus == "logged in" ) {
         userInfoLog("user logged out.");
         jwtRefreshing.stopRefreshing();
     }
 
-    previousUserInfo = currentInfo;
+    previousUserStatus = currentUserStatus;
 }
 
 module.exports = listenToUserInfoChanges;

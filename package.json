@@ -28,6 +28,7 @@
     "webpack-dev-server": "^1.15.0"
   },
   "dependencies": {
+    "history": "3.0.0",
     "immutable": "^3.8.1",
     "jquery": "2.2.2",
     "jquery-ui": "1.10.5",

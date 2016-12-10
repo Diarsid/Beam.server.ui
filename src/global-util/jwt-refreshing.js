@@ -38,7 +38,7 @@ var refreshInterval = 1000 * 60 * 2;
 var jwtRefreshCallbacks = {
     onSuccess : function (jwt) {
         dispatch(
-            actions.acceptUserInfoAction(
+            actions.loggedInAction(
                 storage.saveAndParseJwt(jwt)));
         jwtRefreshLog("...refreshed.");
     },

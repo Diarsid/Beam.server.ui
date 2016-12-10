@@ -30,7 +30,7 @@ var loginAjaxCallbacks = {
     },
     onCallSuccess : function (jwtString) {
         loginLog("success!");
-        dispatch(actions.acceptUserInfoAction(
+        dispatch(actions.loggedInAction(
             storage.saveAndParseJwt(jwtString)));
         navigateTo(routes.mainRoute);
     },

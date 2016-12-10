@@ -3,12 +3,18 @@ var browserHistory =
 
 /* custom modules */
 
-var appName =
-    require("./root-detector.js").appName;
+var appUrlState =
+    require("./app-url-state.js");
+var appStore =
+    require("./../state/store/app-store.js");
 var dispatch =
     require("./../state/store/app-store.js").dispatch;
 var actions =
     require("./../state/actions/actions.js");
+var history =
+    require("./prepared-history.js");
+var authStatus =
+    require("./authentication-status.js");
 
 /* module code */
 
@@ -16,9 +22,25 @@ function navigationLog(message) {
     console.log("[ROUTER NAVIGATOR] " + message);
 }
 
-function makeSimpleRouteTo(path) {
-    console.log("[NAVIGATOR] make route : " + appName + path );
-    return "/" + appName + path;
+/*
+function makeMappingRouteTo(path) {
+    console.log("[NAVIGATOR] mapping route : " + appUrlState.appName + path );
+    return "/" + appUrlState.appName + path;
+}
+*/
+
+function waitForAuthStatus(redirectTo, transition) {
+    var interval = setInterval(() => {
+        navigationLog(" [WAITING] is authentication defined?");
+        if ( authStatus.authenticated() ) {
+            clearInterval(interval);
+            transition();
+        } else if ( authStatus.notAuthenticated() ) {
+            clearInterval(interval);
+            redirectTo(navigationRoutes.loginRoute);
+            transition();
+        }
+    }, 2000);
 }
 
 var routesHooks = {
@@ -26,8 +48,18 @@ var routesHooks = {
         onLeaveHook : function () {
             navigationLog("leaving main");
         },
-        onEnterHook : function () {
-            navigationLog("entering main");
+        onEnterHook : function (nextState, redirectTo, transition) {
+            navigationLog("attempt to enter main...");
+            if ( authStatus.authenticationIsUnknown() ) {
+                navigationLog("entering main, waiting for auth status...");
+                waitForAuthStatus(redirectTo, transition);
+            } else if ( authStatus.authenticated() ) {
+                navigationLog("authentication OK, entering main");
+                transition();
+            } else {
+                redirectTo(navigationRoutes.loginRoute);
+                transition();
+            }
         }
     },
     welcomeRoute : {
@@ -66,6 +98,7 @@ var routesHooks = {
     }
 };
 
+/*
 var navigationRoutes = {
     mainRoute : makeSimpleRouteTo("/main"),
     landingRoute : makeSimpleRouteTo("/"),
@@ -74,13 +107,24 @@ var navigationRoutes = {
     errorRoute : makeSimpleRouteTo("/error"),
     loginRoute : makeSimpleRouteTo("/login")
 };
+*/
+
+var navigationRoutes = {
+    mainRoute : "/main",
+    landingRoute : "/",
+    welcomeRoute : "/welcome",
+    registrationRoute : "/registration",
+    errorRoute : "/error",
+    loginRoute : "/login"
+};
 
 var routerNavigation = {
     routesHooks : routesHooks,
     routes : navigationRoutes,
+//    mappingTo : makeMappingRouteTo,
     navigateTo : function (route) {
         navigationLog(" to : " + route);
-        browserHistory.push(route);
+        history.push(route);
     }
 };
 

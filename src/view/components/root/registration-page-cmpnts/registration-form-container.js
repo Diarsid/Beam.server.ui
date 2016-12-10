@@ -29,7 +29,7 @@ var regAjaxCallbacks = {
     },
     onSuccess : function (jwtString) {
         regLog("success!");
-        dispatch(actions.acceptUserInfoAction(
+        dispatch(actions.loggedInAction(
             storage.saveAndParseJwt(jwtString)));
         navigateTo(routes.mainRoute);
     },

@@ -4,12 +4,8 @@ var ReactDOM =
     require('react-dom');
 var Provider =
     require('react-redux').Provider;
-var syncHistoryWithStore =
-    require('react-router-redux').syncHistoryWithStore;
 var Router =
     require('react-router').Router;
-var browserHistory =
-    require('react-router').browserHistory;
 var Route =
     require('react-router').Route;
 
@@ -42,12 +38,16 @@ var routes =
     require("./global-util/router-navigation.js").routes;
 var navigateTo =
     require("./global-util/router-navigation.js").navigateTo;
-var globalStateListener =
-    require("./state/store/global-state-listener.js");
+var authStatusListener =
+    require("./global-util/authentication-status.js").listenToUserStatus;
+var appUrlState =
+    require("./global-util/app-url-state.js");
+var userStatusListener =
+    require("./state/listeners/jwt-refresh-listener.js");
+var preparedHistory =
+    require("./global-util/prepared-history.js");
 
 /* module code */
-
-var history = syncHistoryWithStore(browserHistory, appStore);
 
 function mainLog(message) {
     console.log('[APP] [MAIN] ' + message);
@@ -57,37 +57,52 @@ var jwtValidationCallbacks = {
     onStart : function () {
     },
     onJwtValid : function () {
-        dispatch(actions.acceptUserInfoAction(storage.parseUserFromJwt()));
-        navigateTo(routes.mainRoute);
+        dispatch(actions.loggedInAction(storage.parseUserFromJwt()));
+        //navigateTo(routes.mainRoute);
     },
     onJwtInvalid : function () {
         storage.deleteJwt();
-        navigateTo(routes.welcomeRoute);
+        //navigateTo(routes.welcomeRoute);
     },
     onJwtExpired : function () {
         storage.deleteJwt();
-        navigateTo(routes.loginRoute);
+        //navigateTo(routes.loginRoute);
     }
 };
 
 function connectGlobalListenerToState() {
     var globalStateSubscription = appStore.subscribe(() => {
-        globalStateListener(appStore.getState());
+        authStatusListener(appStore.getState());
+        userStatusListener(appStore.getState());
     });
 }
 
 function initialAppUserInfoProcessing() {
     if ( storage.hasJwt() ) {
-        ajaxJwtValidation(storage.getJwt(), jwtValidationCallbacks);
+        ajaxJwtValidation(storage.getJwt(), {
+            onStart : () => {},
+            onJwtValid : () => {dispatch(actions.loggedInAction(storage.parseUserFromJwt()));},
+            onJwtInvalid : () => {
+                dispatch(actions.autologinFailedAction());
+                storage.deleteJwt();
+            },
+            onJwtExpired : () => {
+                dispatch(actions.autologinFailedAction());
+                storage.deleteJwt();
+            }
+        });
     } else {
-        navigateTo(routes.welcomeRoute);
+        dispatch(actions.autologinFailedAction());
     }
+    //else {
+    //    navigateTo(routes.welcomeRoute);
+    //}
 }
 
 function renderView() {
     ReactDOM.render(
         <Provider store={appStore} >
-            <Router history={history}>
+            <Router history={preparedHistory}>
                 <Route
                     path={routes.landingRoute}
                     component={LandingPage} />
@@ -122,12 +137,38 @@ function renderView() {
     );
 }
 
+function initialNavigation() {
+    if ( appUrlState.relativePath == "" ) {
+        navigateTo(routes.welcomeRoute);
+    } else {
+        switch ( appUrlState.relativePath ) {
+            case routes.loginRoute :
+                navigateTo(routes.loginRoute);
+                break;
+            case routes.registrationRoute :
+                navigateTo(routes.registrationRoute);
+                break;
+            case routes.welcomeRoute :
+                navigateTo(routes.welcomeRoute);
+                break;
+            case routes.mainRoute :
+                navigateTo(routes.mainRoute);
+                break;
+
+            default :
+                navigateTo(routes.welcomeRoute);
+                break;
+        }
+    }
+}
+
 function startApp() {
     mainLog("start app...");
     dispatch(actions.appStartsAction());
+    initialAppUserInfoProcessing();
     connectGlobalListenerToState();
     renderView();
-    initialAppUserInfoProcessing();
+    initialNavigation();
 }
 
 startApp();

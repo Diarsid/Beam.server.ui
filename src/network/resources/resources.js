@@ -1,7 +1,7 @@
 var rootDetector =
-    require("./../../global-util/root-detector.js");
+    require("./../../global-util/app-url-state.js");
 
-var serverRootUrl = rootDetector.fullRoot + "/services";
+var serverRootUrl = rootDetector.appHost + "/" + rootDetector.appName + "/services";
 
 var urls = {
 
