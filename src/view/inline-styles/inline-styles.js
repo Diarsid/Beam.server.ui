@@ -1,5 +1,30 @@
 var inlineStyles = {
 
+    pageFrameStyle : {
+        inactive : {
+            opacity: '0.9',
+            boxSizing: 'border-box',
+            boxShadow: 'inset 0px 0px 10px 0px lightgrey',
+            WebkitBoxShadow: 'inset 0px 0px 10px 0px lightgrey',
+            MozBoxShadow: 'inset 0px 0px 10px 0px lightgrey',
+            OBoxShadow: 'inset 0px 0px 10px 0px lightgrey',
+            border: '1px solid #C7C7C7',
+            backgroundColor: '#fafafa',
+            height: '120px',
+            width: '120px',
+            float: 'left',
+            padding: '0',
+            margin: '1vw 1.2vw 1vw 1.2vw'
+        },
+        active : {
+            opacity: '1',
+            boxShadow: '0px 0px 10px 0px #fafafa, inset 0px 0px 5px 0px lightgrey',
+            WebkitBoxShadow: '0px 0px 10px 0px #fafafa, inset 0px 0px 5px 0px lightgrey',
+            MozBoxShadow: '0px 0px 10px 0px #fafafa, inset 0px 0px 5px 0px lightgrey',
+            OBoxShadow: '0px 0px 10px 0px #fafafa, inset 0px 0px 5px 0px lightgrey',
+        }
+    },
+
     modalDialogStyle: {
         overlay : {
             backgroundColor   : 'rgba(0, 0, 0, 0.5)'

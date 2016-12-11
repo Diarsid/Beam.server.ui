@@ -8,6 +8,7 @@ var PageTitle =
     require("./page-title.js");
 var PageMenuContainer =
     require("./page-menu-controller.js");
+var inlineStyles = require("./../../../../../../../view/inline-styles/inline-styles.js");
 
 /* module code */
 
@@ -15,19 +16,32 @@ var PageFrame = React.createClass({
 
     menuContainer : {},
 
-    showMenuTrigger : function () {
-        this.menuContainer.pageFrameHover(true);
+    getInitialState : function () {
+        return ({
+            pageFrameStyle : inlineStyles.pageFrameStyle.inactive
+        });
     },
 
-    hideMenuTrigger : function () {
+    mouseEnter : function () {
+        this.menuContainer.pageFrameHover(true);
+        this.setState({
+            pageFrameStyle : inlineStyles.pageFrameStyle.active
+        });
+    },
+
+    mouseLeave : function () {
         this.menuContainer.pageFrameHover(false);
+        this.setState({
+            pageFrameStyle : inlineStyles.pageFrameStyle.inactive
+        });
     },
 
     render : function () {
         return (
             <li className="page-frame"
-                onMouseEnter={this.showMenuTrigger}
-                onMouseLeave={this.hideMenuTrigger}
+                onMouseEnter={this.mouseEnter}
+                onMouseLeave={this.mouseLeave}
+                style={this.state.pageFrameStyle}
             >
                 <a href={this.props.url}
                    target="_blank"
