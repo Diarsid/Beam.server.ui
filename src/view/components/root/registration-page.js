@@ -21,7 +21,12 @@ var RegistrationPage = React.createClass({
                     type="button"
                     className="go-to-landing-button-on-login"
                     onClick={() => navigateTo(routes.welcomeRoute) } >
-                    Back
+                    Back to welcome
+                </button>
+                <button type="button"
+                        className="go-to-login-button-on-landing-page"
+                        onClick={() => navigateTo(routes.loginRoute)}>
+                    Login
                 </button>
                 <div>Registration page</div>
                 <RegistrationFormContainer />

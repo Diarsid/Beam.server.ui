@@ -15,8 +15,8 @@ var LandingPage =
     require("./view/components/root/landing-page.js");
 var MainPage =
     require("./view/components/root/main-page.js");
-var WelcomePage =
-    require("./view/components/root/welcome-page.js");
+var WelcomePageContainer =
+    require("./view/components/root/welcome-page-container.js");
 var LoginPage =
     require("./view/components/root/login-page.js");
 var ErrorPageContainer =
@@ -110,7 +110,7 @@ function renderView() {
                     path={routes.welcomeRoute}
                     onEnter={hooks.welcomeRoute.onEnterHook}
                     onLeave={hooks.welcomeRoute.onLeaveHook}
-                    component={WelcomePage} />
+                    component={WelcomePageContainer} />
                 <Route
                     path={routes.mainRoute}
                     onEnter={hooks.mainRoute.onEnterHook}
